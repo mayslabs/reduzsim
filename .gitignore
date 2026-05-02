@@ -5,6 +5,8 @@ simulador/
 README_PROJETO.md
 RESUMO_CONTINUIDADE.md
 node_modules/
+__pycache__/
+*.pyc
 .env
 .DS_Store
 Thumbs.db
