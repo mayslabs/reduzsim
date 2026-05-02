@@ -929,12 +929,21 @@ body {
   gap: .7rem;
 }
 
+.rs-monthly-card {
+  margin-left: 50%;
+  max-width: none;
+  transform: translateX(-50%);
+  width: min(1220px, calc(100vw - 32px));
+}
+
 .rs-monthly-row {
+  align-items: stretch;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;
   display: grid;
-  gap: .55rem;
+  gap: .65rem;
+  grid-template-columns: minmax(650px, 1fr) 500px;
   padding: .75rem;
 }
 
@@ -942,7 +951,7 @@ body {
   align-items: stretch;
   display: grid;
   gap: .65rem;
-  grid-template-columns: 92px 96px minmax(118px, 1fr) 132px 132px;
+  grid-template-columns: 98px 104px minmax(155px, 1fr) 135px 130px;
 }
 
 .rs-monthly-row span {
@@ -991,7 +1000,8 @@ body {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: .45rem .5rem;
+  min-width: 0;
+  padding: .5rem .6rem;
 }
 
 .rs-monthly-breakdown strong {
@@ -1104,6 +1114,7 @@ body {
   .rs-summary-grid,
   .rs-mini-grid,
   .rs-remuneracao-row,
+  .rs-monthly-row,
   .rs-monthly-main,
   .rs-final-dashboard,
   .rs-mini-chart,
@@ -1119,6 +1130,12 @@ body {
   .rs-preview-percent {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .rs-monthly-card {
+    margin-left: 0;
+    transform: none;
+    width: 100%;
   }
 
   .rs-monthly-breakdown {
