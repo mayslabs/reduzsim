@@ -936,6 +936,71 @@ body {
   width: min(1220px, calc(100vw - 32px));
 }
 
+.rs-rmt-tracker {
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: 1fr 1fr 1.3fr 1fr;
+  margin-bottom: 1rem;
+}
+
+.rs-rmt-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .9rem 1rem;
+}
+
+.rs-rmt-card span {
+  color: var(--gray);
+  display: block;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .35px;
+  margin-bottom: .35rem;
+  text-transform: uppercase;
+}
+
+.rs-rmt-card strong {
+  color: var(--dark);
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.rs-rmt-card small {
+  color: var(--gray);
+  display: block;
+  font-size: .78rem;
+  font-weight: 600;
+  margin-top: .3rem;
+}
+
+.rs-rmt-card--progress {
+  background: var(--green-light);
+  border-color: rgba(26, 160, 123, .36);
+}
+
+.rs-rmt-card--progress strong {
+  color: var(--green-dark);
+  font-size: 1.5rem;
+}
+
+.rs-rmt-progress {
+  background: rgba(26, 160, 123, .15);
+  border-radius: 999px;
+  height: 8px;
+  margin-top: .7rem;
+  overflow: hidden;
+}
+
+.rs-rmt-progress div {
+  background: var(--green);
+  border-radius: inherit;
+  height: 100%;
+  width: 0;
+}
+
 .rs-monthly-row {
   align-items: stretch;
   background: var(--bg);
@@ -1088,6 +1153,7 @@ body {
   .rs-summary-grid,
   .rs-mini-grid,
   .rs-remuneracao-row,
+  .rs-rmt-tracker,
   .rs-monthly-row,
   .rs-final-dashboard,
   .rs-mini-chart,

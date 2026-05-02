@@ -36,6 +36,11 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
+function setWidth(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.style.width = `${Math.max(0, Math.min(value, 100))}%`;
+}
+
 function monthKey(dateValue) {
   return (dateValue || "").slice(0, 7);
 }
@@ -164,7 +169,14 @@ function buildInitialRows() {
 
 function updateTotals(rows) {
   const totalReducao = round(rows.reduce((sum, row) => sum + row.total, 0));
+  const totalRemOriginal = round(rows.reduce((sum, row) => sum + row.remOriginal, 0));
+  const totalRemAtualizada = round(rows.reduce((sum, row) => sum + row.remAtualizada, 0));
   const receita = round(receitaResult.inssEstimado || 0);
+  const rmtSero = round(receitaResult.rmt || 0);
+  const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 50 : 70;
+  const rmtMeta = round(rmtSero * (metaPercentual / 100));
+  const percentualAtingido = rmtSero > 0 ? round((totalRemAtualizada / rmtSero) * 100) : 0;
+  const faltaMeta = round(Math.max(rmtMeta - totalRemAtualizada, 0));
   const economiaBruta = round(Math.max(receita - totalReducao, 0));
   const honorariosPercent = Number.parseFloat(document.getElementById("honorarios-percent").value || "0") || 0;
   const honorarios = round(economiaBruta * (honorariosPercent / 100));
@@ -178,10 +190,23 @@ function updateTotals(rows) {
   setText("honorarios", fmt(honorarios));
   setText("economia-liquida", fmt(economiaLiquida));
   setText("percentual-reducao", percentualReducao.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+  setText("rmt-sero", fmt(rmtSero));
+  setText("rmt-meta", fmt(rmtMeta));
+  setText("rmt-meta-percent", metaPercentual.toLocaleString("pt-BR"));
+  setText("rmt-percentual-atingido", percentualAtingido.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+  setText("rmt-comprovado", fmt(totalRemAtualizada));
+  setText("rmt-falta", fmt(faltaMeta));
+  setWidth("rmt-progress-bar", rmtMeta > 0 ? (totalRemAtualizada / rmtMeta) * 100 : 0);
 
   return {
     receita,
     totalReducao,
+    totalRemOriginal,
+    totalRemAtualizada,
+    rmtSero,
+    rmtMeta,
+    metaPercentual,
+    percentualAtingido,
     economiaBruta,
     honorarios,
     economiaLiquida,

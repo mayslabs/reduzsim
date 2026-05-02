@@ -91,6 +91,30 @@
         <button class="rs-btn-outline" type="button" id="copy-first-remuneracao">Usar a primeira remuneração em todas</button>
       </div>
 
+      <div class="rs-rmt-tracker">
+        <div class="rs-rmt-card">
+          <span>RMT 100% SERO</span>
+          <strong>R$ <span id="rmt-sero">0,00</span></strong>
+        </div>
+        <div class="rs-rmt-card">
+          <span>Meta de comprovação</span>
+          <strong>R$ <span id="rmt-meta">0,00</span></strong>
+          <small><span id="rmt-meta-percent">0</span>% da RMT</small>
+        </div>
+        <div class="rs-rmt-card rs-rmt-card--progress">
+          <span>Comprovado atualizado</span>
+          <strong><span id="rmt-percentual-atingido">0,0</span>%</strong>
+          <small>R$ <span id="rmt-comprovado">0,00</span></small>
+          <div class="rs-rmt-progress">
+            <div id="rmt-progress-bar"></div>
+          </div>
+        </div>
+        <div class="rs-rmt-card">
+          <span>Falta para meta</span>
+          <strong>R$ <span id="rmt-falta">0,00</span></strong>
+        </div>
+      </div>
+
       <div class="rs-monthly-list" id="monthly-rows"></div>
     </section>
 
