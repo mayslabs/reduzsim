@@ -209,24 +209,6 @@ function buildAreaLabel() {
   return labels.join(" | ");
 }
 
-function renderMemoryRows(rows) {
-  const body = document.getElementById("memory-rows");
-  if (!body) return;
-
-  body.innerHTML = "";
-
-  rows
-    .filter((row) => row.area > 0)
-    .forEach((row) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${row.label}</td>
-        <td>${fmt(row.area)} m²</td>
-      `;
-      body.appendChild(tr);
-    });
-}
-
 function renderRemuneracaoRows(rows) {
   const card = document.getElementById("remuneracao-card");
   const body = document.getElementById("remuneracao-rows");
@@ -343,8 +325,6 @@ function updateValues() {
   setText("parcela-60", fmt(total / 60));
   setText("total", fmt(total));
   setText("total-2", fmt(total));
-
-  renderMemoryRows(rmtRows);
 
 }
 
