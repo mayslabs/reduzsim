@@ -107,33 +107,41 @@ function renderRows(rows) {
     item.className = "rs-monthly-row";
     item.dataset.monthRow = row.month;
     item.innerHTML = `
-      <div class="rs-monthly-main">
-        <div class="rs-monthly-competencia">
-          <span>Competência</span>
-          <strong>${row.month}</strong>
-        </div>
-        <label>
-          <span>SELIC (%)</span>
-          <input class="rs-table-input" data-field="selic" type="number" step="0.01" value="${row.selic}">
-        </label>
-        <label>
-          <span>Rem. atualizada</span>
-          <input class="rs-table-input" data-field="remAtualizada" type="number" step="0.01" value="${row.remAtualizada}">
-        </label>
-        <div class="rs-monthly-money">
-          <span>Rem. original</span>
-          <strong>R$ ${fmt(row.remOriginal)}</strong>
-        </div>
-        <div class="rs-monthly-total">
-          <span>Total</span>
-          <strong>R$ ${fmt(row.total)}</strong>
-        </div>
+      <div class="rs-monthly-competencia">
+        <span>Competência</span>
+        <strong>${row.month}</strong>
       </div>
-      <div class="rs-monthly-breakdown">
-        <div><span>CPP</span><strong>R$ ${fmt(row.cpp)}</strong></div>
-        <div><span>Multa</span><strong>R$ ${fmt(row.multaMora)}</strong></div>
-        <div><span>Juros</span><strong>R$ ${fmt(row.juros)}</strong></div>
-        <div><span>MAED</span><strong>R$ ${fmt(row.maed)}</strong></div>
+      <label>
+        <span>Rem. atualizada</span>
+        <input class="rs-table-input" data-field="remAtualizada" type="number" step="0.01" value="${row.remAtualizada}">
+      </label>
+      <div class="rs-monthly-money">
+        <span>Rem. original</span>
+        <strong>R$ ${fmt(row.remOriginal)}</strong>
+      </div>
+      <div class="rs-monthly-money">
+        <span>CPP 20%</span>
+        <strong>R$ ${fmt(row.cpp)}</strong>
+      </div>
+      <div class="rs-monthly-money">
+        <span>Multa 20%</span>
+        <strong>R$ ${fmt(row.multaMora)}</strong>
+      </div>
+      <label>
+        <span>SELIC acum. (%)</span>
+        <input class="rs-table-input" data-field="selic" type="number" step="0.01" value="${row.selic}">
+      </label>
+      <div class="rs-monthly-money">
+        <span>Juros mora</span>
+        <strong>R$ ${fmt(row.juros)}</strong>
+      </div>
+      <div class="rs-monthly-money">
+        <span>MAED</span>
+        <strong>R$ ${fmt(row.maed)}</strong>
+      </div>
+      <div class="rs-monthly-total">
+        <span>Total</span>
+        <strong>R$ ${fmt(row.total)}</strong>
       </div>
     `;
     body.appendChild(item);

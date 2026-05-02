@@ -942,16 +942,9 @@ body {
   border: 1px solid var(--border);
   border-radius: 10px;
   display: grid;
-  gap: .65rem;
-  grid-template-columns: minmax(650px, 1fr) 500px;
+  gap: .55rem;
+  grid-template-columns: 100px 140px 132px 112px 112px 118px 112px 112px 120px;
   padding: .75rem;
-}
-
-.rs-monthly-main {
-  align-items: stretch;
-  display: grid;
-  gap: .65rem;
-  grid-template-columns: 98px 104px minmax(155px, 1fr) 135px 130px;
 }
 
 .rs-monthly-row span {
@@ -981,32 +974,13 @@ body {
   width: 100%;
 }
 
-.rs-monthly-competencia,
-.rs-monthly-money,
-.rs-monthly-total {
+.rs-monthly-row > div,
+.rs-monthly-row > label {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: .5rem .6rem;
-}
-
-.rs-monthly-breakdown {
-  display: grid;
-  gap: .55rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.rs-monthly-breakdown div {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 8px;
   min-width: 0;
-  padding: .5rem .6rem;
-}
-
-.rs-monthly-breakdown strong {
-  font-size: .82rem;
-  white-space: nowrap;
 }
 
 .rs-monthly-total {
@@ -1115,7 +1089,6 @@ body {
   .rs-mini-grid,
   .rs-remuneracao-row,
   .rs-monthly-row,
-  .rs-monthly-main,
   .rs-final-dashboard,
   .rs-mini-chart,
   .rs-service-grid,
@@ -1136,10 +1109,6 @@ body {
     margin-left: 0;
     transform: none;
     width: 100%;
-  }
-
-  .rs-monthly-breakdown {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .rs-final-hero {
