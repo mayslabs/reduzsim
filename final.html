@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReduzSim | Resultado final</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <nav class="rs-navbar no-print">
+    <div class="container">
+      <a href="index.html" class="rs-brand" aria-label="ReduzSim">
+        <img class="rs-brand-logo" src="assets/reduzsim-logo-topo.png" alt="ReduzSim">
+      </a>
+    </div>
+  </nav>
+
+  <main class="container rs-container rs-final-page">
+    <section class="rs-final-hero">
+      <div class="rs-final-hero-mark">
+        <img src="assets/reduzsim-icone-transparente.png" alt="ReduzSim">
+      </div>
+      <div class="rs-final-hero-copy">
+        <span>Relatório final</span>
+        <h1>Resultado da simulação</h1>
+        <p>Emitido em <strong id="final-date">--</strong></p>
+      </div>
+    </section>
+
+    <section class="rs-final-dashboard">
+      <div class="rs-final-main">
+        <span>Redução estimada</span>
+        <strong id="percentual-reducao">0,0%</strong>
+        <small>sobre o valor sem redução</small>
+      </div>
+      <div class="rs-final-chart" aria-label="Comparativo visual">
+        <div class="rs-bar-row">
+          <span>Sem redução</span>
+          <div class="rs-bar-track"><div class="rs-bar rs-bar--gray" id="bar-sem-reducao"></div></div>
+          <strong>R$ <span id="sem-reducao">0,00</span></strong>
+        </div>
+        <div class="rs-bar-row">
+          <span>Com redução</span>
+          <div class="rs-bar-track"><div class="rs-bar rs-bar--green" id="bar-com-reducao"></div></div>
+          <strong>R$ <span id="com-reducao">0,00</span></strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="rs-summary-grid rs-summary-grid--three">
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">Economia bruta</div>
+        <div class="rs-summary-value">R$ <span id="economia-bruta">0,00</span></div>
+      </div>
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">Honorários <span class="rs-inline-percent">(<span id="honorarios-percent">0,0</span>%)</span></div>
+        <div class="rs-summary-value">R$ <span id="honorarios">0,00</span></div>
+      </div>
+      <div class="rs-summary-card rs-summary-card--accent">
+        <div class="rs-summary-label">Economia líquida</div>
+        <div class="rs-summary-value">R$ <span id="economia-liquida">0,00</span></div>
+      </div>
+    </section>
+
+    <section class="rs-card">
+      <div class="rs-section-title rs-section-title--compact">
+        Resumo da obra
+      </div>
+      <div class="row g-2">
+        <div class="col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Cliente</div>
+            <div class="rs-info-value" id="cliente-nome">-</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Telefone</div>
+            <div class="rs-info-value" id="cliente-telefone">-</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">UF</div>
+            <div class="rs-info-value" id="uf">-</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Área total</div>
+            <div class="rs-info-value"><span id="area-total">0,00</span> m²</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Responsável</div>
+            <div class="rs-info-value" id="responsavel-obra">-</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Destinação</div>
+            <div class="rs-info-value" id="destinacao">-</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Tipo de obra</div>
+            <div class="rs-info-value" id="tipo-obra">-</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Início da obra</div>
+            <div class="rs-info-value" id="data-inicio-obra">-</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Final da obra</div>
+            <div class="rs-info-value" id="data-fim-obra">-</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="rs-foot-buttons no-print">
+      <a class="rs-btn-outline" href="reducao.html">Voltar e editar</a>
+      <button class="rs-btn-primary" type="button" id="print-btn">Imprimir relatório</button>
+    </div>
+  </main>
+
+  <script src="final.js"></script>
+</body>
+</html>

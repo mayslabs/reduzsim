@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReduzSim | Cálculo prévio</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <nav class="rs-navbar no-print">
+    <div class="container">
+      <a href="index.html" class="rs-brand" aria-label="ReduzSim">
+        <img class="rs-brand-logo" src="assets/reduzsim-logo-topo.png" alt="ReduzSim">
+      </a>
+    </div>
+  </nav>
+
+  <header class="rs-hero no-print">
+    <div class="container text-center">
+      <h1 class="rs-hero-title">Cálculo prévio de INSS de obra</h1>
+      <p class="rs-hero-sub" id="calc-date">--</p>
+    </div>
+  </header>
+
+  <main class="container rs-container rs-print-page">
+    <section class="rs-total-card">
+      <div class="rs-total-label">INSS estimado pela Receita</div>
+      <div class="rs-total-value">R$ <span id="total">0,00</span></div>
+      <div class="rs-total-sub">Valor principal estimado antes do cálculo de redução</div>
+    </section>
+
+    <section class="rs-summary-grid rs-summary-grid--two">
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">COD</div>
+        <div class="rs-summary-value">R$ <span id="COD">0,00</span></div>
+      </div>
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">RMT 100% SERO</div>
+        <div class="rs-summary-value">R$ <span id="RMT">0,00</span></div>
+      </div>
+    </section>
+
+    <section class="rs-card">
+      <div class="rs-section-title rs-section-title--compact">
+        Dados da aferição e memória de cálculo
+      </div>
+      <div class="row g-2">
+        <div class="col-12 col-md-6" id="cliente-nome-block">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Cliente</div>
+            <div class="rs-info-value" id="cliente-nome">-</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6" id="cliente-telefone-block">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Telefone</div>
+            <div class="rs-info-value" id="cliente-telefone">-</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Responsável</div>
+            <div class="rs-info-value" id="responsavel-obra">-</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">UF</div>
+            <div class="rs-info-value" id="UF">-</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Início</div>
+            <div class="rs-info-value" id="data-inicio-obra">-</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Término</div>
+            <div class="rs-info-value" id="data-fim-obra">-</div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Áreas em aferição</div>
+            <div class="rs-info-value" id="total-area-str">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rs-divider"></div>
+      <div class="rs-calc-row">
+        <div class="rs-calc-item">
+          <div class="rs-calc-label">Período VAU</div>
+          <div class="rs-calc-val" id="date">--/----</div>
+        </div>
+        <div class="rs-calc-item">
+          <div class="rs-calc-label">VAU (R$/m²)</div>
+          <div class="rs-calc-val">R$ <span id="VAU">0,00</span></div>
+        </div>
+        <div class="rs-calc-item">
+          <div class="rs-calc-label">Concreto usinado</div>
+          <div class="rs-calc-val" id="concreto-str">-</div>
+        </div>
+      </div>
+
+      <div class="rs-table-wrap">
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>Área</th>
+              <th>Metragem</th>
+            </tr>
+          </thead>
+          <tbody id="memory-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="rs-alert-info">
+      Esta etapa calcula apenas a cobrança estimada pela Receita. A redução, com competências mensais, SELIC, multa e honorários, fica na próxima tela.
+    </div>
+
+    <div class="rs-foot-buttons no-print">
+      <a class="rs-btn-outline" href="index.html">Voltar e editar</a>
+      <a class="rs-btn-primary" href="reducao.html">Calcular redução</a>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="result.js"></script>
+</body>
+</html>

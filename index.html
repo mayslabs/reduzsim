@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReduzSim | Simulação de INSS de Obras</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <nav class="rs-navbar">
+    <div class="container">
+      <a href="index.html" class="rs-brand" aria-label="ReduzSim">
+        <img class="rs-brand-logo" src="assets/reduzsim-logo-topo.png" alt="ReduzSim - INSS reduzido, obra regularizada">
+      </a>
+    </div>
+  </nav>
+
+  <header class="rs-hero">
+    <div class="container text-center">
+      <h1 class="rs-hero-title">Simulação de INSS de Obras</h1>
+    </div>
+  </header>
+
+  <main class="container rs-container">
+    <form id="form" class="rs-card needs-validation" action="result.html" novalidate>
+      <div class="rs-section-title">
+        <div class="rs-section-icon">1</div>
+        Dados do atendimento
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="rs-label" for="cliente-nome">Nome do cliente <span class="rs-optional">(opcional)</span></label>
+          <input class="rs-input" type="text" name="cliente-nome" id="cliente-nome" maxlength="120" autocomplete="name" placeholder="Ex.: Maria Silva">
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="cliente-telefone">Telefone <span class="rs-optional">(opcional)</span></label>
+          <input class="rs-input" type="tel" name="cliente-telefone" id="cliente-telefone" maxlength="16" autocomplete="tel" placeholder="Ex.: (63) 9 8467-0005">
+        </div>
+      </div>
+
+      <div class="rs-divider"></div>
+
+      <div class="rs-section-title">
+        <div class="rs-section-icon">2</div>
+        Informações da obra
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="rs-label" for="responsavel-obra">Responsável pela obra</label>
+          <select class="rs-select" name="responsavel-obra" id="responsavel-obra" required>
+            <option value="PF">Pessoa física</option>
+            <option value="PJ">Pessoa jurídica</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="destinacao">Destinação</label>
+          <select class="rs-select" name="destinacao" id="destinacao" required>
+            <option value="RES">Residencial unifamiliar</option>
+            <option value="RMUL">Residencial multifamiliar</option>
+            <option value="COM">Comercial salas e lojas</option>
+            <option value="GALP">Galpão industrial</option>
+            <option value="RPOP">Casa popular</option>
+            <option value="CHAB">Conjunto habitacional popular</option>
+            <option value="EGAR">Edifício de garagens</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="tipo-obra">Tipo de obra</label>
+          <select class="rs-select" name="tipo-obra" id="tipo-obra" required>
+            <option value="ALV">Alvenaria</option>
+            <option value="MAD">Madeira ou mista</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="uso-concreto">Usou concreto usinado?</label>
+          <select class="rs-select" name="uso-concreto" id="uso-concreto" required>
+            <option value="false" selected>Não</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="UF">Estado (UF)</label>
+          <select class="rs-select" name="UF" id="UF" required>
+            <option disabled selected value="">-- Selecione --</option>
+            <option>AC</option><option>AL</option><option>AM</option><option>AP</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MG</option><option>MS</option>
+            <option>MT</option><option>PA</option><option>PB</option><option>PE</option>
+            <option>PI</option><option>PR</option><option>RJ</option><option>RN</option>
+            <option>RO</option><option>RR</option><option>RS</option><option>SC</option>
+            <option>SE</option><option>SP</option><option>TO</option>
+          </select>
+          <div class="invalid-feedback">Selecione o estado.</div>
+        </div>
+      </div>
+
+      <div class="rs-divider"></div>
+
+      <div class="rs-section-title">
+        <div class="rs-section-icon">3</div>
+        Datas da obra
+      </div>
+      <p class="rs-hint">Use as datas do caso real. Elas serão usadas para montar as competências mensais no cálculo de redução.</p>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="rs-label" for="data-inicio-obra">Início da obra <span class="rs-optional">(opcional)</span></label>
+          <input class="rs-input" type="date" name="data-inicio-obra" id="data-inicio-obra">
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="data-fim-obra">Data final da obra</label>
+          <input class="rs-input" type="date" name="data-fim-obra" id="data-fim-obra" required>
+          <div class="invalid-feedback">Informe a data final da obra.</div>
+        </div>
+      </div>
+
+      <div class="rs-divider"></div>
+
+      <div class="rs-section-title">
+        <div class="rs-section-icon">4</div>
+        Áreas para aferição
+      </div>
+      <p class="rs-hint">Preencha somente o que existir na obra.</p>
+
+      <div id="msg-erro" class="rs-alert" hidden>
+        Informe ao menos uma área para calcular.
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="rs-label" for="area-construcao">Construção / obra nova</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="number" name="area-construcao" id="area-construcao" step="0.01" min="0" value="0" required>
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="area-reforma">Reforma</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="number" name="area-reforma" id="area-reforma" step="0.01" min="0" value="0" required>
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="area-demolicao">Demolição</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="number" name="area-demolicao" id="area-demolicao" step="0.01" min="0" value="0" required>
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="area-comp-coberta">Área complementar coberta</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="number" name="area-comp-coberta" id="area-comp-coberta" step="0.01" min="0" value="0" required>
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label" for="area-comp-descoberta">Área complementar descoberta</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="number" name="area-comp-descoberta" id="area-comp-descoberta" step="0.01" min="0" value="0" required>
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rs-submit-row">
+        <button class="rs-btn-primary" type="submit">
+          Gerar cálculo prévio
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

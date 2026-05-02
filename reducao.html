@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReduzSim | Cálculo de redução</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <nav class="rs-navbar no-print">
+    <div class="container">
+      <a href="index.html" class="rs-brand" aria-label="ReduzSim">
+        <img class="rs-brand-logo" src="assets/reduzsim-logo-topo.png" alt="ReduzSim">
+      </a>
+    </div>
+  </nav>
+
+  <header class="rs-hero no-print">
+    <div class="container text-center">
+      <h1 class="rs-hero-title">Cálculo de redução</h1>
+    </div>
+  </header>
+
+  <main class="container rs-container rs-print-page">
+    <section class="rs-card no-print">
+      <div class="rs-section-title rs-section-title--compact">
+        <div class="rs-section-icon">1</div>
+        Parâmetros editáveis
+      </div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="rs-label" for="honorarios-percent">Honorários (%)</label>
+          <input class="rs-input" id="honorarios-percent" type="number" min="0" step="0.01" value="30">
+        </div>
+        <div class="col-md-4">
+          <label class="rs-label" for="aplicar-maed">Aplicar multa MAED?</label>
+          <select class="rs-select" id="aplicar-maed">
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="rs-label" for="data-referencia">Data de referência</label>
+          <input class="rs-input" id="data-referencia" type="date">
+        </div>
+      </div>
+    </section>
+
+    <section class="rs-total-card">
+      <div class="rs-total-card-row">
+        <div>
+          <div class="rs-total-label">Economia bruta estimada</div>
+          <div class="rs-total-value">R$ <span id="economia-bruta">0,00</span></div>
+          <div class="rs-total-sub">Antes dos honorários sobre a economia gerada</div>
+        </div>
+        <div class="rs-total-badge">
+          <span>Redução estimada</span>
+          <strong><span id="percentual-reducao">0,0</span>%</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="rs-summary-grid">
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">Sem redução</div>
+        <div class="rs-summary-value">R$ <span id="receita-total">0,00</span></div>
+      </div>
+      <div class="rs-summary-card rs-summary-card--accent">
+        <div class="rs-summary-label">Com redução</div>
+        <div class="rs-summary-value">R$ <span id="reducao-total">0,00</span></div>
+      </div>
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">Honorários</div>
+        <div class="rs-summary-value">R$ <span id="honorarios">0,00</span></div>
+      </div>
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">Economia líquida</div>
+        <div class="rs-summary-value">R$ <span id="economia-liquida">0,00</span></div>
+      </div>
+    </section>
+
+    <section class="rs-card">
+      <div class="rs-section-title rs-section-title--compact">
+        <div class="rs-section-icon">2</div>
+        Remunerações mensais ajustadas
+      </div>
+
+      <div class="rs-actions-row no-print">
+        <button class="rs-btn-outline" type="button" id="copy-first-remuneracao">Usar a primeira remuneração em todas</button>
+      </div>
+
+      <div class="rs-table-wrap">
+        <table class="rs-table">
+          <thead>
+            <tr>
+              <th>Competência</th>
+              <th>SELIC (%)</th>
+              <th>Rem. atualizada</th>
+              <th>Rem. original</th>
+              <th>CPP 20%</th>
+              <th>Multa mora</th>
+              <th>Juros</th>
+              <th>MAED</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="monthly-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="rs-alert-info">
+      A SELIC é aplicada por competência. Competências futuras ou ainda no prazo não recebem multa de mora.
+    </div>
+
+    <div class="rs-foot-buttons no-print">
+      <a class="rs-btn-outline" href="result.html">Voltar para o cálculo prévio</a>
+      <button class="rs-btn-primary" type="button" id="recalc-btn">Atualizar cálculo</button>
+    </div>
+  </main>
+
+  <script src="reducao.js"></script>
+</body>
+</html>

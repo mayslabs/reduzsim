@@ -1,0 +1,10 @@
+*.log
+vau-*.pdf
+pdf-reference-page.png
+simulador/
+README_PROJETO.md
+RESUMO_CONTINUIDADE.md
+node_modules/
+.env
+.DS_Store
+Thumbs.db
