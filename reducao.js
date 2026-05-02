@@ -156,15 +156,27 @@ function renderRows(rows) {
 
 function buildInitialRows() {
   const months = listMonths(formData.dataInicioObra, formData.dataFimObra);
-  const fatorArea = (receitaResult.areaTotal || 0) <= 350 ? 0.5 : 0.7;
-  const rmtEstrategica = round((receitaResult.rmt || 0) * fatorArea);
-  const remMensalOriginal = months.length ? round(rmtEstrategica / months.length) : 0;
+  const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 0.5 : 0.7;
+  const rmtMeta = round((receitaResult.rmt || 0) * metaPercentual);
+  const selicFactors = months.map((month) => 1 + ((SELIC_ACUMULADA[month] ?? 0) / 100));
+  const totalFactor = selicFactors.reduce((sum, factor) => sum + factor, 0);
+  const remMensalOriginal = totalFactor > 0 ? round(rmtMeta / totalFactor) : 0;
 
-  return months.map((month) => ({
+  const rows = months.map((month) => ({
     month,
     selic: SELIC_ACUMULADA[month] ?? 0,
     remOriginal: remMensalOriginal,
   }));
+
+  if (rows.length) {
+    const totalAtualizado = rows.reduce((sum, row) => sum + round(row.remOriginal * (1 + (row.selic / 100))), 0);
+    const diff = round(rmtMeta - totalAtualizado);
+    const lastRow = rows[rows.length - 1];
+    const lastFactor = 1 + (lastRow.selic / 100);
+    lastRow.remOriginal = round(lastRow.remOriginal + (diff / lastFactor));
+  }
+
+  return rows;
 }
 
 function updateTotals(rows) {
