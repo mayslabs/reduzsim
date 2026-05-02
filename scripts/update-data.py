@@ -39,7 +39,7 @@ VAU_KEY_ORDER = ["RPOP", "COM", "CHAB", "EGAR", "GALP", "RMUL", "RES"]
 def today_brasilia() -> dt.date:
     # GitHub Actions runs in UTC. This fixed offset is enough for Brazil, which
     # currently does not observe daylight saving time.
-    return (dt.datetime.utcnow() - dt.timedelta(hours=3)).date()
+    return (dt.datetime.now(dt.UTC) - dt.timedelta(hours=3)).date()
 
 
 def add_month(year: int, month: int, delta: int) -> tuple[int, int]:
@@ -121,11 +121,12 @@ def build_selic_accumulated(reference: dt.date) -> dict[str, float]:
             accumulated[key] = 0.0
             continue
 
-        # Juros de mora: SELIC acumulada do mês seguinte ao vencimento até o
-        # mês anterior ao pagamento, acrescida de 1% no mês do pagamento.
+        # Critério espelhado no simulador original: SELIC acumulada disponível
+        # até o segundo mês anterior à referência, acrescida de 1% no mês do
+        # pagamento. Ex.: referência 05/2026 usa SELIC até 03/2026 + 1%.
         due_month = add_month(year, month, 1)
         interest_start = add_month(*due_month, 1)
-        interest_end = add_month(reference.year, reference.month, -1)
+        interest_end = add_month(reference.year, reference.month, -2)
         total = 1.0
 
         if interest_start <= interest_end:
