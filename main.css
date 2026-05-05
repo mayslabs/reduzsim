@@ -898,57 +898,40 @@ body {
 
 .rs-final-contact {
   background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
-  border: 1px solid rgba(255, 255, 255, .26);
-  border-radius: var(--radius);
-  box-shadow: 0 12px 32px rgba(0, 128, 96, .22);
-  display: grid;
-  gap: .75rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 1.25rem;
-  padding: 1.1rem;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, .9);
+  margin-bottom: 1rem;
+  padding: .65rem .85rem;
 }
 
 .rs-final-contact-title {
   color: #fff;
-  font-size: .95rem;
-  font-weight: 800;
-  grid-column: 1 / -1;
-  letter-spacing: 0;
-}
-
-.rs-final-contact-item,
-.rs-final-contact-address {
-  background: rgba(255, 255, 255, .12);
-  border: 1px solid rgba(255, 255, 255, .26);
-  border-radius: 8px;
-  padding: .85rem .95rem;
-}
-
-.rs-final-contact-address {
-  grid-column: 1 / -1;
-}
-
-.rs-final-contact span {
-  color: rgba(255, 255, 255, .78);
-  display: block;
   font-size: .72rem;
   font-weight: 800;
-  letter-spacing: .4px;
-  margin-bottom: .3rem;
+  letter-spacing: .3px;
+  margin-bottom: .25rem;
   text-transform: uppercase;
+}
+
+.rs-final-contact p {
+  font-size: .72rem;
+  font-weight: 550;
+  line-height: 1.35;
+  margin: 0;
 }
 
 .rs-final-contact strong {
   color: #fff;
-  display: block;
-  font-size: 1.05rem;
   font-weight: 800;
-  line-height: 1.35;
 }
 
-.rs-final-contact-address strong {
-  font-size: .92rem;
-  font-weight: 700;
+.rs-final-contact p + p {
+  margin-top: .15rem;
+}
+
+.rs-final-contact span {
+  color: rgba(255, 255, 255, .65);
+  padding: 0 .35rem;
 }
 
 .rs-indices-update {
@@ -1555,32 +1538,21 @@ body {
   .rs-final-contact {
     box-shadow: none;
     break-inside: avoid;
-    gap: .45rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin-bottom: .55rem;
-    padding: .6rem .7rem;
-  }
-
-  .rs-final-contact-item,
-  .rs-final-contact-address {
-    padding: .5rem .6rem;
+    margin-bottom: .35rem;
+    padding: .4rem .55rem;
   }
 
   .rs-final-contact-title {
-    font-size: .76rem;
+    font-size: .54rem;
+    margin-bottom: .12rem;
   }
 
-  .rs-final-contact span {
-    font-size: .56rem;
-    margin-bottom: .18rem;
+  .rs-final-contact p {
+    font-size: .52rem;
+    line-height: 1.25;
   }
 
-  .rs-final-contact strong {
-    font-size: .82rem;
-  }
-
-  .rs-final-contact-address strong {
-    font-size: .66rem;
-    line-height: 1.28;
+  .rs-final-contact p + p {
+    margin-top: .08rem;
   }
 }
