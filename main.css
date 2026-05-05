@@ -873,7 +873,7 @@ body {
 
 .rs-work-area strong {
   color: var(--green-dark);
-  font-size: 1.55rem;
+  font-size: 1.22rem;
 }
 
 .rs-work-details {
@@ -1527,7 +1527,7 @@ body {
   }
 
   .rs-work-area strong {
-    font-size: 1.12rem;
+    font-size: .95rem;
   }
 
   .rs-work-details {
