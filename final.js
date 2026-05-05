@@ -21,12 +21,22 @@ const typeTipoObra = {
   MAD: "Madeira ou mista",
 };
 
+function toNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const normalized = String(value || "").replace(/[^\d,.-]/g, "").trim();
+  if (!normalized) return 0;
+  const parsed = normalized.includes(",")
+    ? Number(normalized.replace(/\./g, "").replace(",", "."))
+    : Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function fmt(value) {
-  return (Number(value) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return toNumber(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function fmtPercent(value) {
-  return (Number(value) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return toNumber(value).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 function setText(id, value) {
@@ -37,7 +47,9 @@ function setText(id, value) {
 function setBar(id, value, max) {
   const el = document.getElementById(id);
   if (!el) return;
-  const width = max > 0 ? Math.max((value / max) * 100, 2) : 2;
+  const numericValue = toNumber(value);
+  const numericMax = toNumber(max);
+  const width = numericMax > 0 ? Math.max((numericValue / numericMax) * 100, 2) : 2;
   el.style.width = `${Math.min(width, 100)}%`;
 }
 
@@ -62,6 +74,7 @@ function fmtDate(value) {
   }
 
   const totals = reducaoResult.totals || {};
+  const totalComHonorarios = toNumber(totals.totalReducao) + toNumber(totals.honorarios);
 
   setText("final-date", new Date(reducaoResult.calculatedAt || Date.now()).toLocaleString("pt-BR"));
   setText("percentual-reducao", `${fmtPercent(totals.percentualReducao)}%`);
@@ -70,7 +83,7 @@ function fmtDate(value) {
   setText("economia-bruta", fmt(totals.economiaBruta));
   setText("honorarios", fmt(totals.honorarios));
   setText("economia-liquida", fmt(totals.economiaLiquida));
-  setText("total-com-honorarios", fmt((totals.totalReducao || 0) + (totals.honorarios || 0)));
+  setText("total-com-honorarios", fmt(totalComHonorarios));
   setText("honorarios-percent", fmtPercent(totals.honorariosPercent));
   setText("cliente-nome", formData.clienteNome || "-");
   setText("cliente-telefone", formData.clienteTelefone || "-");
