@@ -16,6 +16,7 @@ from pypdf import PdfReader
 ROOT = Path(__file__).resolve().parents[1]
 RESULT_JS = ROOT / "result.js"
 REDUCAO_JS = ROOT / "reducao.js"
+REDUCAO_HTML = ROOT / "reducao.html"
 
 UF_ORDER = [
     "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -230,9 +231,26 @@ def update_vau(reference: dt.date, force: bool = False) -> None:
 
 def update_metadata(timestamp: dt.datetime) -> None:
     label = timestamp.strftime("%d/%m/%Y às %H:%M")
+    version = timestamp.strftime("%Y%m%d%H%M")
     text = REDUCAO_JS.read_text(encoding="utf-8")
     text = replace_string_const(text, "INDICES_UPDATED_AT", label)
     REDUCAO_JS.write_text(text, encoding="utf-8", newline="\n")
+
+    html = REDUCAO_HTML.read_text(encoding="utf-8")
+    html, note_count = re.subn(
+        r"Os índices foram atualizados pela última vez no dia .*?\.",
+        f"Os índices foram atualizados pela última vez no dia {label}.",
+        html,
+        flags=re.S,
+    )
+    html, script_count = re.subn(
+        r'<script src="reducao\.js(?:\?v=[^"]*)?"></script>',
+        f'<script src="reducao.js?v={version}"></script>',
+        html,
+    )
+    if note_count != 1 or script_count != 1:
+        raise RuntimeError("Não foi possível atualizar a mensagem/cache bust da página de redução.")
+    REDUCAO_HTML.write_text(html, encoding="utf-8", newline="\n")
     print(f"Metadados de atualização gravados: {label}.")
 
 
