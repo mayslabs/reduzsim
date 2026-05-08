@@ -1011,10 +1011,10 @@ body {
 }
 
 .rs-indices-update {
-  display: inline-flex;
+  display: flex;
   font-weight: 650;
   line-height: 1.25;
-  margin: .25rem 0 1rem;
+  margin: .25rem auto 1rem;
   max-width: max-content;
   padding: .55rem .95rem;
 }
