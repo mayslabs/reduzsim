@@ -938,6 +938,284 @@ body {
   font-weight: 650;
 }
 
+.rs-proposal-page {
+  max-width: 1120px;
+}
+
+.rs-proposal-sheet {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  padding: 1.35rem;
+}
+
+.rs-proposal-header {
+  align-items: center;
+  display: flex;
+  gap: 1.25rem;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.rs-proposal-logo {
+  display: block;
+  max-height: 84px;
+  max-width: 280px;
+  object-fit: contain;
+}
+
+.rs-proposal-heading {
+  color: #0d332b;
+  text-align: right;
+}
+
+.rs-proposal-heading h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0 0 .6rem;
+}
+
+.rs-proposal-heading p {
+  color: #0f3d34;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.rs-proposal-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(280px, .9fr) minmax(0, 1.55fr);
+}
+
+.rs-proposal-sidebar {
+  display: grid;
+  gap: .9rem;
+}
+
+.rs-proposal-panel,
+.rs-proposal-calcs {
+  border: 1.5px solid var(--green);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.rs-proposal-panel h2,
+.rs-proposal-calcs h2 {
+  color: #0d332b;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 .85rem;
+}
+
+.rs-proposal-info-list {
+  display: grid;
+  gap: .65rem;
+}
+
+.rs-proposal-info-list--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rs-proposal-info {
+  border-bottom: 1px solid #d8eee8;
+  min-width: 0;
+  padding-bottom: .55rem;
+}
+
+.rs-proposal-info:last-child,
+.rs-proposal-info-list--compact .rs-proposal-info:nth-last-child(-n+2) {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.rs-proposal-info span {
+  color: var(--green-dark);
+  display: block;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .35px;
+  margin-bottom: .18rem;
+  text-transform: uppercase;
+}
+
+.rs-proposal-info strong {
+  color: #12342e;
+  display: block;
+  font-size: .95rem;
+  font-weight: 700;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+
+.rs-proposal-economy {
+  align-items: center;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.rs-proposal-economy h2 {
+  justify-self: start;
+  margin-bottom: .45rem;
+}
+
+.rs-donut {
+  align-items: center;
+  background:
+    radial-gradient(circle, #fff 0 50%, transparent 51%),
+    conic-gradient(var(--green) 0 var(--value, 0%), #595959 var(--value, 0%) 100%);
+  border-radius: 50%;
+  display: flex;
+  height: 170px;
+  justify-content: center;
+  margin: .25rem 0 .7rem;
+  width: 170px;
+}
+
+.rs-donut > div {
+  align-items: center;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  height: 104px;
+  justify-content: center;
+  width: 104px;
+}
+
+.rs-donut strong {
+  color: #0d332b;
+  font-size: 2.15rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.rs-proposal-economy p {
+  color: var(--gray);
+  font-size: .8rem;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.rs-proposal-calcs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rs-proposal-calcs-head {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: .9rem;
+}
+
+.rs-proposal-calcs-head p {
+  color: var(--gray);
+  font-size: .82rem;
+  line-height: 1.35;
+  margin: 0;
+  max-width: 280px;
+  text-align: right;
+}
+
+.rs-proposal-bars {
+  display: grid;
+  gap: .8rem;
+}
+
+.rs-proposal-bar-row {
+  align-items: center;
+  display: grid;
+  gap: .8rem;
+  grid-template-columns: minmax(130px, .8fr) minmax(150px, 1.65fr) minmax(96px, .55fr);
+}
+
+.rs-proposal-bar-row > span {
+  color: #12342e;
+  font-size: .86rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.rs-proposal-bar-row small {
+  color: var(--green-dark);
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+.rs-proposal-bar-row strong {
+  color: #12342e;
+  font-size: .9rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rs-proposal-bar-track {
+  background: linear-gradient(90deg, #e5e7eb 1px, transparent 1px) 0 0 / 25% 100%, #f2f5f4;
+  border-radius: 8px;
+  height: 58px;
+  overflow: hidden;
+}
+
+.rs-proposal-bar {
+  border-radius: 0 8px 8px 0;
+  height: 100%;
+  min-width: 3px;
+}
+
+.rs-proposal-bar--gray {
+  background: #555;
+}
+
+.rs-proposal-bar--green {
+  background: var(--green);
+}
+
+.rs-proposal-bar--darkgreen {
+  background: #006f55;
+}
+
+.rs-proposal-bar--taupe {
+  background: #9a918e;
+}
+
+.rs-proposal-bar--mint {
+  background: #8bd9c5;
+}
+
+.rs-proposal-highlight {
+  align-items: center;
+  background: var(--green-light);
+  border: 1px solid rgba(26, 160, 123, .35);
+  border-radius: 10px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: auto;
+  padding: .9rem 1rem;
+}
+
+.rs-proposal-highlight span {
+  color: var(--green-dark);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .35px;
+  text-transform: uppercase;
+}
+
+.rs-proposal-highlight strong {
+  color: #12342e;
+  font-size: 1.45rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .rs-calc-row {
   display: flex;
   flex-wrap: wrap;
@@ -1277,8 +1555,44 @@ body {
   .rs-preview-reduction,
   .rs-work-overview,
   .rs-work-details,
-  .rs-final-contact {
+  .rs-final-contact,
+  .rs-proposal-layout,
+  .rs-proposal-info-list--compact {
     grid-template-columns: 1fr;
+  }
+
+  .rs-proposal-sheet {
+    padding: 1rem;
+  }
+
+  .rs-proposal-header,
+  .rs-proposal-calcs-head,
+  .rs-proposal-highlight {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .rs-proposal-heading {
+    text-align: left;
+  }
+
+  .rs-proposal-heading h1 {
+    font-size: 1.45rem;
+  }
+
+  .rs-proposal-logo {
+    max-height: 64px;
+    max-width: 220px;
+  }
+
+  .rs-proposal-bar-row {
+    gap: .45rem;
+    grid-template-columns: 1fr;
+  }
+
+  .rs-proposal-bar-row strong,
+  .rs-proposal-calcs-head p {
+    text-align: left;
   }
 
   .rs-preview-money,
@@ -1554,5 +1868,139 @@ body {
 
   .rs-final-contact p + p {
     margin-top: .08rem;
+  }
+
+  .rs-proposal-sheet {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .rs-proposal-header {
+    margin-bottom: .45rem;
+  }
+
+  .rs-proposal-logo {
+    max-height: 56px;
+    max-width: 190px;
+  }
+
+  .rs-proposal-heading h1 {
+    font-size: 1.35rem;
+    margin-bottom: .2rem;
+  }
+
+  .rs-proposal-heading p {
+    font-size: .72rem;
+  }
+
+  .rs-proposal-layout {
+    gap: .45rem;
+    grid-template-columns: .92fr 1.55fr;
+  }
+
+  .rs-proposal-sidebar {
+    gap: .45rem;
+  }
+
+  .rs-proposal-panel,
+  .rs-proposal-calcs {
+    border-width: 1px;
+    break-inside: avoid;
+    padding: .52rem;
+  }
+
+  .rs-proposal-panel h2,
+  .rs-proposal-calcs h2 {
+    font-size: .78rem;
+    margin-bottom: .38rem;
+  }
+
+  .rs-proposal-info-list {
+    gap: .35rem;
+  }
+
+  .rs-proposal-info-list--compact {
+    gap: .35rem .5rem;
+  }
+
+  .rs-proposal-info {
+    padding-bottom: .32rem;
+  }
+
+  .rs-proposal-info span {
+    font-size: .49rem;
+    margin-bottom: .12rem;
+  }
+
+  .rs-proposal-info strong {
+    font-size: .66rem;
+  }
+
+  .rs-donut {
+    height: 92px;
+    margin: .05rem 0 .25rem;
+    width: 92px;
+  }
+
+  .rs-donut > div {
+    height: 56px;
+    width: 56px;
+  }
+
+  .rs-donut strong {
+    font-size: 1.25rem;
+  }
+
+  .rs-proposal-economy p {
+    font-size: .52rem;
+  }
+
+  .rs-proposal-calcs-head {
+    margin-bottom: .38rem;
+  }
+
+  .rs-proposal-calcs-head p {
+    font-size: .56rem;
+    max-width: 220px;
+  }
+
+  .rs-proposal-bars {
+    gap: .36rem;
+  }
+
+  .rs-proposal-bar-row {
+    gap: .35rem;
+    grid-template-columns: minmax(92px, .8fr) minmax(150px, 1.55fr) minmax(76px, .5fr);
+  }
+
+  .rs-proposal-bar-row > span {
+    font-size: .58rem;
+  }
+
+  .rs-proposal-bar-row small {
+    font-size: .5rem;
+  }
+
+  .rs-proposal-bar-row strong {
+    font-size: .58rem;
+  }
+
+  .rs-proposal-bar-track {
+    height: 34px;
+  }
+
+  .rs-proposal-highlight {
+    margin-top: .45rem;
+    padding: .48rem .6rem;
+  }
+
+  .rs-proposal-highlight span {
+    font-size: .52rem;
+  }
+
+  .rs-proposal-highlight strong {
+    font-size: .88rem;
   }
 }

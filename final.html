@@ -17,96 +17,117 @@
     </div>
   </nav>
 
-  <main class="container rs-container rs-final-page">
-    <section class="rs-final-hero">
-      <div class="rs-final-hero-mark">
-        <img src="assets/reduzsim-icone-transparente.png" alt="ReduzSim">
-      </div>
-      <div class="rs-final-hero-copy">
-        <span>Relatório final</span>
-        <h1>Resultado da simulação</h1>
-        <p>Emitido em <strong id="final-date">--</strong></p>
-      </div>
-    </section>
+  <main class="container rs-container rs-final-page rs-proposal-page">
+    <section class="rs-proposal-sheet">
+      <header class="rs-proposal-header">
+        <img class="rs-proposal-logo" src="assets/reduzsim-logo-topo.png" alt="ReduzSim">
+        <div class="rs-proposal-heading">
+          <h1>Redução de INSS de Obra</h1>
+          <p>Emitido em <strong id="final-date">--</strong></p>
+        </div>
+      </header>
 
-    <section class="rs-final-dashboard">
-      <div class="rs-final-main">
-        <span>Redução estimada</span>
-        <strong id="percentual-reducao">0,0%</strong>
-        <small>sobre o valor sem redução</small>
-      </div>
-      <div class="rs-final-chart" aria-label="Comparativo visual">
-        <div class="rs-bar-row">
-          <span>Sem redução</span>
-          <div class="rs-bar-track"><div class="rs-bar rs-bar--gray" id="bar-sem-reducao"></div></div>
-          <strong>R$ <span id="sem-reducao">0,00</span></strong>
-        </div>
-        <div class="rs-bar-row">
-          <span>Com redução</span>
-          <div class="rs-bar-track"><div class="rs-bar rs-bar--green" id="bar-com-reducao"></div></div>
-          <strong>R$ <span id="com-reducao">0,00</span></strong>
-        </div>
-      </div>
-    </section>
+      <div class="rs-proposal-layout">
+        <aside class="rs-proposal-sidebar">
+          <section class="rs-proposal-panel">
+            <h2>Dados do cliente</h2>
+            <div class="rs-proposal-info-list">
+              <div class="rs-proposal-info">
+                <span>Cliente</span>
+                <strong id="cliente-nome">-</strong>
+              </div>
+              <div class="rs-proposal-info">
+                <span>Telefone</span>
+                <strong id="cliente-telefone">-</strong>
+              </div>
+              <div class="rs-proposal-info">
+                <span>Responsável</span>
+                <strong id="responsavel-obra">-</strong>
+              </div>
+              <div class="rs-proposal-info">
+                <span>Local</span>
+                <strong id="uf">-</strong>
+              </div>
+            </div>
+          </section>
 
-    <section class="rs-summary-grid">
-      <div class="rs-summary-card">
-        <div class="rs-summary-label">Economia bruta</div>
-        <div class="rs-summary-value">R$ <span id="economia-bruta">0,00</span></div>
-      </div>
-      <div class="rs-summary-card">
-        <div class="rs-summary-label">Honorários <span class="rs-inline-percent">(<span id="honorarios-percent">0,0</span>%)</span></div>
-        <div class="rs-summary-value">R$ <span id="honorarios">0,00</span></div>
-      </div>
-      <div class="rs-summary-card rs-summary-card--accent">
-        <div class="rs-summary-label">Economia líquida</div>
-        <div class="rs-summary-value">R$ <span id="economia-liquida">0,00</span></div>
-      </div>
-      <div class="rs-summary-card rs-summary-card--strong">
-        <div class="rs-summary-label">Total com honorários</div>
-        <div class="rs-summary-value">R$ <span id="total-com-honorarios">0,00</span></div>
-      </div>
-    </section>
+          <section class="rs-proposal-panel">
+            <h2>Dados da construção</h2>
+            <div class="rs-proposal-info-list rs-proposal-info-list--compact">
+              <div class="rs-proposal-info">
+                <span>Prazo da obra</span>
+                <strong><span id="data-inicio-obra">-</span> a <span id="data-fim-obra">-</span></strong>
+              </div>
+              <div class="rs-proposal-info">
+                <span>Área</span>
+                <strong><span id="area-total">0,00</span> m²</strong>
+              </div>
+              <div class="rs-proposal-info">
+                <span>Destinação</span>
+                <strong id="destinacao">-</strong>
+              </div>
+              <div class="rs-proposal-info">
+                <span>Tipo de obra</span>
+                <strong id="tipo-obra">-</strong>
+              </div>
+            </div>
+          </section>
 
-    <section class="rs-card rs-work-summary">
-      <div class="rs-section-title rs-section-title--compact">
-        Resumo da obra
+          <section class="rs-proposal-panel rs-proposal-economy">
+            <h2>Economia</h2>
+            <div class="rs-donut" id="economia-donut">
+              <div><strong id="percentual-reducao">0,0%</strong></div>
+            </div>
+            <p>Percentual de redução sobre o valor sem redução.</p>
+          </section>
+        </aside>
+
+        <section class="rs-proposal-calcs">
+          <div class="rs-proposal-calcs-head">
+            <h2>Cálculos</h2>
+            <p>Comparativo entre o INSS estimado pela Receita e a simulação com redução.</p>
+          </div>
+
+          <div class="rs-proposal-bars">
+            <div class="rs-proposal-bar-row">
+              <span>INSS sem redução</span>
+              <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--gray" id="bar-sem-reducao"></div></div>
+              <strong>R$ <span id="sem-reducao">0,00</span></strong>
+            </div>
+            <div class="rs-proposal-bar-row">
+              <span>INSS com redução</span>
+              <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--green" id="bar-com-reducao"></div></div>
+              <strong>R$ <span id="com-reducao">0,00</span></strong>
+            </div>
+            <div class="rs-proposal-bar-row">
+              <span>Economia bruta</span>
+              <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--darkgreen" id="bar-economia-bruta"></div></div>
+              <strong>R$ <span id="economia-bruta">0,00</span></strong>
+            </div>
+            <div class="rs-proposal-bar-row">
+              <span>Honorários <small>(<span id="honorarios-percent">0,0</span>%)</small></span>
+              <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--taupe" id="bar-honorarios"></div></div>
+              <strong>R$ <span id="honorarios">0,00</span></strong>
+            </div>
+            <div class="rs-proposal-bar-row">
+              <span>Total com honorários</span>
+              <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--mint" id="bar-total-com-honorarios"></div></div>
+              <strong>R$ <span id="total-com-honorarios">0,00</span></strong>
+            </div>
+          </div>
+
+          <div class="rs-proposal-highlight">
+            <span>Economia líquida estimada</span>
+            <strong>R$ <span id="economia-liquida">0,00</span></strong>
+          </div>
+        </section>
       </div>
 
-      <div class="rs-work-overview">
-        <div class="rs-work-person">
-          <span>Cliente</span>
-          <strong id="cliente-nome">-</strong>
-          <small id="cliente-telefone">-</small>
-        </div>
-        <div class="rs-work-area">
-          <span>Área total da obra</span>
-          <strong><span id="area-total">0,00</span> m²</strong>
-          <small>UF <span id="uf">-</span></small>
-        </div>
-      </div>
-
-      <div class="rs-work-details">
-        <div>
-          <span>Enquadramento</span>
-          <strong id="destinacao">-</strong>
-          <small>Tipo: <span id="tipo-obra">-</span></small>
-        </div>
-        <div>
-          <span>Responsável pela obra</span>
-          <strong id="responsavel-obra">-</strong>
-        </div>
-        <div>
-          <span>Período da obra</span>
-          <strong><span id="data-inicio-obra">-</span> a <span id="data-fim-obra">-</span></strong>
-        </div>
-      </div>
-    </section>
-
-    <section class="rs-final-contact">
-      <div class="rs-final-contact-title">Contato ReduzSim</div>
-      <p><strong>Instagram</strong> @reduzsiminss <span>•</span> <strong>Telefone</strong> (63) 98467-0005</p>
-      <p><strong>Endereço</strong> Avenida Joaquim Teotônio Segurado, Quadra 201 Sul, Conjunto 1, Lote 13, Condomínio Cosmopolitan Home & Office Complex, Sala 304, Bairro: Plano Diretor Sul, Palmas - TO, CEP: 77015-200</p>
+      <footer class="rs-final-contact">
+        <div class="rs-final-contact-title">Contato ReduzSim</div>
+        <p><strong>Instagram</strong> @reduzsiminss <span>•</span> <strong>Telefone</strong> (63) 98467-0005</p>
+        <p><strong>Endereço</strong> Avenida Joaquim Teotônio Segurado, Quadra 201 Sul, Conjunto 1, Lote 13, Condomínio Cosmopolitan Home & Office Complex, Sala 304, Bairro: Plano Diretor Sul, Palmas - TO, CEP: 77015-200</p>
+      </footer>
     </section>
 
     <div class="rs-foot-buttons no-print">
@@ -115,6 +136,6 @@
     </div>
   </main>
 
-  <script src="final.js?v=20260504-total-honorarios"></script>
+  <script src="final.js?v=20260507-proposta"></script>
 </body>
 </html>

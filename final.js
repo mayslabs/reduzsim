@@ -53,6 +53,13 @@ function setBar(id, value, max) {
   el.style.width = `${Math.min(width, 100)}%`;
 }
 
+function setDonut(id, percent) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const value = Math.max(0, Math.min(toNumber(percent), 100));
+  el.style.setProperty("--value", `${value}%`);
+}
+
 function fmtDate(value) {
   if (!value) return "-";
   const [year, month, day] = value.split("-");
@@ -95,8 +102,20 @@ function fmtDate(value) {
   setText("data-inicio-obra", fmtDate(formData.dataInicioObra));
   setText("data-fim-obra", fmtDate(formData.dataFimObra));
 
-  setBar("bar-sem-reducao", totals.receita || 0, totals.receita || 0);
-  setBar("bar-com-reducao", totals.totalReducao || 0, totals.receita || 0);
+  const chartMax = Math.max(
+    toNumber(totals.receita),
+    toNumber(totals.economiaBruta),
+    toNumber(totals.totalReducao),
+    toNumber(totals.honorarios),
+    totalComHonorarios,
+  );
+
+  setDonut("economia-donut", totals.percentualReducao);
+  setBar("bar-sem-reducao", totals.receita || 0, chartMax);
+  setBar("bar-com-reducao", totals.totalReducao || 0, chartMax);
+  setBar("bar-economia-bruta", totals.economiaBruta || 0, chartMax);
+  setBar("bar-honorarios", totals.honorarios || 0, chartMax);
+  setBar("bar-total-com-honorarios", totalComHonorarios, chartMax);
 
   document.getElementById("print-btn").addEventListener("click", () => window.print());
 })();
