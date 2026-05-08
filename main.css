@@ -1310,6 +1310,62 @@ body {
   background: #8bd9c5;
 }
 
+.rs-proposal-services {
+  border: 1.5px solid var(--green);
+  border-radius: 12px;
+  margin-top: 2.1rem;
+  max-width: 285px;
+  padding: .8rem 1rem .85rem;
+}
+
+.rs-proposal-services h3 {
+  color: #12342e;
+  font-size: 1.04rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 .45rem;
+}
+
+.rs-proposal-services ul {
+  display: grid;
+  gap: .28rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rs-proposal-services li {
+  color: #12342e;
+  font-size: .82rem;
+  font-weight: 500;
+  line-height: 1.25;
+  padding-left: 1.35rem;
+  position: relative;
+}
+
+.rs-proposal-services li::before {
+  border: 1.5px solid var(--green);
+  border-radius: 50%;
+  content: "";
+  height: .9rem;
+  left: 0;
+  position: absolute;
+  top: .05rem;
+  width: .9rem;
+}
+
+.rs-proposal-services li::after {
+  border-bottom: 1.5px solid var(--green);
+  border-right: 1.5px solid var(--green);
+  content: "";
+  height: .48rem;
+  left: .33rem;
+  position: absolute;
+  top: .18rem;
+  transform: rotate(42deg);
+  width: .22rem;
+}
+
 .rs-proposal-highlight {
   align-items: center;
   background: var(--green-light);
@@ -1322,7 +1378,7 @@ body {
   padding: .9rem 1rem;
 }
 
-.rs-proposal-highlight span {
+.rs-proposal-highlight > span {
   color: var(--green-dark);
   font-size: .75rem;
   font-weight: 800;
@@ -1332,9 +1388,17 @@ body {
 
 .rs-proposal-highlight strong {
   color: #12342e;
-  font-size: 1.45rem;
+  font-size: 1.95rem;
   font-weight: 800;
   white-space: nowrap;
+}
+
+.rs-proposal-highlight strong span {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .rs-calc-row {
@@ -2143,16 +2207,50 @@ body {
     height: 34px;
   }
 
+  .rs-proposal-services {
+    border-width: 1px;
+    margin-top: .75rem;
+    max-width: 180px;
+    padding: .42rem .55rem .48rem;
+  }
+
+  .rs-proposal-services h3 {
+    font-size: .68rem;
+    margin-bottom: .25rem;
+  }
+
+  .rs-proposal-services ul {
+    gap: .14rem;
+  }
+
+  .rs-proposal-services li {
+    font-size: .48rem;
+    padding-left: .82rem;
+  }
+
+  .rs-proposal-services li::before {
+    height: .52rem;
+    top: .03rem;
+    width: .52rem;
+  }
+
+  .rs-proposal-services li::after {
+    height: .28rem;
+    left: .19rem;
+    top: .1rem;
+    width: .13rem;
+  }
+
   .rs-proposal-highlight {
     margin-top: .45rem;
     padding: .48rem .6rem;
   }
 
-  .rs-proposal-highlight span {
+  .rs-proposal-highlight > span {
     font-size: .52rem;
   }
 
   .rs-proposal-highlight strong {
-    font-size: .88rem;
+    font-size: 1.12rem;
   }
 }
