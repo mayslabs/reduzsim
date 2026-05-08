@@ -898,22 +898,27 @@ body {
 
 .rs-final-contact {
   align-items: center;
-  background: transparent;
-  border-bottom: 8px solid #555;
+  background: #fff;
+  border-bottom: 8px solid #565656;
   color: #555;
   display: flex;
   gap: 1rem;
   justify-content: space-between;
   margin: 1rem -1.35rem -1.35rem;
-  min-height: 56px;
-  padding: .45rem 0 0 1rem;
+  min-height: 62px;
+  overflow: hidden;
+  padding: .35rem 0 0 1.05rem;
+  position: relative;
 }
 
 .rs-contact-left {
   align-items: center;
   display: flex;
-  gap: 1.25rem;
+  gap: 1.35rem;
   min-width: 0;
+  padding-bottom: .35rem;
+  position: relative;
+  z-index: 1;
 }
 
 .rs-contact-item {
@@ -925,20 +930,28 @@ body {
 
 .rs-contact-icon {
   align-items: center;
-  border: 2px solid #666;
-  border-radius: 50%;
-  color: #666;
+  color: #5b5b5b;
   display: flex;
-  flex: 0 0 28px;
-  font-size: 1rem;
-  font-weight: 800;
-  height: 28px;
+  flex: 0 0 30px;
+  height: 30px;
   justify-content: center;
   padding: 0;
-  width: 28px;
+  width: 30px;
 }
 
-.rs-contact-item small {
+.rs-contact-icon svg,
+.rs-site-icon svg {
+  display: block;
+  fill: none;
+  height: 100%;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 100%;
+}
+
+.rs-contact-copy small {
   color: #666;
   display: block;
   font-size: .48rem;
@@ -946,12 +959,12 @@ body {
   line-height: 1;
 }
 
-.rs-contact-item strong {
+.rs-contact-copy strong {
   color: #555;
   display: block;
-  font-size: .72rem;
+  font-size: .76rem;
   font-weight: 800;
-  line-height: 1.12;
+  line-height: 1.08;
   white-space: nowrap;
 }
 
@@ -961,28 +974,40 @@ body {
   background: var(--green);
   color: #fff;
   display: flex;
-  font-size: .82rem;
+  font-size: .84rem;
   font-weight: 800;
   justify-content: center;
-  min-width: 260px;
-  padding: 0 1.25rem 0 2rem;
+  min-width: 335px;
+  padding: 0 1.3rem 0 2.6rem;
   position: relative;
 }
 
 .rs-contact-site::before {
-  border-bottom: 56px solid var(--green);
-  border-left: 28px solid transparent;
+  border-bottom: 62px solid var(--green);
+  border-left: 42px solid transparent;
   content: "";
-  left: -28px;
+  left: -42px;
   position: absolute;
   top: 0;
 }
 
-.rs-contact-site::after {
-  content: "◉";
-  font-size: .9rem;
+.rs-contact-site strong {
+  color: #fff;
+  font-weight: 800;
+  position: relative;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.rs-site-icon {
+  color: #fff;
+  display: inline-flex;
+  flex: 0 0 19px;
+  height: 19px;
   margin-right: .45rem;
-  order: -1;
+  position: relative;
+  width: 19px;
+  z-index: 1;
 }
 
 .rs-indices-update {
@@ -1927,11 +1952,12 @@ body {
     gap: .45rem;
     margin: .45rem 0 0;
     min-height: 34px;
-    padding: .25rem 0 0 .35rem;
+    padding: .2rem 0 0 .35rem;
   }
 
   .rs-contact-left {
-    gap: .6rem;
+    gap: .62rem;
+    padding-bottom: .18rem;
   }
 
   .rs-contact-item {
@@ -1939,36 +1965,36 @@ body {
   }
 
   .rs-contact-icon {
-    border-width: 1.4px;
     flex-basis: 18px;
-    font-size: .62rem;
     height: 18px;
     width: 18px;
   }
 
-  .rs-contact-item small {
+  .rs-contact-copy small {
     font-size: .34rem;
   }
 
-  .rs-contact-item strong {
-    font-size: .45rem;
+  .rs-contact-copy strong {
+    font-size: .46rem;
   }
 
   .rs-contact-site {
     font-size: .5rem;
-    min-width: 150px;
-    padding: 0 .55rem 0 1rem;
+    min-width: 180px;
+    padding: 0 .55rem 0 1.1rem;
   }
 
   .rs-contact-site::before {
     border-bottom-width: 34px;
-    border-left-width: 17px;
-    left: -17px;
+    border-left-width: 20px;
+    left: -20px;
   }
 
-  .rs-contact-site::after {
-    font-size: .52rem;
+  .rs-site-icon {
+    flex-basis: 10px;
+    height: 10px;
     margin-right: .22rem;
+    width: 10px;
   }
 
   .rs-proposal-sheet {
