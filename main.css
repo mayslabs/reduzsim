@@ -1119,12 +1119,12 @@ body {
 .rs-proposal-info span {
   color: var(--green-dark);
   display: block;
-  font-size: .64rem;
+  font-family: "Poppins", sans-serif;
+  font-size: .68rem;
   font-weight: 800;
-  letter-spacing: .35px;
+  letter-spacing: 0;
   line-height: 1.15;
   margin-bottom: .28rem;
-  text-transform: uppercase;
 }
 
 .rs-proposal-info strong {

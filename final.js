@@ -21,6 +21,36 @@ const typeTipoObra = {
   MAD: "Madeira ou mista",
 };
 
+const ufNames = {
+  AC: "Acre",
+  AL: "Alagoas",
+  AM: "Amazonas",
+  AP: "Amapá",
+  BA: "Bahia",
+  CE: "Ceará",
+  DF: "Distrito Federal",
+  ES: "Espírito Santo",
+  GO: "Goiás",
+  MA: "Maranhão",
+  MG: "Minas Gerais",
+  MS: "Mato Grosso do Sul",
+  MT: "Mato Grosso",
+  PA: "Pará",
+  PB: "Paraíba",
+  PE: "Pernambuco",
+  PI: "Piauí",
+  PR: "Paraná",
+  RJ: "Rio de Janeiro",
+  RN: "Rio Grande do Norte",
+  RO: "Rondônia",
+  RR: "Roraima",
+  RS: "Rio Grande do Sul",
+  SC: "Santa Catarina",
+  SE: "Sergipe",
+  SP: "São Paulo",
+  TO: "Tocantins",
+};
+
 function toNumber(value) {
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
   const normalized = String(value || "").replace(/[^\d,.-]/g, "").trim();
@@ -98,7 +128,7 @@ function fmtDate(value) {
   setText("honorarios-percent", fmtPercent(totals.honorariosPercent));
   setText("cliente-nome", formData.clienteNome || "-");
   setText("cliente-telefone", formData.clienteTelefone || "-");
-  setText("uf", formData.UF || "-");
+  setText("uf", ufNames[formData.UF] || formData.UF || "-");
   setText("area-total", fmt(formData.areaTotal));
   setText("responsavel-obra", typeResponsavel[formData.responsavelObra] || "-");
   setText("destinacao", typeDestinacao[formData.destinacao] || "-");
