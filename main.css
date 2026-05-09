@@ -1069,13 +1069,13 @@ body {
 .rs-proposal-layout {
   align-items: start;
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
   grid-template-columns: minmax(280px, .9fr) minmax(0, 1.55fr);
 }
 
 .rs-proposal-sidebar {
   display: grid;
-  gap: .9rem;
+  gap: 1.05rem;
 }
 
 .rs-proposal-panel,
@@ -1100,9 +1100,8 @@ body {
 }
 
 .rs-proposal-info-list--compact {
-  column-gap: .95rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  row-gap: .75rem;
+  grid-template-columns: 1fr;
+  row-gap: .82rem;
 }
 
 .rs-proposal-info {
@@ -1150,13 +1149,14 @@ body {
 }
 
 .rs-proposal-info-list--compact .rs-proposal-info:nth-child(3) {
-  grid-column: 1 / -1;
+  grid-column: auto;
+  grid-row: 4;
 }
 
 .rs-proposal-info-list--compact .rs-proposal-info:nth-child(4) {
   border-bottom: 1px solid #d8eee8;
-  grid-column: 2;
-  grid-row: 2;
+  grid-column: auto;
+  grid-row: 3;
   padding-bottom: .55rem;
 }
 
@@ -1164,6 +1164,16 @@ body {
 .rs-proposal-info-list--compact .rs-proposal-info:nth-last-child(-n+2) {
   border-bottom: 0;
   padding-bottom: 0;
+}
+
+.rs-proposal-info-list--compact .rs-proposal-info:nth-child(3) {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.rs-proposal-info-list--compact .rs-proposal-info:nth-child(4) {
+  border-bottom: 1px solid #d8eee8;
+  padding-bottom: .55rem;
 }
 
 .rs-proposal-info-copy > span {
@@ -1280,7 +1290,7 @@ body {
 
 .rs-proposal-bars {
   display: grid;
-  gap: .8rem;
+  gap: .95rem;
 }
 
 .rs-proposal-bar-row {
@@ -2153,16 +2163,17 @@ body {
   }
 
   .rs-proposal-layout {
-    align-items: start;
-    flex: 0 0 auto;
-    gap: .58rem;
-    grid-template-columns: minmax(210px, .84fr) minmax(0, 1.38fr);
+    align-items: stretch;
+    flex: 0 0 780px;
+    gap: .78rem;
+    grid-template-columns: minmax(220px, .86fr) minmax(0, 1.34fr);
     min-height: 0;
   }
 
   .rs-proposal-sidebar {
-    gap: .58rem;
-    grid-template-rows: 1fr 1fr 1fr;
+    gap: .72rem;
+    grid-template-rows: .9fr 1.08fr .92fr;
+    min-height: 0;
   }
 
   .rs-proposal-panel,
@@ -2171,6 +2182,8 @@ body {
     break-inside: avoid;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    min-height: 0;
     padding: .66rem;
   }
 
@@ -2187,7 +2200,18 @@ body {
   }
 
   .rs-proposal-info-list--compact {
-    gap: .44rem .55rem;
+    gap: .5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .rs-proposal-info-list--compact .rs-proposal-info:nth-child(3) {
+    grid-column: auto;
+    grid-row: 4;
+  }
+
+  .rs-proposal-info-list--compact .rs-proposal-info:nth-child(4) {
+    grid-column: auto;
+    grid-row: 3;
   }
 
   .rs-proposal-info {
@@ -2253,7 +2277,7 @@ body {
   }
 
   .rs-proposal-bars {
-    gap: .56rem;
+    gap: .7rem;
   }
 
   .rs-proposal-bar-row {
@@ -2274,7 +2298,7 @@ body {
   }
 
   .rs-proposal-bar-track {
-    height: 46px;
+    height: 50px;
   }
 
   .rs-proposal-honorarios-note {
@@ -2286,7 +2310,7 @@ body {
     align-content: start;
     display: grid;
     flex: 0;
-    margin-top: .42rem;
+    margin-top: .55rem;
   }
 
   .rs-proposal-services h3 {
@@ -2306,7 +2330,7 @@ body {
   }
 
   .rs-proposal-highlight {
-    margin-top: .58rem;
+    margin-top: .72rem;
     padding: .62rem .72rem;
   }
 
