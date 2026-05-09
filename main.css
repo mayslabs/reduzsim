@@ -1879,8 +1879,8 @@ body {
 
 @media print {
   @page {
-    margin: 8mm;
-    size: A4;
+    margin: 6mm;
+    size: A4 landscape;
   }
 
   html,
@@ -2155,6 +2155,9 @@ body {
     border: 0;
     border-radius: 0;
     box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     padding: 0;
   }
 
@@ -2177,18 +2180,23 @@ body {
   }
 
   .rs-proposal-layout {
+    flex: 1;
     gap: .45rem;
     grid-template-columns: .92fr 1.55fr;
+    min-height: 0;
   }
 
   .rs-proposal-sidebar {
     gap: .45rem;
+    grid-template-rows: 1fr 1fr 1fr;
   }
 
   .rs-proposal-panel,
   .rs-proposal-calcs {
     border-width: 1px;
     break-inside: avoid;
+    display: flex;
+    flex-direction: column;
     padding: .52rem;
   }
 
@@ -2199,6 +2207,8 @@ body {
   }
 
   .rs-proposal-info-list {
+    align-content: space-evenly;
+    flex: 1;
     gap: .35rem;
   }
 
@@ -2255,6 +2265,10 @@ body {
     font-size: .52rem;
   }
 
+  .rs-proposal-economy {
+    align-content: space-evenly;
+  }
+
   .rs-proposal-calcs-head {
     margin-bottom: .38rem;
   }
@@ -2265,7 +2279,7 @@ body {
   }
 
   .rs-proposal-bars {
-    gap: .36rem;
+    gap: .46rem;
   }
 
   .rs-proposal-bar-row {
@@ -2286,7 +2300,7 @@ body {
   }
 
   .rs-proposal-bar-track {
-    height: 34px;
+    height: 40px;
   }
 
   .rs-proposal-honorarios-note {
@@ -2299,8 +2313,9 @@ body {
 
   .rs-proposal-services {
     border-width: 1px;
-    margin-top: .42rem;
-    min-height: 88px;
+    flex: 1;
+    margin-top: .38rem;
+    min-height: 0;
     padding: .38rem;
     width: 100%;
   }
@@ -2316,24 +2331,24 @@ body {
 
   .rs-proposal-services li {
     border-radius: 5px;
-    font-size: .34rem;
-    padding: 1rem .12rem .18rem;
+    font-size: .4rem;
+    padding: 3.1rem .12rem .18rem;
   }
 
   .rs-proposal-services li::before {
     height: .46rem;
-    top: .24rem;
+    top: 2.45rem;
     width: .46rem;
   }
 
   .rs-proposal-services li::after {
     height: .24rem;
-    top: .31rem;
+    top: 2.52rem;
     width: .11rem;
   }
 
   .rs-proposal-highlight {
-    margin-top: .45rem;
+    margin-top: .38rem;
     padding: .48rem .6rem;
   }
 
