@@ -6,7 +6,7 @@
   <title>ReduzSim | Resultado final</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css?v=20260509-print-balanced">
+  <link rel="stylesheet" href="main.css?v=20260509-proposal-layout">
 </head>
 <body>
   <nav class="rs-navbar no-print">
@@ -87,7 +87,35 @@
             </div>
           </section>
 
-          <section class="rs-proposal-panel">
+          <section class="rs-proposal-panel rs-proposal-services-panel">
+            <div class="rs-proposal-services">
+              <h3>Serviços inclusos</h3>
+              <ul>
+                <li>Abertura do CNO</li>
+                <li>Planejamento de reduções</li>
+                <li>Emissão das guias (DARF)</li>
+                <li>Acompanhamento no SERO</li>
+                <li>Emissão da CND/CPEND</li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="rs-proposal-note-panel">
+            <p><strong>Observação:</strong> os honorários são calculados sobre a economia obtida.</p>
+            <p><strong>Validade:</strong> os valores podem mudar conforme atualização de índices, dados da obra ou documentação apresentada.</p>
+          </section>
+
+          <section class="rs-proposal-panel rs-proposal-economy">
+            <h2>Economia</h2>
+            <div class="rs-donut" id="economia-donut">
+              <div><strong id="percentual-reducao">0,0%</strong></div>
+            </div>
+            <p>Percentual de redução sobre o valor sem redução.</p>
+          </section>
+        </aside>
+
+        <section class="rs-proposal-main">
+          <section class="rs-proposal-panel rs-proposal-build-panel">
             <h2>Dados da construção</h2>
             <div class="rs-proposal-info-list rs-proposal-info-list--compact">
               <div class="rs-proposal-info rs-proposal-info--with-icon rs-proposal-info--period">
@@ -147,20 +175,11 @@
             </div>
           </section>
 
-          <section class="rs-proposal-panel rs-proposal-economy">
-            <h2>Economia</h2>
-            <div class="rs-donut" id="economia-donut">
-              <div><strong id="percentual-reducao">0,0%</strong></div>
+          <section class="rs-proposal-calcs">
+            <div class="rs-proposal-calcs-head">
+              <h2>Cálculos</h2>
+              <p>Comparativo entre o INSS estimado pela Receita e a simulação com redução.</p>
             </div>
-            <p>Percentual de redução sobre o valor sem redução.</p>
-          </section>
-        </aside>
-
-        <section class="rs-proposal-calcs">
-          <div class="rs-proposal-calcs-head">
-            <h2>Cálculos</h2>
-            <p>Comparativo entre o INSS estimado pela Receita e a simulação com redução.</p>
-          </div>
 
           <div class="rs-proposal-bars">
             <div class="rs-proposal-bar-row">
@@ -190,25 +209,11 @@
             </div>
           </div>
 
-          <p class="rs-proposal-honorarios-note">
-            Observação: os honorários são calculados sobre a economia obtida.
-          </p>
-
-          <div class="rs-proposal-services">
-            <h3>Serviços inclusos</h3>
-            <ul>
-              <li>Abertura do CNO</li>
-              <li>Planejamento de reduções</li>
-              <li>Emissão das guias (DARF)</li>
-              <li>Acompanhamento no SERO</li>
-              <li>Emissão da CND/CPEND</li>
-            </ul>
-          </div>
-
-          <div class="rs-proposal-highlight">
-            <span>Economia líquida estimada</span>
-            <strong>R$ <span id="economia-liquida">0,00</span></strong>
-          </div>
+            <div class="rs-proposal-highlight">
+              <span>Economia líquida estimada</span>
+              <strong>R$ <span id="economia-liquida">0,00</span></strong>
+            </div>
+          </section>
         </section>
       </div>
 

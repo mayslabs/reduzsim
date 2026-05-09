@@ -1078,6 +1078,13 @@ body {
   gap: 1.05rem;
 }
 
+.rs-proposal-main {
+  display: grid;
+  gap: 1rem;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
 .rs-proposal-panel,
 .rs-proposal-calcs {
   border: 1.5px solid var(--green);
@@ -1100,8 +1107,9 @@ body {
 }
 
 .rs-proposal-info-list--compact {
-  grid-template-columns: 1fr;
-  row-gap: .82rem;
+  column-gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: .78rem;
 }
 
 .rs-proposal-info {
@@ -1149,15 +1157,25 @@ body {
 }
 
 .rs-proposal-info-list--compact .rs-proposal-info:nth-child(3) {
-  grid-column: auto;
-  grid-row: 4;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .rs-proposal-info-list--compact .rs-proposal-info:nth-child(4) {
   border-bottom: 1px solid #d8eee8;
-  grid-column: auto;
-  grid-row: 3;
+  grid-column: 2;
+  grid-row: 2;
   padding-bottom: .55rem;
+}
+
+.rs-proposal-info-list--compact .rs-proposal-info:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.rs-proposal-info-list--compact .rs-proposal-info:nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
 }
 
 .rs-proposal-info:last-child,
@@ -1167,8 +1185,8 @@ body {
 }
 
 .rs-proposal-info-list--compact .rs-proposal-info:nth-child(3) {
-  border-bottom: 0;
-  padding-bottom: 0;
+  border-bottom: 1px solid #d8eee8;
+  padding-bottom: .55rem;
 }
 
 .rs-proposal-info-list--compact .rs-proposal-info:nth-child(4) {
@@ -1270,6 +1288,58 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+}
+
+.rs-proposal-services-panel .rs-proposal-services {
+  margin: 0;
+}
+
+.rs-proposal-services-panel .rs-proposal-services ul {
+  gap: .42rem;
+  list-style: none;
+  padding-left: 0;
+}
+
+.rs-proposal-services-panel .rs-proposal-services li {
+  align-items: center;
+  display: flex;
+  gap: .45rem;
+}
+
+.rs-proposal-services-panel .rs-proposal-services li::before {
+  align-items: center;
+  border: 1.5px solid var(--green);
+  border-radius: 50%;
+  color: var(--green);
+  content: "✓";
+  display: inline-flex;
+  flex: 0 0 18px;
+  font-size: .72rem;
+  font-weight: 800;
+  height: 18px;
+  justify-content: center;
+  line-height: 1;
+  width: 18px;
+}
+
+.rs-proposal-note-panel {
+  background: var(--green);
+  border-radius: 12px;
+  color: #fff;
+  display: grid;
+  gap: .75rem;
+  padding: 1rem;
+}
+
+.rs-proposal-note-panel p {
+  font-size: .78rem;
+  font-weight: 500;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.rs-proposal-note-panel strong {
+  font-weight: 800;
 }
 
 .rs-proposal-calcs-head {
@@ -2164,15 +2234,22 @@ body {
 
   .rs-proposal-layout {
     align-items: stretch;
-    flex: 0 0 780px;
+    flex: 0 0 850px;
     gap: .78rem;
-    grid-template-columns: minmax(220px, .86fr) minmax(0, 1.34fr);
+    grid-template-columns: minmax(210px, .78fr) minmax(0, 1.42fr);
     min-height: 0;
   }
 
   .rs-proposal-sidebar {
-    gap: .72rem;
-    grid-template-rows: .9fr 1.08fr .92fr;
+    gap: .6rem;
+    grid-template-rows: .86fr .52fr .66fr .82fr;
+    min-height: 0;
+  }
+
+  .rs-proposal-main {
+    display: grid;
+    gap: .6rem;
+    grid-template-rows: 205px 1fr;
     min-height: 0;
   }
 
@@ -2185,6 +2262,33 @@ body {
     justify-content: space-between;
     min-height: 0;
     padding: .66rem;
+  }
+
+  .rs-proposal-note-panel {
+    border-radius: 8px;
+    gap: .45rem;
+    padding: .64rem .72rem;
+  }
+
+  .rs-proposal-note-panel p {
+    font-size: .56rem;
+    line-height: 1.32;
+  }
+
+  .rs-proposal-build-panel .rs-proposal-info-list {
+    align-content: start;
+    flex: 0;
+    gap: .42rem .65rem;
+  }
+
+  .rs-proposal-build-panel .rs-proposal-info {
+    padding-bottom: .3rem;
+  }
+
+  .rs-proposal-build-panel .rs-proposal-info:nth-child(2),
+  .rs-proposal-build-panel .rs-proposal-info:nth-child(4) {
+    border-bottom: 0;
+    padding-bottom: 0;
   }
 
   .rs-proposal-panel h2,
@@ -2200,18 +2304,28 @@ body {
   }
 
   .rs-proposal-info-list--compact {
-    gap: .5rem;
-    grid-template-columns: 1fr;
+    gap: .52rem .65rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .rs-proposal-info-list--compact .rs-proposal-info:nth-child(3) {
-    grid-column: auto;
-    grid-row: 4;
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .rs-proposal-info-list--compact .rs-proposal-info:nth-child(4) {
-    grid-column: auto;
-    grid-row: 3;
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .rs-proposal-info-list--compact .rs-proposal-info:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .rs-proposal-info-list--compact .rs-proposal-info:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
   }
 
   .rs-proposal-info {
@@ -2277,7 +2391,7 @@ body {
   }
 
   .rs-proposal-bars {
-    gap: .7rem;
+    gap: .82rem;
   }
 
   .rs-proposal-bar-row {
@@ -2298,7 +2412,7 @@ body {
   }
 
   .rs-proposal-bar-track {
-    height: 50px;
+    height: 58px;
   }
 
   .rs-proposal-honorarios-note {
@@ -2315,22 +2429,42 @@ body {
 
   .rs-proposal-services h3 {
     font-size: .88rem;
-    margin-bottom: .32rem;
+    margin-bottom: .28rem;
   }
 
   .rs-proposal-services ul {
-    gap: .52rem;
+    gap: .34rem;
     padding-left: 1rem;
   }
 
   .rs-proposal-services li {
-    font-size: .62rem;
+    font-size: .58rem;
     line-height: 1.18;
     padding: 0;
   }
 
+  .rs-proposal-services-panel .rs-proposal-services {
+    margin-top: 0;
+  }
+
+  .rs-proposal-services-panel .rs-proposal-services ul {
+    gap: .28rem;
+    padding-left: 0;
+  }
+
+  .rs-proposal-services-panel .rs-proposal-services li {
+    gap: .24rem;
+  }
+
+  .rs-proposal-services-panel .rs-proposal-services li::before {
+    flex-basis: 12px;
+    font-size: .46rem;
+    height: 12px;
+    width: 12px;
+  }
+
   .rs-proposal-highlight {
-    margin-top: .72rem;
+    margin-top: .6rem;
     padding: .62rem .72rem;
   }
 
