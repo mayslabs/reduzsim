@@ -1445,7 +1445,7 @@ body {
 
 .rs-proposal-highlight > span {
   color: var(--green-dark);
-  font-size: .75rem;
+  font-size: .95rem;
   font-weight: 800;
   letter-spacing: .35px;
   text-transform: uppercase;
@@ -2338,7 +2338,7 @@ body {
   }
 
   .rs-proposal-highlight > span {
-    font-size: .52rem;
+    font-size: .62rem;
   }
 
   .rs-proposal-highlight strong {
