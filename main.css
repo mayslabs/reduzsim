@@ -1347,12 +1347,11 @@ body {
 .rs-proposal-services {
   border: 1.5px solid var(--green);
   border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin: 1.6rem 0 0;
-  min-height: 245px;
-  padding: 1rem 1.05rem 1.05rem;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  margin: 1.2rem 0 0;
+  min-height: 270px;
+  padding: 1rem;
   width: 100%;
 }
 
@@ -1361,16 +1360,17 @@ body {
   font-size: 1.04rem;
   font-weight: 800;
   line-height: 1.15;
-  margin: 0 0 .45rem;
+  margin: 0;
 }
 
 .rs-proposal-services ul {
   display: grid;
-  gap: .48rem;
+  gap: .55rem;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   list-style: none;
   margin: 0;
   padding: 0;
+  place-items: stretch;
 }
 
 .rs-proposal-services li:last-child {
@@ -1387,10 +1387,10 @@ body {
   flex-direction: column;
   font-size: .68rem;
   font-weight: 650;
-  justify-content: center;
+  justify-content: flex-start;
   line-height: 1.12;
-  min-height: 108px;
-  padding: 1.8rem .35rem .45rem;
+  min-height: 0;
+  padding: 6.9rem .35rem .6rem;
   position: relative;
   text-align: center;
 }
@@ -1402,7 +1402,7 @@ body {
   height: .9rem;
   left: 50%;
   position: absolute;
-  top: .58rem;
+  top: 5.65rem;
   transform: translateX(-50%);
   width: .9rem;
 }
@@ -1414,7 +1414,7 @@ body {
   height: .48rem;
   left: 50%;
   position: absolute;
-  top: .7rem;
+  top: 5.77rem;
   transform: translateX(-42%) rotate(42deg);
   width: .22rem;
 }
@@ -2279,15 +2279,14 @@ body {
 
   .rs-proposal-services {
     border-width: 1px;
-    margin-top: .55rem;
-    min-height: 74px;
-    padding: .42rem .55rem .48rem;
+    margin-top: .42rem;
+    min-height: 88px;
+    padding: .38rem;
     width: 100%;
   }
 
   .rs-proposal-services h3 {
     font-size: .68rem;
-    margin-bottom: .25rem;
   }
 
   .rs-proposal-services ul {
@@ -2298,19 +2297,18 @@ body {
   .rs-proposal-services li {
     border-radius: 5px;
     font-size: .34rem;
-    min-height: 38px;
-    padding: .9rem .12rem .16rem;
+    padding: 1rem .12rem .18rem;
   }
 
   .rs-proposal-services li::before {
     height: .46rem;
-    top: .18rem;
+    top: .24rem;
     width: .46rem;
   }
 
   .rs-proposal-services li::after {
     height: .24rem;
-    top: .25rem;
+    top: .31rem;
     width: .11rem;
   }
 
