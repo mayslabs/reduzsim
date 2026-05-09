@@ -1367,13 +1367,12 @@ body {
 }
 
 .rs-proposal-services ul {
-  column-gap: 1.35rem;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  list-style: disc;
+  gap: .42rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  list-style: none;
   margin: 0;
-  padding-left: 1.1rem;
-  row-gap: .22rem;
+  padding: 0;
 }
 
 .rs-proposal-services li:last-child {
@@ -1382,19 +1381,39 @@ body {
 
 .rs-proposal-services li {
   color: #12342e;
-  display: list-item;
-  font-size: .78rem;
+  display: block;
+  font-size: .8rem;
   font-weight: 500;
   line-height: 1.25;
-  padding: 0;
-  text-align: left;
+  min-width: 0;
+  padding: 0 .6rem 0 0;
+  position: relative;
+  text-align: center;
 }
 
 .rs-proposal-services li::before {
-  content: none;
+  background: rgba(26, 160, 123, .45);
+  border-radius: 999px;
+  content: "";
+  height: 4px;
+  left: 50%;
+  position: absolute;
+  top: -.42rem;
+  transform: translateX(-50%);
+  width: 4px;
 }
 
 .rs-proposal-services li::after {
+  background: #d8eee8;
+  content: "";
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 1px;
+}
+
+.rs-proposal-services li:last-child::after {
   content: none;
 }
 
@@ -2288,13 +2307,24 @@ body {
   }
 
   .rs-proposal-services ul {
-    gap: .08rem .55rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding-left: .7rem;
+    gap: .18rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 0;
   }
 
   .rs-proposal-services li {
-    font-size: .52rem;
+    font-size: .42rem;
+    padding-right: .16rem;
+  }
+
+  .rs-proposal-services li::before {
+    height: 2px;
+    top: -.18rem;
+    width: 2px;
+  }
+
+  .rs-proposal-services li::after {
+    height: 90%;
   }
 
   .rs-proposal-highlight {
