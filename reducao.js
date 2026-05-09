@@ -20,7 +20,7 @@ const SELIC_ACUMULADA = {
   "2026-04": 0.00, "2026-05": 0.00,
 };
 
-const INDICES_UPDATED_AT = "08/05/2026 às 09:17";
+const INDICES_UPDATED_AT = "09/05/2026 às 08:14";
 
 let formData = {};
 let receitaResult = {};
