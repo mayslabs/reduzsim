@@ -1354,14 +1354,8 @@ body {
 }
 
 .rs-proposal-services {
-  border: 1.5px solid var(--green);
-  border-radius: 12px;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  margin: 1.2rem 0 0;
-  min-height: 270px;
-  padding: 1rem;
-  width: 100%;
+  margin: .85rem 0 0;
+  padding: 0;
 }
 
 .rs-proposal-services h3 {
@@ -1369,17 +1363,17 @@ body {
   font-size: 1.04rem;
   font-weight: 800;
   line-height: 1.15;
-  margin: 0;
+  margin: 0 0 .42rem;
 }
 
 .rs-proposal-services ul {
+  column-gap: 1.35rem;
   display: grid;
-  gap: .55rem;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  list-style: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: disc;
   margin: 0;
-  padding: 0;
-  place-items: stretch;
+  padding-left: 1.1rem;
+  row-gap: .22rem;
 }
 
 .rs-proposal-services li:last-child {
@@ -1387,45 +1381,21 @@ body {
 }
 
 .rs-proposal-services li {
-  align-items: center;
-  background: var(--green-light);
-  border: 1px solid rgba(26, 160, 123, .25);
-  border-radius: 8px;
   color: #12342e;
-  display: flex;
-  flex-direction: column;
-  font-size: .68rem;
-  font-weight: 650;
-  justify-content: flex-start;
-  line-height: 1.12;
-  min-height: 0;
-  padding: 6.9rem .35rem .6rem;
-  position: relative;
-  text-align: center;
+  display: list-item;
+  font-size: .78rem;
+  font-weight: 500;
+  line-height: 1.25;
+  padding: 0;
+  text-align: left;
 }
 
 .rs-proposal-services li::before {
-  border: 1.5px solid var(--green);
-  border-radius: 50%;
-  content: "";
-  height: .9rem;
-  left: 50%;
-  position: absolute;
-  top: 5.65rem;
-  transform: translateX(-50%);
-  width: .9rem;
+  content: none;
 }
 
 .rs-proposal-services li::after {
-  border-bottom: 1.5px solid var(--green);
-  border-right: 1.5px solid var(--green);
-  content: "";
-  height: .48rem;
-  left: 50%;
-  position: absolute;
-  top: 5.77rem;
-  transform: translateX(-42%) rotate(42deg);
-  width: .22rem;
+  content: none;
 }
 
 .rs-proposal-highlight {
@@ -1442,7 +1412,7 @@ body {
 
 .rs-proposal-highlight > span {
   color: var(--green-dark);
-  font-size: .95rem;
+  font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: .35px;
   text-transform: uppercase;
@@ -1450,7 +1420,7 @@ body {
 
 .rs-proposal-highlight strong {
   color: #12342e;
-  font-size: 1.56rem;
+  font-size: 1.05rem;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -2306,39 +2276,25 @@ body {
   }
 
   .rs-proposal-services {
-    border-width: 1px;
+    align-content: center;
+    display: grid;
     flex: 1;
-    margin-top: .38rem;
-    min-height: 0;
-    padding: .38rem;
-    width: 100%;
+    margin-top: .32rem;
   }
 
   .rs-proposal-services h3 {
     font-size: .68rem;
+    margin-bottom: .18rem;
   }
 
   .rs-proposal-services ul {
-    gap: .18rem;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .08rem .55rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-left: .7rem;
   }
 
   .rs-proposal-services li {
-    border-radius: 5px;
-    font-size: .4rem;
-    padding: 3.1rem .12rem .18rem;
-  }
-
-  .rs-proposal-services li::before {
-    height: .46rem;
-    top: 2.45rem;
-    width: .46rem;
-  }
-
-  .rs-proposal-services li::after {
-    height: .24rem;
-    top: 2.52rem;
-    width: .11rem;
+    font-size: .52rem;
   }
 
   .rs-proposal-highlight {
@@ -2347,10 +2303,10 @@ body {
   }
 
   .rs-proposal-highlight > span {
-    font-size: .62rem;
+    font-size: .68rem;
   }
 
   .rs-proposal-highlight strong {
-    font-size: .92rem;
+    font-size: .68rem;
   }
 }
