@@ -1866,7 +1866,7 @@ body {
 @media print {
   @page {
     margin: 6mm;
-    size: A4 landscape;
+    size: A4 portrait;
   }
 
   html,
@@ -2143,37 +2143,37 @@ body {
     box-shadow: none;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: calc(297mm - 12mm);
     padding: 0;
   }
 
   .rs-proposal-header {
-    margin-bottom: .45rem;
+    margin-bottom: .58rem;
   }
 
   .rs-proposal-logo {
-    max-height: 62px;
-    max-width: 230px;
+    max-height: 70px;
+    max-width: 250px;
   }
 
   .rs-proposal-heading h1 {
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     margin-bottom: .2rem;
   }
 
   .rs-proposal-heading p {
-    font-size: .72rem;
+    font-size: .76rem;
   }
 
   .rs-proposal-layout {
     flex: 1;
-    gap: .45rem;
-    grid-template-columns: .92fr 1.55fr;
+    gap: .58rem;
+    grid-template-columns: minmax(210px, .84fr) minmax(0, 1.38fr);
     min-height: 0;
   }
 
   .rs-proposal-sidebar {
-    gap: .45rem;
+    gap: .58rem;
     grid-template-rows: 1fr 1fr 1fr;
   }
 
@@ -2183,23 +2183,23 @@ body {
     break-inside: avoid;
     display: flex;
     flex-direction: column;
-    padding: .52rem;
+    padding: .66rem;
   }
 
   .rs-proposal-panel h2,
   .rs-proposal-calcs h2 {
-    font-size: .78rem;
-    margin-bottom: .38rem;
+    font-size: .88rem;
+    margin-bottom: .48rem;
   }
 
   .rs-proposal-info-list {
     align-content: space-evenly;
     flex: 1;
-    gap: .35rem;
+    gap: .44rem;
   }
 
   .rs-proposal-info-list--compact {
-    gap: .35rem .5rem;
+    gap: .44rem .55rem;
   }
 
   .rs-proposal-info {
@@ -2224,31 +2224,31 @@ body {
   }
 
   .rs-proposal-info-copy > span {
-    font-size: .54rem;
+    font-size: .6rem;
     margin-bottom: .12rem;
   }
 
   .rs-proposal-info strong {
-    font-size: .62rem;
+    font-size: .7rem;
   }
 
   .rs-donut {
-    height: 92px;
+    height: 104px;
     margin: .05rem 0 .25rem;
-    width: 92px;
+    width: 104px;
   }
 
   .rs-donut > div {
-    height: 56px;
-    width: 56px;
+    height: 64px;
+    width: 64px;
   }
 
   .rs-donut strong {
-    font-size: 1.45rem;
+    font-size: 1.65rem;
   }
 
   .rs-proposal-economy p {
-    font-size: .52rem;
+    font-size: .58rem;
   }
 
   .rs-proposal-economy {
@@ -2256,64 +2256,65 @@ body {
   }
 
   .rs-proposal-calcs-head {
-    margin-bottom: .38rem;
+    margin-bottom: .48rem;
   }
 
   .rs-proposal-calcs-head p {
-    font-size: .56rem;
-    max-width: 220px;
+    font-size: .62rem;
+    max-width: 250px;
   }
 
   .rs-proposal-bars {
-    gap: .46rem;
+    gap: .56rem;
   }
 
   .rs-proposal-bar-row {
-    gap: .35rem;
-    grid-template-columns: minmax(92px, .8fr) minmax(150px, 1.55fr) minmax(76px, .5fr);
+    gap: .38rem;
+    grid-template-columns: minmax(92px, .8fr) minmax(130px, 1.4fr) minmax(76px, .55fr);
   }
 
   .rs-proposal-bar-row > span {
-    font-size: .58rem;
+    font-size: .62rem;
   }
 
   .rs-proposal-bar-row small {
-    font-size: .5rem;
+    font-size: .54rem;
   }
 
   .rs-proposal-bar-row strong {
-    font-size: .58rem;
+    font-size: .62rem;
   }
 
   .rs-proposal-bar-track {
-    height: 40px;
+    height: 46px;
   }
 
   .rs-proposal-honorarios-note {
-    font-size: .43rem;
-    margin-top: .32rem;
+    font-size: .48rem;
+    margin-top: .42rem;
   }
 
   .rs-proposal-services {
     align-content: center;
     display: grid;
     flex: 1;
-    margin-top: .32rem;
+    margin-top: .42rem;
   }
 
   .rs-proposal-services h3 {
-    font-size: .68rem;
-    margin-bottom: .18rem;
+    font-size: .88rem;
+    margin-bottom: .32rem;
   }
 
   .rs-proposal-services ul {
-    gap: .18rem;
+    gap: .25rem;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     padding: 0;
   }
 
   .rs-proposal-services li {
-    font-size: .42rem;
+    font-size: .54rem;
+    line-height: 1.18;
     padding-right: .16rem;
   }
 
@@ -2328,15 +2329,15 @@ body {
   }
 
   .rs-proposal-highlight {
-    margin-top: .38rem;
-    padding: .48rem .6rem;
+    margin-top: .52rem;
+    padding: .62rem .72rem;
   }
 
   .rs-proposal-highlight > span {
-    font-size: .68rem;
+    font-size: .78rem;
   }
 
   .rs-proposal-highlight strong {
-    font-size: .68rem;
+    font-size: .78rem;
   }
 }
