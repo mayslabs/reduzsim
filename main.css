@@ -1369,7 +1369,7 @@ body {
 .rs-proposal-services ul {
   display: flex;
   flex-direction: column;
-  gap: .48rem;
+  gap: .62rem;
   list-style: disc;
   margin: 0;
   padding: 0 0 0 1.1rem;
@@ -1382,7 +1382,7 @@ body {
 .rs-proposal-services li {
   color: #12342e;
   display: list-item;
-  font-size: .8rem;
+  font-size: .88rem;
   font-weight: 500;
   line-height: 1.25;
   min-width: 0;
@@ -2293,12 +2293,12 @@ body {
   }
 
   .rs-proposal-services ul {
-    gap: .42rem;
+    gap: .54rem;
     padding-left: 1rem;
   }
 
   .rs-proposal-services li {
-    font-size: .54rem;
+    font-size: .62rem;
     line-height: 1.18;
     padding: 0;
   }
