@@ -2155,11 +2155,11 @@ body {
   .rs-final-contact {
     box-shadow: none;
     break-inside: avoid;
-    border-bottom-width: 5px;
+    border-bottom-width: 6px;
     gap: .45rem;
-    margin: auto 0 0;
-    min-height: 34px;
-    padding: .2rem 0 0 .35rem;
+    margin: .75rem -.82rem -.82rem;
+    min-height: 42px;
+    padding: .22rem 0 0 .5rem;
   }
 
   .rs-contact-left {
@@ -2172,29 +2172,29 @@ body {
   }
 
   .rs-contact-icon {
-    flex-basis: 18px;
-    height: 18px;
-    width: 18px;
+    flex-basis: 20px;
+    height: 20px;
+    width: 20px;
   }
 
   .rs-contact-copy small {
-    font-size: .34rem;
+    font-size: .36rem;
   }
 
   .rs-contact-copy strong {
-    font-size: .46rem;
+    font-size: .5rem;
   }
 
   .rs-contact-site {
-    font-size: .5rem;
-    min-width: 180px;
-    padding: 0 .55rem 0 1.1rem;
+    font-size: .55rem;
+    min-width: 210px;
+    padding: 0 .7rem 0 1.35rem;
   }
 
   .rs-contact-site::before {
-    border-bottom-width: 34px;
-    border-left-width: 20px;
-    left: -20px;
+    border-bottom-width: 42px;
+    border-left-width: 26px;
+    left: -26px;
   }
 
   .rs-site-icon {
@@ -2205,26 +2205,26 @@ body {
   }
 
   .rs-proposal-sheet {
-    border: 0;
-    border-radius: 0;
+    border: 1px solid #d7dee4;
+    border-radius: 10px;
     box-shadow: none;
-    display: flex;
-    flex-direction: column;
-    min-height: calc(297mm - 12mm);
-    padding: 0;
+    display: block;
+    min-height: 0;
+    overflow: hidden;
+    padding: .82rem;
   }
 
   .rs-proposal-header {
-    margin-bottom: .58rem;
+    margin-bottom: .75rem;
   }
 
   .rs-proposal-logo {
-    max-height: 70px;
-    max-width: 250px;
+    max-height: 72px;
+    max-width: 240px;
   }
 
   .rs-proposal-heading h1 {
-    font-size: 1.45rem;
+    font-size: 1.35rem;
     margin-bottom: .2rem;
   }
 
@@ -2234,16 +2234,14 @@ body {
 
   .rs-proposal-layout {
     align-items: start;
-    flex: 0 0 720px;
     gap: .7rem;
-    grid-template-columns: minmax(210px, .78fr) minmax(0, 1.42fr);
+    grid-template-columns: minmax(205px, .92fr) minmax(0, 1.58fr);
     min-height: 0;
   }
 
   .rs-proposal-sidebar {
-    align-content: space-between;
+    align-content: start;
     gap: .58rem;
-    height: 100%;
     min-height: 0;
   }
 
@@ -2251,8 +2249,7 @@ body {
     align-content: start;
     display: grid;
     gap: .58rem;
-    grid-template-rows: auto 1fr;
-    height: 100%;
+    grid-template-rows: auto auto;
     min-height: 0;
   }
 
@@ -2302,14 +2299,14 @@ body {
 
   .rs-proposal-panel h2,
   .rs-proposal-calcs h2 {
-    font-size: .88rem;
-    margin-bottom: .48rem;
+    font-size: .98rem;
+    margin-bottom: .58rem;
   }
 
   .rs-proposal-info-list {
     align-content: space-evenly;
     flex: 1;
-    gap: .44rem;
+    gap: .54rem;
   }
 
   .rs-proposal-info-list--compact {
@@ -2342,53 +2339,53 @@ body {
   }
 
   .rs-proposal-info--with-icon {
-    gap: .32rem;
-    grid-template-columns: 26px minmax(0, 1fr);
+    gap: .42rem;
+    grid-template-columns: 32px minmax(0, 1fr);
   }
 
   .rs-proposal-info-icon {
-    border-radius: 5px;
-    height: 26px;
-    width: 26px;
+    border-radius: 6px;
+    height: 32px;
+    width: 32px;
   }
 
   .rs-proposal-info-icon svg {
-    height: 17px;
+    height: 20px;
     stroke-width: 1.7;
-    width: 17px;
+    width: 20px;
   }
 
   .rs-proposal-info-copy > span {
-    font-size: .6rem;
-    margin-bottom: .12rem;
+    font-size: .64rem;
+    margin-bottom: .14rem;
   }
 
   .rs-proposal-info strong {
-    font-size: .7rem;
+    font-size: .76rem;
   }
 
   .rs-donut {
-    height: 92px;
-    margin: .05rem 0 .25rem;
-    width: 92px;
+    height: 132px;
+    margin: .15rem 0 .42rem;
+    width: 132px;
   }
 
   .rs-donut > div {
-    height: 58px;
-    width: 58px;
+    height: 82px;
+    width: 82px;
   }
 
   .rs-donut strong {
-    font-size: 1.48rem;
+    font-size: 2rem;
   }
 
   .rs-proposal-economy p {
-    font-size: .58rem;
+    font-size: .62rem;
   }
 
   .rs-proposal-economy {
     align-content: center;
-    min-height: 146px;
+    min-height: 206px;
   }
 
   .rs-proposal-calcs-head {
@@ -2422,7 +2419,7 @@ body {
   }
 
   .rs-proposal-bar-track {
-    height: 52px;
+    height: 50px;
   }
 
   .rs-proposal-honorarios-note {
@@ -2474,7 +2471,7 @@ body {
   }
 
   .rs-proposal-highlight {
-    margin-top: auto;
+    margin-top: .65rem;
     padding: .62rem .72rem;
   }
 
