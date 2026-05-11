@@ -2233,25 +2233,26 @@ body {
   }
 
   .rs-proposal-layout {
-    align-items: stretch;
-    flex: 0 0 950px;
-    gap: .78rem;
+    align-items: start;
+    flex: 0 0 720px;
+    gap: .7rem;
     grid-template-columns: minmax(210px, .78fr) minmax(0, 1.42fr);
     min-height: 0;
   }
 
   .rs-proposal-sidebar {
     align-content: space-between;
-    gap: .7rem;
-    grid-template-rows: repeat(4, auto);
+    gap: .58rem;
+    height: 100%;
     min-height: 0;
   }
 
   .rs-proposal-main {
     align-content: start;
     display: grid;
-    gap: .6rem;
+    gap: .58rem;
     grid-template-rows: auto 1fr;
+    height: 100%;
     min-height: 0;
   }
 
@@ -2266,7 +2267,7 @@ body {
   }
 
   .rs-proposal-calcs {
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
   .rs-proposal-note-panel {
@@ -2387,7 +2388,7 @@ body {
 
   .rs-proposal-economy {
     align-content: center;
-    min-height: 152px;
+    min-height: 146px;
   }
 
   .rs-proposal-calcs-head {
@@ -2400,7 +2401,7 @@ body {
   }
 
   .rs-proposal-bars {
-    gap: .95rem;
+    gap: .7rem;
   }
 
   .rs-proposal-bar-row {
@@ -2421,7 +2422,7 @@ body {
   }
 
   .rs-proposal-bar-track {
-    height: 64px;
+    height: 52px;
   }
 
   .rs-proposal-honorarios-note {
@@ -2473,7 +2474,7 @@ body {
   }
 
   .rs-proposal-highlight {
-    margin-top: .9rem;
+    margin-top: auto;
     padding: .62rem .72rem;
   }
 
