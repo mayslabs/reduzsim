@@ -24,6 +24,7 @@ const INDICES_UPDATED_AT = "20/05/2026 às 15:03";
 
 let formData = {};
 let receitaResult = {};
+let paralisacoes = [];
 
 function round(value) {
   return Math.round((Number(value) || 0) * 100) / 100;
@@ -71,6 +72,123 @@ function listMonths(start, end) {
   return months;
 }
 
+function monthLabel(month) {
+  const [year, itemMonth] = (month || "").split("-");
+  return year && itemMonth ? `${itemMonth}/${year}` : month;
+}
+
+function periodLabel(period) {
+  return period.start === period.end
+    ? monthLabel(period.start)
+    : `${monthLabel(period.start)} a ${monthLabel(period.end)}`;
+}
+
+function getWorkMonths() {
+  return listMonths(formData.dataInicioObra, formData.dataFimObra);
+}
+
+function getParalisacaoMonths() {
+  const pausedMonths = new Set();
+
+  paralisacoes.forEach((period) => {
+    listMonths(period.start, period.end).forEach((month) => pausedMonths.add(month));
+  });
+
+  return pausedMonths;
+}
+
+function sortParalisacoes() {
+  paralisacoes.sort((first, second) => first.start.localeCompare(second.start) || first.end.localeCompare(second.end));
+}
+
+function setParalisacaoError(message = "") {
+  const error = document.getElementById("paralisacao-error");
+  if (!error) return;
+  error.textContent = message;
+  error.hidden = !message;
+}
+
+function validateParalisacao(start, end) {
+  const workMonths = getWorkMonths();
+  const firstMonth = workMonths[0];
+  const lastMonth = workMonths[workMonths.length - 1];
+
+  if (!start || !end) return "Informe a competência inicial e final da paralisação.";
+  if (start > end) return "A competência final deve ser igual ou posterior à inicial.";
+  if (!firstMonth || start < firstMonth || end > lastMonth) {
+    return `Informe um período dentro da obra: ${monthLabel(firstMonth)} a ${monthLabel(lastMonth)}.`;
+  }
+
+  const pauseMonths = new Set(getParalisacaoMonths());
+  listMonths(start, end).forEach((month) => pauseMonths.add(month));
+  if (pauseMonths.size >= workMonths.length) return "Deixe ao menos uma competência ativa para distribuir a remuneração.";
+  return "";
+}
+
+function renderParalisacoes() {
+  const list = document.getElementById("paralisacao-list");
+  const summary = document.getElementById("paralisacao-summary");
+  if (!list || !summary) return;
+
+  list.innerHTML = "";
+  sortParalisacoes();
+
+  paralisacoes.forEach((period, index) => {
+    const item = document.createElement("div");
+    item.className = "rs-stop-item";
+    item.innerHTML = `
+      <strong>${periodLabel(period)}</strong>
+      <button class="rs-btn-outline" type="button" data-remove-paralisacao="${index}">Remover</button>
+    `;
+    list.appendChild(item);
+  });
+
+  const text = paralisacoes.length
+    ? `Paralisações consideradas: ${paralisacoes.map(periodLabel).join("; ")}. Meses paralisados ficam sem remuneração, encargos e MAED.`
+    : "";
+  summary.textContent = text;
+  summary.hidden = !text;
+}
+
+function setParalisacaoInputRange() {
+  const workMonths = getWorkMonths();
+  const firstMonth = workMonths[0] || "";
+  const lastMonth = workMonths[workMonths.length - 1] || "";
+
+  ["paralisacao-inicio", "paralisacao-fim"].forEach((id) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.min = firstMonth;
+    input.max = lastMonth;
+  });
+}
+
+function addParalisacao() {
+  const startInput = document.getElementById("paralisacao-inicio");
+  const endInput = document.getElementById("paralisacao-fim");
+  const start = startInput.value;
+  const end = endInput.value;
+  const error = validateParalisacao(start, end);
+  if (error) {
+    setParalisacaoError(error);
+    return;
+  }
+
+  paralisacoes.push({ start, end });
+  startInput.value = "";
+  endInput.value = "";
+  setParalisacaoError();
+  renderParalisacoes();
+  recalculate(false);
+}
+
+function removeParalisacao(index) {
+  paralisacoes.splice(index, 1);
+  setParalisacaoError();
+  renderParalisacoes();
+  recalculate(false);
+}
+
 function isCurrentOrFuture(month, referenceDate) {
   const ref = new Date(`${referenceDate}T00:00:00`);
   const [year, itemMonth] = month.split("-").map(Number);
@@ -89,6 +207,7 @@ function isPreviousMonthWithinGrace(month, referenceDate) {
 function readMonthlyRows() {
   return Array.from(document.querySelectorAll("[data-month-row]")).map((row) => ({
     month: row.dataset.monthRow,
+    isParalisacao: row.dataset.paralisacao === "true",
     remOriginal: Number.parseFloat(row.querySelector("[data-field='remOriginal']").value || "0") || 0,
     selic: Number.parseFloat(row.querySelector("[data-field='selic']").value || "0") || 0,
   }));
@@ -99,6 +218,19 @@ function calculateRows(baseRows) {
   const referenceDate = document.getElementById("data-referencia").value || new Date().toISOString().slice(0, 10);
 
   return baseRows.map((row) => {
+    if (row.isParalisacao) {
+      return {
+        ...row,
+        remOriginal: 0,
+        remAtualizada: 0,
+        cpp: 0,
+        multaMora: 0,
+        juros: 0,
+        maed: 0,
+        total: 0,
+      };
+    }
+
     const noDelay = isCurrentOrFuture(row.month, referenceDate) || isPreviousMonthWithinGrace(row.month, referenceDate);
     const remOriginal = round(row.remOriginal || 0);
     const remAtualizada = round(remOriginal * (1 + (row.selic / 100)));
@@ -117,12 +249,14 @@ function renderRows(rows) {
 
   rows.forEach((row) => {
     const item = document.createElement("div");
-    item.className = "rs-monthly-row";
+    item.className = `rs-monthly-row${row.isParalisacao ? " rs-monthly-row--paused" : ""}`;
     item.dataset.monthRow = row.month;
+    item.dataset.paralisacao = row.isParalisacao ? "true" : "false";
     item.innerHTML = `
       <div class="rs-monthly-competencia">
         <span>Competência</span>
         <strong>${row.month}</strong>
+        ${row.isParalisacao ? '<small>Paralisação</small>' : ""}
       </div>
       <label>
         <span>Rem. atualizada</span>
@@ -130,7 +264,7 @@ function renderRows(rows) {
       </label>
       <label>
         <span>Rem. original</span>
-        <input class="rs-table-input" data-field="remOriginal" type="number" step="0.01" value="${row.remOriginal}">
+        <input class="rs-table-input" data-field="remOriginal" type="number" step="0.01" value="${row.remOriginal}" ${row.isParalisacao ? "disabled" : ""}>
       </label>
       <div class="rs-monthly-money">
         <span>CPP 20%</span>
@@ -142,7 +276,7 @@ function renderRows(rows) {
       </div>
       <label>
         <span>SELIC acum. (%)</span>
-        <input class="rs-table-input" data-field="selic" type="number" step="0.01" value="${row.selic}">
+        <input class="rs-table-input" data-field="selic" type="number" step="0.01" value="${row.selic}" ${row.isParalisacao ? "disabled" : ""}>
       </label>
       <div class="rs-monthly-money">
         <span>Juros mora</span>
@@ -162,23 +296,27 @@ function renderRows(rows) {
 }
 
 function buildInitialRows() {
-  const months = listMonths(formData.dataInicioObra, formData.dataFimObra);
+  const months = getWorkMonths();
+  const pausedMonths = getParalisacaoMonths();
+  const activeMonths = months.filter((month) => !pausedMonths.has(month));
   const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 0.5 : 0.7;
   const rmtMeta = round((receitaResult.rmt || 0) * metaPercentual);
-  const selicFactors = months.map((month) => 1 + ((SELIC_ACUMULADA[month] ?? 0) / 100));
+  const selicFactors = activeMonths.map((month) => 1 + ((SELIC_ACUMULADA[month] ?? 0) / 100));
   const totalFactor = selicFactors.reduce((sum, factor) => sum + factor, 0);
   const remMensalOriginal = totalFactor > 0 ? round(rmtMeta / totalFactor) : 0;
 
   const rows = months.map((month) => ({
     month,
     selic: SELIC_ACUMULADA[month] ?? 0,
-    remOriginal: remMensalOriginal,
+    isParalisacao: pausedMonths.has(month),
+    remOriginal: pausedMonths.has(month) ? 0 : remMensalOriginal,
   }));
 
-  if (rows.length) {
-    const totalAtualizado = rows.reduce((sum, row) => sum + round(row.remOriginal * (1 + (row.selic / 100))), 0);
+  const activeRows = rows.filter((row) => !row.isParalisacao);
+  if (activeRows.length) {
+    const totalAtualizado = activeRows.reduce((sum, row) => sum + round(row.remOriginal * (1 + (row.selic / 100))), 0);
     const diff = round(rmtMeta - totalAtualizado);
-    const lastRow = rows[rows.length - 1];
+    const lastRow = activeRows[activeRows.length - 1];
     const lastFactor = 1 + (lastRow.selic / 100);
     lastRow.remOriginal = round(lastRow.remOriginal + (diff / lastFactor));
   }
@@ -262,10 +400,10 @@ function updateMonthlyCalculation() {
 }
 
 function copyFirstRemuneracaoToAll() {
-  const firstInput = document.querySelector("[data-month-row] [data-field='remOriginal']");
+  const firstInput = document.querySelector("[data-month-row]:not([data-paralisacao='true']) [data-field='remOriginal']");
   if (!firstInput) return;
 
-  document.querySelectorAll("[data-month-row] [data-field='remOriginal']").forEach((input) => {
+  document.querySelectorAll("[data-month-row]:not([data-paralisacao='true']) [data-field='remOriginal']").forEach((input) => {
     input.value = firstInput.value;
   });
 
@@ -297,11 +435,18 @@ function finalizeCalculation() {
   }
 
   setPrintTitle("Cálculo de redução", formData.clienteNome);
+  setParalisacaoInputRange();
+  renderParalisacoes();
   document.getElementById("data-referencia").value = new Date().toISOString().slice(0, 10);
   setText("indices-update-note", `Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
   document.getElementById("recalc-btn").addEventListener("click", finalizeCalculation);
   document.getElementById("print-reducao-btn").addEventListener("click", () => window.print());
   document.getElementById("copy-first-remuneracao").addEventListener("click", copyFirstRemuneracaoToAll);
+  document.getElementById("add-paralisacao-btn").addEventListener("click", addParalisacao);
+  document.getElementById("paralisacao-list").addEventListener("click", (event) => {
+    const removeButton = event.target.closest("[data-remove-paralisacao]");
+    if (removeButton) removeParalisacao(Number.parseInt(removeButton.dataset.removeParalisacao, 10));
+  });
   document.getElementById("monthly-rows").addEventListener("input", (event) => {
     if (event.target.matches("[data-field='remOriginal'], [data-field='selic']")) {
       updateMonthlyCalculation();

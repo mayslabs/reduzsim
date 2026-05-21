@@ -517,6 +517,71 @@ body {
   margin: -.25rem 0 1rem;
 }
 
+.rs-stop-editor {
+  display: grid;
+  gap: .75rem;
+}
+
+.rs-stop-editor .rs-hint {
+  margin: 0;
+}
+
+.rs-stop-form {
+  align-items: end;
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+}
+
+.rs-stop-form label {
+  margin: 0;
+}
+
+.rs-stop-form label span {
+  color: var(--gray);
+  display: block;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .35px;
+  margin-bottom: .35rem;
+  text-transform: uppercase;
+}
+
+.rs-stop-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+}
+
+.rs-stop-item {
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: inline-flex;
+  gap: .65rem;
+  padding: .45rem .55rem .45rem .75rem;
+}
+
+.rs-stop-item strong {
+  font-size: .9rem;
+}
+
+.rs-stop-item .rs-btn-outline {
+  padding: .45rem .65rem;
+}
+
+.rs-stop-summary {
+  background: #f0fdf9;
+  border: 1px solid rgba(26, 160, 123, .35);
+  border-radius: 8px;
+  color: var(--green-dark);
+  font-size: .85rem;
+  line-height: 1.45;
+  margin-bottom: 1rem;
+  padding: .7rem .85rem;
+}
+
 .rs-final-page {
   max-width: 980px;
 }
@@ -1750,6 +1815,14 @@ body {
   line-height: 1.2;
 }
 
+.rs-monthly-competencia small {
+  color: var(--green-dark);
+  display: block;
+  font-size: .72rem;
+  font-weight: 800;
+  margin-top: .28rem;
+}
+
 .rs-monthly-row label {
   margin: 0;
 }
@@ -1761,6 +1834,12 @@ body {
   width: 100%;
 }
 
+.rs-monthly-row .rs-table-input:disabled {
+  background: #eef2f3;
+  color: var(--gray);
+  cursor: not-allowed;
+}
+
 .rs-monthly-row > div,
 .rs-monthly-row > label {
   background: var(--white);
@@ -1768,6 +1847,15 @@ body {
   border-radius: 8px;
   padding: .5rem .6rem;
   min-width: 0;
+}
+
+.rs-monthly-row--paused {
+  border-color: rgba(26, 160, 123, .36);
+}
+
+.rs-monthly-row--paused > div,
+.rs-monthly-row--paused > label {
+  background: #f0fdf9;
 }
 
 .rs-monthly-total {
@@ -1934,6 +2022,14 @@ body {
     margin-left: 0;
     transform: none;
     width: 100%;
+  }
+
+  .rs-stop-form {
+    grid-template-columns: 1fr;
+  }
+
+  .rs-stop-form .rs-btn-outline {
+    justify-content: center;
   }
 
   .rs-final-hero {
