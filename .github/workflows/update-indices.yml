@@ -2,8 +2,9 @@ name: Atualizar SELIC e VAU
 
 on:
   schedule:
-    # 08:00 UTC = 05:00 em Brasília.
+    # Atualiza diariamente às 08:00 no horário de Brasília.
     - cron: "0 8 * * *"
+      timezone: "America/Sao_Paulo"
   workflow_dispatch:
 
 permissions:
