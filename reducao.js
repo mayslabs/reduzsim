@@ -274,6 +274,7 @@ function finalizeCalculation() {
   document.getElementById("data-referencia").value = new Date().toISOString().slice(0, 10);
   setText("indices-update-note", `Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
   document.getElementById("recalc-btn").addEventListener("click", finalizeCalculation);
+  document.getElementById("print-reducao-btn").addEventListener("click", () => window.print());
   document.getElementById("copy-first-remuneracao").addEventListener("click", copyFirstRemuneracaoToAll);
   document.getElementById("honorarios-percent").addEventListener("input", () => recalculate(true));
   document.getElementById("aplicar-maed").addEventListener("change", () => recalculate(true));
