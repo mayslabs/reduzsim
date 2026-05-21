@@ -126,7 +126,7 @@ function renderRows(rows) {
       </div>
       <label>
         <span>Rem. atualizada</span>
-        <strong>R$ ${fmt(row.remAtualizada)}</strong>
+        <strong data-output="remAtualizada">R$ ${fmt(row.remAtualizada)}</strong>
       </label>
       <label>
         <span>Rem. original</span>
@@ -134,11 +134,11 @@ function renderRows(rows) {
       </label>
       <div class="rs-monthly-money">
         <span>CPP 20%</span>
-        <strong>R$ ${fmt(row.cpp)}</strong>
+        <strong data-output="cpp">R$ ${fmt(row.cpp)}</strong>
       </div>
       <div class="rs-monthly-money">
         <span>Multa 20%</span>
-        <strong>R$ ${fmt(row.multaMora)}</strong>
+        <strong data-output="multaMora">R$ ${fmt(row.multaMora)}</strong>
       </div>
       <label>
         <span>SELIC acum. (%)</span>
@@ -146,15 +146,15 @@ function renderRows(rows) {
       </label>
       <div class="rs-monthly-money">
         <span>Juros mora</span>
-        <strong>R$ ${fmt(row.juros)}</strong>
+        <strong data-output="juros">R$ ${fmt(row.juros)}</strong>
       </div>
       <div class="rs-monthly-money">
         <span>MAED</span>
-        <strong>R$ ${fmt(row.maed)}</strong>
+        <strong data-output="maed">R$ ${fmt(row.maed)}</strong>
       </div>
       <div class="rs-monthly-total">
         <span>Total</span>
-        <strong>R$ ${fmt(row.total)}</strong>
+        <strong data-output="total">R$ ${fmt(row.total)}</strong>
       </div>
     `;
     body.appendChild(item);
@@ -241,6 +241,26 @@ function recalculate(fromInputs = true) {
   return { rows, totals: updateTotals(rows) };
 }
 
+function updateRenderedMonthlyValues(rows) {
+  const rowElements = Array.from(document.querySelectorAll("[data-month-row]"));
+
+  rows.forEach((row, index) => {
+    const rowElement = rowElements[index];
+    if (!rowElement || rowElement.dataset.monthRow !== row.month) return;
+
+    ["remAtualizada", "cpp", "multaMora", "juros", "maed", "total"].forEach((field) => {
+      const output = rowElement.querySelector(`[data-output="${field}"]`);
+      if (output) output.textContent = `R$ ${fmt(row[field])}`;
+    });
+  });
+}
+
+function updateMonthlyCalculation() {
+  const rows = calculateRows(readMonthlyRows());
+  updateRenderedMonthlyValues(rows);
+  return { rows, totals: updateTotals(rows) };
+}
+
 function copyFirstRemuneracaoToAll() {
   const firstInput = document.querySelector("[data-month-row] [data-field='remOriginal']");
   if (!firstInput) return;
@@ -249,7 +269,7 @@ function copyFirstRemuneracaoToAll() {
     input.value = firstInput.value;
   });
 
-  recalculate(true);
+  updateMonthlyCalculation();
 }
 
 function finalizeCalculation() {
@@ -282,9 +302,14 @@ function finalizeCalculation() {
   document.getElementById("recalc-btn").addEventListener("click", finalizeCalculation);
   document.getElementById("print-reducao-btn").addEventListener("click", () => window.print());
   document.getElementById("copy-first-remuneracao").addEventListener("click", copyFirstRemuneracaoToAll);
-  document.getElementById("honorarios-percent").addEventListener("input", () => recalculate(true));
-  document.getElementById("aplicar-maed").addEventListener("change", () => recalculate(true));
-  document.getElementById("data-referencia").addEventListener("change", () => recalculate(true));
+  document.getElementById("monthly-rows").addEventListener("input", (event) => {
+    if (event.target.matches("[data-field='remOriginal'], [data-field='selic']")) {
+      updateMonthlyCalculation();
+    }
+  });
+  document.getElementById("honorarios-percent").addEventListener("input", updateMonthlyCalculation);
+  document.getElementById("aplicar-maed").addEventListener("change", updateMonthlyCalculation);
+  document.getElementById("data-referencia").addEventListener("change", updateMonthlyCalculation);
 
   recalculate(false);
 })();
