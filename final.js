@@ -78,6 +78,11 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
+function setPrintTitle(prefix, clientName) {
+  const safeClientName = (clientName || "").trim().replace(/[\\/:*?"<>|]/g, " ");
+  document.title = safeClientName ? `${prefix} - ${safeClientName}` : prefix;
+}
+
 function setBar(id, value, max) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -117,6 +122,7 @@ function fmtDate(value) {
   const totals = reducaoResult.totals || {};
   const totalComHonorarios = toNumber(totals.totalReducao) + toNumber(totals.honorarios);
 
+  setPrintTitle("Redução de INSS de obra", formData.clienteNome);
   setText("final-date", new Date(reducaoResult.calculatedAt || Date.now()).toLocaleString("pt-BR"));
   setText("percentual-reducao", `${fmtPercentInt(totals.percentualReducao)}%`);
   setText("sem-reducao", fmt(totals.receita));

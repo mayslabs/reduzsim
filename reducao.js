@@ -43,6 +43,11 @@ function setWidth(id, value) {
   if (el) el.style.width = `${Math.max(0, Math.min(value, 100))}%`;
 }
 
+function setPrintTitle(prefix, clientName) {
+  const safeClientName = (clientName || "").trim().replace(/[\\/:*?"<>|]/g, " ");
+  document.title = safeClientName ? `${prefix} - ${safeClientName}` : prefix;
+}
+
 function monthKey(dateValue) {
   return (dateValue || "").slice(0, 7);
 }
@@ -271,6 +276,7 @@ function finalizeCalculation() {
     return;
   }
 
+  setPrintTitle("Cálculo de redução", formData.clienteNome);
   document.getElementById("data-referencia").value = new Date().toISOString().slice(0, 10);
   setText("indices-update-note", `Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
   document.getElementById("recalc-btn").addEventListener("click", finalizeCalculation);
