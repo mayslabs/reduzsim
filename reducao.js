@@ -21,6 +21,7 @@ const SELIC_ACUMULADA = {
 };
 
 const INDICES_UPDATED_AT = "21/05/2026 às 14:08";
+const PARALISACOES_STORAGE_KEY = "reducaoParalisacoes";
 
 let formData = {};
 let receitaResult = {};
@@ -125,6 +126,31 @@ function validateParalisacao(start, end) {
   return "";
 }
 
+function saveParalisacoes() {
+  localStorage.setItem(PARALISACOES_STORAGE_KEY, JSON.stringify(paralisacoes));
+}
+
+function loadParalisacoes() {
+  try {
+    const storedPeriods = JSON.parse(localStorage.getItem(PARALISACOES_STORAGE_KEY));
+    if (!Array.isArray(storedPeriods)) return [];
+
+    const workMonths = getWorkMonths();
+    const firstMonth = workMonths[0];
+    const lastMonth = workMonths[workMonths.length - 1];
+
+    return storedPeriods.filter((period) => period
+      && typeof period.start === "string"
+      && typeof period.end === "string"
+      && period.start <= period.end
+      && firstMonth
+      && period.start >= firstMonth
+      && period.end <= lastMonth);
+  } catch (error) {
+    return [];
+  }
+}
+
 function renderParalisacoes() {
   const list = document.getElementById("paralisacao-list");
   const summary = document.getElementById("paralisacao-summary");
@@ -178,6 +204,7 @@ function addParalisacao() {
   startInput.value = "";
   endInput.value = "";
   setParalisacaoError();
+  saveParalisacoes();
   renderParalisacoes();
   recalculate(false);
 }
@@ -185,6 +212,7 @@ function addParalisacao() {
 function removeParalisacao(index) {
   paralisacoes.splice(index, 1);
   setParalisacaoError();
+  saveParalisacoes();
   renderParalisacoes();
   recalculate(false);
 }
@@ -436,6 +464,7 @@ function finalizeCalculation() {
 
   setPrintTitle("Cálculo de redução", formData.clienteNome);
   setParalisacaoInputRange();
+  paralisacoes = loadParalisacoes();
   renderParalisacoes();
   document.getElementById("data-referencia").value = new Date().toISOString().slice(0, 10);
   setText("indices-update-note", `Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
