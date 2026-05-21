@@ -25,6 +25,7 @@ const PARALISACOES_STORAGE_KEY = "reducaoParalisacoes";
 
 let formData = {};
 let receitaResult = {};
+let reducaoResult = {};
 let paralisacoes = [];
 
 function round(value) {
@@ -352,6 +353,26 @@ function buildInitialRows() {
   return rows;
 }
 
+function getStoredRows() {
+  const storedRows = reducaoResult && reducaoResult.rows;
+  if (!Array.isArray(storedRows)) return null;
+
+  const initialRows = buildInitialRows();
+  if (storedRows.length !== initialRows.length) return null;
+
+  const isCompatible = storedRows.every((row, index) => row
+    && row.month === initialRows[index].month
+    && Boolean(row.isParalisacao) === Boolean(initialRows[index].isParalisacao));
+  if (!isCompatible) return null;
+
+  return storedRows.map((row, index) => ({
+    month: initialRows[index].month,
+    isParalisacao: initialRows[index].isParalisacao,
+    remOriginal: Number.parseFloat(row.remOriginal || "0") || 0,
+    selic: Number.parseFloat(row.selic || "0") || 0,
+  }));
+}
+
 function updateTotals(rows) {
   const totalReducao = round(rows.reduce((sum, row) => sum + row.total, 0));
   const totalRemOriginal = round(rows.reduce((sum, row) => sum + row.remOriginal, 0));
@@ -407,6 +428,15 @@ function recalculate(fromInputs = true) {
   return { rows, totals: updateTotals(rows) };
 }
 
+function restoreMonthlyCalculation() {
+  const storedRows = getStoredRows();
+  if (!storedRows) return recalculate(false);
+
+  const rows = calculateRows(storedRows);
+  renderRows(rows);
+  return { rows, totals: updateTotals(rows) };
+}
+
 function updateRenderedMonthlyValues(rows) {
   const rowElements = Array.from(document.querySelectorAll("[data-month-row]"));
 
@@ -452,9 +482,11 @@ function finalizeCalculation() {
   try {
     formData = JSON.parse(localStorage.getItem("formData"));
     receitaResult = JSON.parse(localStorage.getItem("receitaResult"));
+    reducaoResult = JSON.parse(localStorage.getItem("reducaoResult"));
   } catch (error) {
     formData = null;
     receitaResult = null;
+    reducaoResult = null;
   }
 
   if (!formData || !receitaResult) {
@@ -485,5 +517,5 @@ function finalizeCalculation() {
   document.getElementById("aplicar-maed").addEventListener("change", updateMonthlyCalculation);
   document.getElementById("data-referencia").addEventListener("change", updateMonthlyCalculation);
 
-  recalculate(false);
+  restoreMonthlyCalculation();
 })();
