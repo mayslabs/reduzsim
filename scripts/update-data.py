@@ -135,12 +135,12 @@ def build_selic_accumulated(reference: dt.date) -> dict[str, float]:
             accumulated[key] = 0.0
             continue
 
-        # Critério espelhado no simulador original: SELIC acumulada disponível
-        # até o segundo mês anterior à referência, acrescida de 1% no mês do
-        # pagamento. Ex.: referência 05/2026 usa SELIC até 03/2026 + 1%.
+        # Critério do Sicalc: SELIC acumulada disponível até o mês anterior
+        # ao pagamento, acrescida de 1% no mês do pagamento.
+        # Ex.: referência 05/2026 usa SELIC até 04/2026 + 1%.
         due_month = add_month(year, month, 1)
         interest_start = add_month(*due_month, 1)
-        interest_end = add_month(reference.year, reference.month, -2)
+        interest_end = add_month(reference.year, reference.month, -1)
         total = 1.0
 
         if interest_start <= interest_end:
