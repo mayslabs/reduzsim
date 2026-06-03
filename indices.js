@@ -1,7 +1,7 @@
 const ReduzSimIndices = (() => {
   const AUTO_UPDATE_HOURS = [8, 10, 12, 15, 17, 19];
-  const STORAGE_KEY = "reduzsim_indices_cache_v2";
-  const ATTEMPT_KEY = "reduzsim_indices_attempts_v2";
+  const STORAGE_KEY = "reduzsim_indices_cache_v3";
+  const ATTEMPT_KEY = "reduzsim_indices_attempts_v3";
   const BCB_SELIC_URL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4390/dados";
   const SIDRA_SINAPI_URL = "https://apisidra.ibge.gov.br/values/t/6586/n1/1/v/all/p/last%201/h/y";
 
@@ -23,7 +23,25 @@ const ReduzSimIndices = (() => {
 
   function parseNumberBR(value) {
     if (typeof value === "number") return value;
-    return Number.parseFloat(String(value || "").replace(/\./g, "").replace(",", ".")) || 0;
+    const cleaned = String(value || "").replace(/[^\d,.-]/g, "").trim();
+    if (!cleaned) return 0;
+
+    const lastComma = cleaned.lastIndexOf(",");
+    const lastDot = cleaned.lastIndexOf(".");
+    let normalized = cleaned;
+
+    if (lastComma >= 0 && lastDot >= 0) {
+      normalized = lastComma > lastDot
+        ? cleaned.replace(/\./g, "").replace(",", ".")
+        : cleaned.replace(/,/g, "");
+    } else if (lastComma >= 0) {
+      normalized = cleaned.replace(/\./g, "").replace(",", ".");
+    } else if ((cleaned.match(/\./g) || []).length > 1) {
+      const parts = cleaned.split(".");
+      normalized = `${parts.slice(0, -1).join("")}.${parts.at(-1)}`;
+    }
+
+    return Number.parseFloat(normalized) || 0;
   }
 
   function round(value) {
@@ -150,13 +168,18 @@ const ReduzSimIndices = (() => {
     const rateMap = Object.fromEntries(rates.map((rate) => [rate.month, rate.value]));
     const referenceDate = referenceDateValue ? new Date(`${referenceDateValue}T00:00:00`) : new Date();
     const paymentMonth = `${referenceDate.getFullYear()}-${String(referenceDate.getMonth() + 1).padStart(2, "0")}`;
+    const previousMonth = addMonths(paymentMonth, -1);
 
     return Object.fromEntries(months.map((month) => {
-      let sum = 0;
-      for (let current = addMonths(month, 1); current < paymentMonth; current = addMonths(current, 1)) {
+      if (month >= paymentMonth || (month === previousMonth && referenceDate.getDate() <= 15)) {
+        return [month, 0];
+      }
+
+      let sum = 1;
+      const interestEnd = addMonths(paymentMonth, -1);
+      for (let current = addMonths(month, 2); current <= interestEnd; current = addMonths(current, 1)) {
         sum += rateMap[current] || 0;
       }
-      if (month < paymentMonth) sum += 1;
       return [month, round(sum)];
     }));
   }
@@ -218,10 +241,7 @@ const ReduzSimIndices = (() => {
   async function refreshVau(fallbackRows) {
     const sinapi = await fetchSinapiVariation();
     const cache = getCache();
-    const fallbackKey = periodToKey(fallbackRows?.[0]?.data);
-    const cachedKey = periodToKey(cache.vau?.period);
-    const baseRows = cache.vau?.rows?.length && cachedKey > fallbackKey ? cache.vau.rows : fallbackRows;
-    cache.vau = projectVauRows(baseRows, sinapi);
+    cache.vau = projectVauRows(fallbackRows, sinapi);
     setCache(cache);
     return cache.vau;
   }

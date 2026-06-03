@@ -33,7 +33,16 @@
   }
 
   function parseMoney(value) {
-    return toNumber(value);
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+    const cleaned = String(value || "").replace(/[^\d,.-]/g, "").trim();
+    if (!cleaned) return 0;
+    if (cleaned.includes(",")) {
+      return Number(cleaned.replace(/\./g, "").replace(",", ".")) || 0;
+    }
+    if (/^-?\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+      return Number(cleaned.replace(/\./g, "")) || 0;
+    }
+    return Number(cleaned) || 0;
   }
 
   function initIndexPage() {
@@ -82,23 +91,24 @@
 
   function initResultPage() {
     if (!document.getElementById("indices-status") || typeof VAU_DATA === "undefined") return;
+    const baseVauRows = VAU_DATA.map((row) => ({ ...row }));
 
     async function refreshVauAndRecalculate() {
       if (!window.ReduzSimIndices) {
-        describeIndexSource({ period: VAU_DATA[0]?.data, source: "Tabela local" });
+        describeIndexSource({ period: baseVauRows[0]?.data, source: "Tabela local" });
         if (typeof updateValues === "function") updateValues();
         return;
       }
 
       try {
-        const vauMeta = await window.ReduzSimIndices.getVauData(VAU_DATA);
+        const vauMeta = await window.ReduzSimIndices.getVauData(baseVauRows);
         if (Array.isArray(vauMeta.rows) && vauMeta.rows.length) {
           VAU_DATA.splice(0, VAU_DATA.length, ...vauMeta.rows);
         }
         describeIndexSource(vauMeta);
       } catch (error) {
         console.warn("Falha ao atualizar VAU.", error);
-        describeIndexSource({ period: VAU_DATA[0]?.data, source: "Tabela local" });
+        describeIndexSource({ period: baseVauRows[0]?.data, source: "Tabela local" });
       }
 
       if (typeof updateValues === "function") updateValues();
@@ -109,7 +119,7 @@
       button.disabled = true;
       button.textContent = "Atualizando...";
       try {
-        await window.ReduzSimIndices?.refreshAll(VAU_DATA);
+        await window.ReduzSimIndices?.refreshAll(baseVauRows);
         await refreshVauAndRecalculate();
       } finally {
         button.disabled = false;
@@ -218,6 +228,25 @@
       if (typeof updateMonthlyCalculation === "function") updateMonthlyCalculation();
     });
 
+    function applyCurrentSelicToRows() {
+      if (typeof readMonthlyRows !== "function"
+        || typeof calculateRows !== "function"
+        || typeof renderRows !== "function"
+        || typeof updateTotals !== "function"
+        || typeof SELIC_ACUMULADA === "undefined") {
+        if (typeof recalculate === "function") return recalculate(false);
+        return null;
+      }
+
+      const baseRows = readMonthlyRows().map((row) => ({
+        ...row,
+        selic: row.isParalisacao ? 0 : (SELIC_ACUMULADA[row.month] ?? row.selic),
+      }));
+      const rows = calculateRows(baseRows);
+      renderRows(rows);
+      return { rows, totals: updateTotals(rows) };
+    }
+
     async function refreshSelic() {
       const note = document.getElementById("indices-update-note");
       if (!window.ReduzSimIndices || typeof SELIC_ACUMULADA === "undefined") {
@@ -229,7 +258,7 @@
         const months = typeof getWorkMonths === "function" ? getWorkMonths() : Object.keys(SELIC_ACUMULADA);
         const reference = document.getElementById("data-referencia")?.value;
         Object.assign(SELIC_ACUMULADA, window.ReduzSimIndices.calculateSelicMap(months, reference));
-        if (typeof restoreMonthlyCalculation === "function") restoreMonthlyCalculation();
+        applyCurrentSelicToRows();
         if (note) note.textContent = "SELIC atualizada automaticamente com tentativas a partir de 8h.";
       } catch (error) {
         console.warn("Falha ao atualizar SELIC.", error);
