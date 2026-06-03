@@ -1077,11 +1077,60 @@ body {
 
 .rs-indices-update {
   display: flex;
+  flex-direction: column;
   font-weight: 650;
   line-height: 1.25;
   margin: .25rem auto 1rem;
   max-width: max-content;
   padding: .55rem .95rem;
+}
+
+.rs-textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.rs-history-card {
+  margin-top: 22px;
+}
+
+.rs-history-list {
+  display: grid;
+  gap: 10px;
+}
+
+.rs-history-item {
+  align-items: center;
+  background: #f8faf9;
+  border: 1px solid rgba(29, 64, 54, .1);
+  border-radius: 8px;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.rs-history-item strong,
+.rs-history-item span,
+.rs-history-item small {
+  display: block;
+}
+
+.rs-history-item span,
+.rs-history-item small {
+  color: #657285;
+}
+
+.rs-history-item-actions,
+.rs-history-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rs-proposal-legal {
+  font-size: .78rem;
 }
 
 .rs-proposal-page {

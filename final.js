@@ -1,5 +1,7 @@
 let formData = {};
+let receitaResult = {};
 let reducaoResult = {};
+const HISTORY_KEY = "reduzsim_simulation_history_v1";
 
 const typeResponsavel = {
   PF: "Pessoa física",
@@ -53,11 +55,21 @@ const ufNames = {
 
 function toNumber(value) {
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
-  const normalized = String(value || "").replace(/[^\d,.-]/g, "").trim();
-  if (!normalized) return 0;
-  const parsed = normalized.includes(",")
-    ? Number(normalized.replace(/\./g, "").replace(",", "."))
-    : Number(normalized);
+  const cleaned = String(value || "").replace(/[^\d,.-]/g, "").trim();
+  if (!cleaned) return 0;
+  const lastComma = cleaned.lastIndexOf(",");
+  const lastDot = cleaned.lastIndexOf(".");
+  let normalized = cleaned;
+  if (lastComma >= 0 && lastDot >= 0) {
+    normalized = lastComma > lastDot
+      ? cleaned.replace(/\./g, "").replace(",", ".")
+      : cleaned.replace(/,/g, "");
+  } else if (lastComma >= 0) {
+    normalized = cleaned.replace(/\./g, "").replace(",", ".");
+  } else if (/^-?\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+    normalized = cleaned.replace(/\./g, "");
+  }
+  const parsed = Number.parseFloat(normalized);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
@@ -105,12 +117,124 @@ function fmtDate(value) {
   return year && month && day ? `${day}/${month}/${year}` : "-";
 }
 
+function fmtDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("pt-BR");
+}
+
+function getSimulationRecord() {
+  return {
+    id: reducaoResult.historyId || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+    savedAt: new Date().toISOString(),
+    formData,
+    receitaResult,
+    reducaoResult,
+  };
+}
+
+function readHistory() {
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY));
+    return Array.isArray(history) ? history : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveHistory(record) {
+  const history = readHistory().filter((item) => item.reducaoResult?.calculatedAt !== reducaoResult.calculatedAt);
+  history.unshift(record);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 30)));
+}
+
+function downloadJson(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildWhatsappSummary(totals, totalComHonorarios) {
+  const commercial = reducaoResult.commercial || {};
+  return [
+    `Resumo ReduzSim - ${formData.clienteNome || "cliente"}`,
+    `INSS sem redução: R$ ${fmt(totals.receita)}`,
+    `INSS com redução: R$ ${fmt(totals.totalReducao)}`,
+    `Economia bruta: R$ ${fmt(totals.economiaBruta)}`,
+    `Honorários: R$ ${fmt(totals.honorarios)} (${totals.honorariosDescription || `${fmtPercent(totals.honorariosPercent)}% sobre economia obtida`})`,
+    `Total com honorários: R$ ${fmt(totalComHonorarios)}`,
+    `Economia líquida estimada: R$ ${fmt(totals.economiaLiquida)}`,
+    commercial.validade ? `Validade da proposta: ${fmtDate(commercial.validade)}` : "",
+    commercial.consultor ? `Consultor/atendente: ${commercial.consultor}` : "",
+    "Observação: simulação prévia sujeita à aferição oficial no Sero/DCTFWeb Aferição de Obras.",
+  ].filter(Boolean).join("\n");
+}
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
+function renderCommercialAndLegal(totals) {
+  const commercial = reducaoResult.commercial || {};
+  const indices = reducaoResult.indices || {};
+  const honorariosDescription = totals.honorariosDescription || `${fmtPercent(totals.honorariosPercent)}% sobre economia obtida`;
+
+  const honorariosLabel = document.getElementById("honorarios-label");
+  if (honorariosLabel) {
+    honorariosLabel.textContent = totals.honorariosMode === "fixo" ? "(fixos)" : `(${honorariosDescription})`;
+  }
+  setText("honorarios-note", `Observação: ${honorariosDescription}.`);
+
+  if (commercial.validade) {
+    setText("proposal-validity", `Validade da proposta: ${fmtDate(commercial.validade)}. Valores sujeitos à atualização de índices, dados da obra e documentação apresentada.`);
+  }
+
+  const consultorInfo = document.getElementById("consultor-info");
+  if (consultorInfo && commercial.consultor) {
+    consultorInfo.hidden = false;
+    consultorInfo.querySelector("span").textContent = commercial.consultor;
+  }
+
+  const observations = document.getElementById("commercial-observations");
+  if (observations && commercial.observacoes) {
+    observations.hidden = false;
+    observations.textContent = `Observações comerciais: ${commercial.observacoes}`;
+  }
+
+  const selic = indices.selic || {};
+  const vau = indices.vau || receitaResult.indices?.vau || {};
+  const selicUpdated = fmtDateTime(selic.updatedAt);
+  const vauUpdated = fmtDateTime(vau.updatedAt);
+  const indexText = [
+    `SELIC: ${selicUpdated ? `atualizada em ${selicUpdated}` : "último índice válido/tabela local"}; fonte: ${selic.source || "Tabela local do sistema"}.`,
+    `VAU: ${vau.period || receitaResult.vauPeriodo || "-"}${vauUpdated ? `, atualizado em ${vauUpdated}` : ""}; fonte: ${vau.source || "Tabela local do sistema"}.`,
+    `Juros de mora: ${indices.jurosMora?.rule || "Selic do mês seguinte ao vencimento até o mês anterior ao pagamento, mais 1% no mês do pagamento."} Fonte: ${indices.jurosMora?.source || "Receita Federal - juros de mora"}.`,
+  ].join(" ");
+  setText("indices-info", indexText);
+}
+
 (() => {
   try {
     formData = JSON.parse(localStorage.getItem("formData"));
+    receitaResult = JSON.parse(localStorage.getItem("receitaResult"));
     reducaoResult = JSON.parse(localStorage.getItem("reducaoResult"));
   } catch (error) {
     formData = null;
+    receitaResult = null;
     reducaoResult = null;
   }
 
@@ -118,6 +242,7 @@ function fmtDate(value) {
     window.location.href = "index.html";
     return;
   }
+  receitaResult = receitaResult || {};
 
   const totals = reducaoResult.totals || {};
   const totalComHonorarios = toNumber(totals.totalReducao) + toNumber(totals.honorarios);
@@ -141,6 +266,7 @@ function fmtDate(value) {
   setText("tipo-obra", typeTipoObra[formData.tipoObra] || "-");
   setText("data-inicio-obra", fmtDate(formData.dataInicioObra));
   setText("data-fim-obra", fmtDate(formData.dataFimObra));
+  renderCommercialAndLegal(totals);
 
   const chartMax = Math.max(
     toNumber(totals.receita),
@@ -157,5 +283,24 @@ function fmtDate(value) {
   setBar("bar-honorarios", totals.honorarios || 0, chartMax);
   setBar("bar-total-com-honorarios", totalComHonorarios, chartMax);
 
+  const record = getSimulationRecord();
+  saveHistory(record);
   document.getElementById("print-btn").addEventListener("click", () => window.print());
+  document.getElementById("download-json-btn").addEventListener("click", () => {
+    downloadJson(`reduzsim-${record.id}.json`, record);
+  });
+  document.getElementById("copy-whatsapp-btn").addEventListener("click", async (event) => {
+    await copyText(buildWhatsappSummary(totals, totalComHonorarios));
+    event.currentTarget.textContent = "Resumo copiado";
+    window.setTimeout(() => {
+      event.currentTarget.textContent = "Copiar resumo para WhatsApp";
+    }, 1800);
+  });
+  document.getElementById("new-simulation-btn").addEventListener("click", () => {
+    localStorage.removeItem("formData");
+    localStorage.removeItem("receitaResult");
+    localStorage.removeItem("reducaoResult");
+    localStorage.removeItem("reducaoParalisacoes");
+    window.location.href = "index.html";
+  });
 })();

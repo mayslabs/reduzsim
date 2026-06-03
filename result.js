@@ -47,6 +47,7 @@ const VAU_DATA = [
   { data: "06/2026", UF: "SE", RPOP: 1369.17, COM: 2534.72, CHAB: 1369.17, EGAR: 2534.72, GALP: 1165.42, RMUL: 2263.20, RES: 2498.49 },
   { data: "06/2026", UF: "TO", RPOP: 1488.43, COM: 2651.89, CHAB: 1488.43, EGAR: 2651.89, GALP: 1239.30, RMUL: 2329.40, RES: 2790.08 },
 ];
+const VAU_BASE_DATA = VAU_DATA.map((row) => ({ ...row }));
 
 const CONCRETO_DATA = [
   { UF: "AC", RES: 0.0743, RMUL: 0.0961, COM: 0.1333, EGAR: 0.1333, GALP: 0.0452, RPOP: 0.0469, CHAB: 0.0469 },
@@ -205,6 +206,34 @@ function fmt(value) {
   return value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function fmtDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("pt-BR");
+}
+
+function setIndexStatus(meta) {
+  const element = document.getElementById("indices-status");
+  if (!element || !meta) return;
+  const updatedAt = fmtDateTime(meta.updatedAt);
+  const updatedText = updatedAt ? `Índice atualizado em ${updatedAt}.` : "Usando último índice válido disponível.";
+  element.innerHTML = `
+    <strong>VAU ${meta.period || VAU_BASE_DATA[0]?.data || ""}</strong><br>
+    ${updatedText}<br>
+    Fonte utilizada: ${meta.source || "Tabela local do sistema"}.
+  `;
+}
+
+async function getVauMeta(forceRefresh = false) {
+  if (!window.ReduzSimIndices) {
+    return { rows: VAU_BASE_DATA, period: VAU_BASE_DATA[0]?.data, source: "Tabela local do sistema", updatedAt: "" };
+  }
+
+  if (forceRefresh) await window.ReduzSimIndices.refreshAll(VAU_BASE_DATA);
+  return window.ReduzSimIndices.getVauData(VAU_BASE_DATA);
+}
+
 function fmtPercent(value) {
   return `${value.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 }
@@ -250,16 +279,17 @@ function renderRemuneracaoRows(rows) {
   const body = document.getElementById("remuneracao-rows");
   if (!card || !body) return;
 
-  const validRows = rows.filter((row) => row.valor > 0 || row.competencia);
+  const validRows = rows.filter((row) => row.area > 0 || row.cod > 0 || row.rmt > 0);
   card.hidden = validRows.length === 0;
   body.innerHTML = "";
 
   validRows.forEach((row) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${row.competencia || "-"}</td>
-      <td>${row.origem || "-"}</td>
-      <td>R$ ${fmt(row.valor || 0)}</td>
+      <td>${row.label || "-"}</td>
+      <td>${fmt(row.area || 0)} m²</td>
+      <td>R$ ${fmt(row.cod || 0)}</td>
+      <td>R$ ${fmt(row.rmt || 0)}</td>
     `;
     body.appendChild(tr);
   });
@@ -273,14 +303,16 @@ function setOptionalBlock(blockId, valueId, value) {
   setText(valueId, safeValue || "-");
 }
 
-function updateValues() {
+async function updateValues(forceRefresh = false) {
   formData = normalizeFormData(formData);
   const totalAreaFatorSocial = formData.areaConstrucao + formData.areaCoberta + formData.areaDescoberta;
   const areaRef = formData.areaReforma;
   const areaDem = formData.areaDemolicao;
 
   const UF = formData.UF;
-  const vauRow = VAU_DATA.find((row) => row.UF === UF);
+  const vauMeta = await getVauMeta(forceRefresh);
+  const vauRows = vauMeta.rows?.length ? vauMeta.rows : VAU_BASE_DATA;
+  const vauRow = vauRows.find((row) => row.UF === UF);
   const concretoRow = CONCRETO_DATA.find((row) => row.UF === UF);
 
   if (!vauRow || !concretoRow || !vauRow[formData.destinacao]) {
@@ -324,6 +356,7 @@ function updateValues() {
       rmt: calcRMT(COD[4], formData.areaDescoberta, totalAreaFatorSocial, formData.responsavelObra, 1),
     },
   ];
+  renderRemuneracaoRows(rmtRows);
 
   const rmtBeforeConcreto = rmtRows.reduce((sum, row) => sum + row.rmt, 0);
   const percentConcreto = formData.isUsoConcreto ? concretoRow[formData.destinacao] : 0;
@@ -340,8 +373,16 @@ function updateValues() {
     dateInitial: formData.dataInicioObra,
     dateFinal: formData.dataFimObra,
     vauPeriodo: vauRow.data,
+    indices: {
+      vau: {
+        period: vauMeta.period || vauRow.data,
+        source: vauMeta.source || "Tabela local do sistema",
+        updatedAt: vauMeta.updatedAt || "",
+      },
+    },
   };
   localStorage.setItem("receitaResult", JSON.stringify(receitaResult));
+  setIndexStatus(receitaResult.indices.vau);
 
   setText("date", vauRow.data);
   setText("date-hero", vauRow.data);
@@ -380,9 +421,16 @@ function updateValues() {
   }
 
   updateValues();
+  document.getElementById("refresh-indices-btn")?.addEventListener("click", async (event) => {
+    event.currentTarget.disabled = true;
+    event.currentTarget.textContent = "Atualizando...";
+    try {
+      await updateValues(true);
+    } finally {
+      event.currentTarget.disabled = false;
+      event.currentTarget.textContent = "Atualizar índices";
+    }
+  });
+  window.ReduzSimIndices?.scheduleAutoUpdates(VAU_BASE_DATA, () => updateValues());
 
-  const printBtn = document.getElementById("print-btn");
-  if (printBtn) {
-    printBtn.addEventListener("click", () => window.print());
-  }
 })();

@@ -32,8 +32,38 @@ function round(value) {
   return Math.round((Number(value) || 0) * 100) / 100;
 }
 
+function parseLocaleNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const cleaned = String(value || "").replace(/[^\d,.-]/g, "").trim();
+  if (!cleaned) return 0;
+
+  const lastComma = cleaned.lastIndexOf(",");
+  const lastDot = cleaned.lastIndexOf(".");
+  let normalized = cleaned;
+
+  if (lastComma >= 0 && lastDot >= 0) {
+    normalized = lastComma > lastDot
+      ? cleaned.replace(/\./g, "").replace(",", ".")
+      : cleaned.replace(/,/g, "");
+  } else if (lastComma >= 0) {
+    normalized = cleaned.replace(/\./g, "").replace(",", ".");
+  } else if (/^-?\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+    normalized = cleaned.replace(/\./g, "");
+  }
+
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function fmt(value) {
   return (Number(value) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("pt-BR");
 }
 
 function setText(id, value) {
@@ -237,8 +267,8 @@ function readMonthlyRows() {
   return Array.from(document.querySelectorAll("[data-month-row]")).map((row) => ({
     month: row.dataset.monthRow,
     isParalisacao: row.dataset.paralisacao === "true",
-    remOriginal: Number.parseFloat(row.querySelector("[data-field='remOriginal']").value || "0") || 0,
-    selic: Number.parseFloat(row.querySelector("[data-field='selic']").value || "0") || 0,
+    remOriginal: parseLocaleNumber(row.querySelector("[data-field='remOriginal']").value),
+    selic: parseLocaleNumber(row.querySelector("[data-field='selic']").value),
   }));
 }
 
@@ -368,8 +398,8 @@ function getStoredRows() {
   const mappedRows = storedRows.map((row, index) => ({
     month: initialRows[index].month,
     isParalisacao: initialRows[index].isParalisacao,
-    remOriginal: Number.parseFloat(row.remOriginal || "0") || 0,
-    selic: Number.parseFloat(row.selic || "0") || 0,
+    remOriginal: parseLocaleNumber(row.remOriginal),
+    selic: parseLocaleNumber(row.selic),
   }));
 
   const storedBasis = reducaoResult && reducaoResult.basis;
@@ -419,6 +449,54 @@ function isRowsCompatibleWithRmtGoal(rows) {
   return Math.abs(total - goal) <= tolerance;
 }
 
+function updateHonorariosMode() {
+  const mode = document.getElementById("honorarios-mode")?.value || "percentual";
+  const percentBlock = document.getElementById("honorarios-percent-block");
+  const baseBlock = document.getElementById("honorarios-base-block");
+  const fixedBlock = document.getElementById("honorarios-fixed-block");
+  if (percentBlock) percentBlock.hidden = mode === "fixo";
+  if (baseBlock) baseBlock.hidden = mode === "fixo";
+  if (fixedBlock) fixedBlock.hidden = mode !== "fixo";
+}
+
+function getHonorariosBaseValue(base, values) {
+  if (base === "debito-original") return values.receita;
+  if (base === "debito-reduzido") return values.totalReducao;
+  return values.economiaBruta;
+}
+
+function getHonorariosBaseLabel(base) {
+  if (base === "debito-original") return "débito original";
+  if (base === "debito-reduzido") return "débito com redução";
+  return "economia obtida";
+}
+
+function getHonorariosConfig(values) {
+  const mode = document.getElementById("honorarios-mode")?.value || "percentual";
+  if (mode === "fixo") {
+    const fixedValue = round(Math.max(parseLocaleNumber(document.getElementById("honorarios-fixed")?.value), 0));
+    return {
+      value: fixedValue,
+      mode: "fixo",
+      base: "valor-fixo",
+      percent: values.economiaBruta > 0 ? round((fixedValue / values.economiaBruta) * 100) : 0,
+      description: `Honorários fixos: R$ ${fmt(fixedValue)}`,
+    };
+  }
+
+  const base = document.getElementById("honorarios-base")?.value || "economia";
+  const percent = Math.max(parseLocaleNumber(document.getElementById("honorarios-percent")?.value), 0);
+  const baseValue = getHonorariosBaseValue(base, values);
+  const baseLabel = getHonorariosBaseLabel(base);
+  return {
+    value: round(baseValue * (percent / 100)),
+    mode: "percentual",
+    base,
+    percent,
+    description: `${percent.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% sobre ${baseLabel}`,
+  };
+}
+
 function updateTotals(rows) {
   const totalReducao = round(rows.reduce((sum, row) => sum + row.total, 0));
   const totalRemOriginal = round(rows.reduce((sum, row) => sum + row.remOriginal, 0));
@@ -430,8 +508,9 @@ function updateTotals(rows) {
   const percentualAtingido = rmtSero > 0 ? round((totalRemAtualizada / rmtSero) * 100) : 0;
   const faltaMeta = round(Math.max(rmtMeta - totalRemAtualizada, 0));
   const economiaBruta = round(Math.max(receita - totalReducao, 0));
-  const honorariosPercent = Number.parseFloat(document.getElementById("honorarios-percent").value || "0") || 0;
-  const honorarios = round(economiaBruta * (honorariosPercent / 100));
+  updateHonorariosMode();
+  const honorariosConfig = getHonorariosConfig({ receita, totalReducao, economiaBruta });
+  const honorarios = honorariosConfig.value;
   const economiaLiquida = round(Math.max(economiaBruta - honorarios, 0));
   const percentualReducao = receita > 0 ? round((economiaBruta / receita) * 100) : 0;
 
@@ -461,8 +540,11 @@ function updateTotals(rows) {
     percentualAtingido,
     economiaBruta,
     honorarios,
+    honorariosMode: honorariosConfig.mode,
+    honorariosBase: honorariosConfig.base,
+    honorariosDescription: honorariosConfig.description,
     economiaLiquida,
-    honorariosPercent,
+    honorariosPercent: honorariosConfig.percent,
     percentualReducao,
   };
 }
@@ -514,11 +596,110 @@ function copyFirstRemuneracaoToAll() {
   updateMonthlyCalculation();
 }
 
+function getIndicesMeta() {
+  const status = window.ReduzSimIndices?.getStatus?.();
+  const selic = status?.cache?.selic || {};
+  const receitaIndices = receitaResult.indices || {};
+  return {
+    selic: {
+      updatedAt: selic.updatedAt || "",
+      source: selic.source || "Tabela local do sistema",
+      referenceDate: document.getElementById("data-referencia")?.value || "",
+    },
+    vau: receitaIndices.vau || {
+      period: receitaResult.vauPeriodo || "",
+      source: "Tabela local do sistema",
+      updatedAt: "",
+    },
+    jurosMora: {
+      source: "Receita Federal - juros de mora",
+      rule: "Selic do mês seguinte ao vencimento até o mês anterior ao pagamento, mais 1% no mês do pagamento.",
+      url: "https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/pagamentos-e-parcelamentos/pagamento-em-atraso",
+    },
+    sero: {
+      source: "Receita Federal - Sero",
+      rule: "A aferição oficial da obra é feita no Sero e a confissão do débito segue pela DCTFWeb Aferição de Obras.",
+      url: "https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/declaracoes-e-demonstrativos/sero-servico-eletronico-para-afericao-de-obras",
+    },
+  };
+}
+
+function updateIndicesNote(message) {
+  const note = document.getElementById("indices-update-note");
+  if (!note) return;
+  const meta = getIndicesMeta();
+  const selicUpdated = fmtDateTime(meta.selic.updatedAt);
+  const vauUpdated = fmtDateTime(meta.vau.updatedAt);
+  note.innerHTML = `
+    <strong>${message}</strong><br>
+    SELIC: ${selicUpdated ? `índice atualizado em ${selicUpdated}` : "último índice válido/tabela local"}.
+    Fonte utilizada: ${meta.selic.source}.<br>
+    VAU: ${meta.vau.period || "período local"}${vauUpdated ? `, atualizado em ${vauUpdated}` : ""}.
+    Fonte utilizada: ${meta.vau.source}.<br>
+    Juros de mora: ${meta.jurosMora.rule} Fonte: ${meta.jurosMora.source}.
+  `;
+}
+
+function applyCurrentSelicToRows() {
+  const baseRows = readMonthlyRows().map((row) => ({
+    ...row,
+    selic: row.isParalisacao ? 0 : (SELIC_ACUMULADA[row.month] ?? row.selic),
+  }));
+  const rows = calculateRows(baseRows);
+  renderRows(rows);
+  return { rows, totals: updateTotals(rows) };
+}
+
+async function refreshSelic() {
+  if (!window.ReduzSimIndices) {
+    updateIndicesNote(`Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
+    return;
+  }
+
+  try {
+    await window.ReduzSimIndices.fetchSelicRates();
+    const months = typeof getWorkMonths === "function" ? getWorkMonths() : Object.keys(SELIC_ACUMULADA);
+    const reference = document.getElementById("data-referencia")?.value;
+    Object.assign(SELIC_ACUMULADA, window.ReduzSimIndices.calculateSelicMap(months, reference));
+    applyCurrentSelicToRows();
+    updateIndicesNote("Índices atualizados para este cálculo.");
+  } catch (error) {
+    console.warn("Falha ao atualizar SELIC.", error);
+    updateIndicesNote("Não foi possível buscar a SELIC agora; usando último índice válido como fallback.");
+  }
+}
+
+function defaultValidityDate() {
+  const date = new Date();
+  date.setDate(date.getDate() + 7);
+  return date.toISOString().slice(0, 10);
+}
+
+function initCommercialFields() {
+  const commercial = reducaoResult?.commercial || {};
+  const consultor = document.getElementById("consultor-nome");
+  const validade = document.getElementById("proposta-validade");
+  const observacoes = document.getElementById("observacoes-comerciais");
+  if (consultor) consultor.value = commercial.consultor || "";
+  if (validade) validade.value = commercial.validade || defaultValidityDate();
+  if (observacoes) observacoes.value = commercial.observacoes || "";
+}
+
+function getCommercialData() {
+  return {
+    consultor: document.getElementById("consultor-nome")?.value.trim() || "",
+    validade: document.getElementById("proposta-validade")?.value || "",
+    observacoes: document.getElementById("observacoes-comerciais")?.value.trim() || "",
+  };
+}
+
 function finalizeCalculation() {
   const result = recalculate(true);
   localStorage.setItem("reducaoResult", JSON.stringify({
     calculatedAt: new Date().toISOString(),
     basis: getCurrentCalculationBasis(),
+    commercial: getCommercialData(),
+    indices: getIndicesMeta(),
     rows: result.rows,
     totals: result.totals,
   }));
@@ -546,9 +727,22 @@ function finalizeCalculation() {
   paralisacoes = loadParalisacoes();
   renderParalisacoes();
   document.getElementById("data-referencia").value = new Date().toISOString().slice(0, 10);
-  setText("indices-update-note", `Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
+  initCommercialFields();
+  updateHonorariosMode();
+  updateIndicesNote(`Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
   document.getElementById("recalc-btn").addEventListener("click", finalizeCalculation);
   document.getElementById("print-reducao-btn").addEventListener("click", () => window.print());
+  document.getElementById("refresh-indices-btn").addEventListener("click", async (event) => {
+    event.currentTarget.disabled = true;
+    event.currentTarget.textContent = "Atualizando...";
+    try {
+      await window.ReduzSimIndices?.refreshAll([]);
+      await refreshSelic();
+    } finally {
+      event.currentTarget.disabled = false;
+      event.currentTarget.textContent = "Atualizar índices";
+    }
+  });
   document.getElementById("copy-first-remuneracao").addEventListener("click", copyFirstRemuneracaoToAll);
   document.getElementById("add-paralisacao-btn").addEventListener("click", addParalisacao);
   document.getElementById("paralisacao-list").addEventListener("click", (event) => {
@@ -561,8 +755,16 @@ function finalizeCalculation() {
     }
   });
   document.getElementById("honorarios-percent").addEventListener("input", updateMonthlyCalculation);
+  document.getElementById("honorarios-mode").addEventListener("change", () => {
+    updateHonorariosMode();
+    updateMonthlyCalculation();
+  });
+  document.getElementById("honorarios-base").addEventListener("change", updateMonthlyCalculation);
+  document.getElementById("honorarios-fixed").addEventListener("input", updateMonthlyCalculation);
   document.getElementById("aplicar-maed").addEventListener("change", updateMonthlyCalculation);
-  document.getElementById("data-referencia").addEventListener("change", updateMonthlyCalculation);
+  document.getElementById("data-referencia").addEventListener("change", refreshSelic);
 
   restoreMonthlyCalculation();
+  refreshSelic();
+  window.ReduzSimIndices?.scheduleAutoUpdates([], refreshSelic);
 })();
