@@ -365,12 +365,58 @@ function getStoredRows() {
     && Boolean(row.isParalisacao) === Boolean(initialRows[index].isParalisacao));
   if (!isCompatible) return null;
 
-  return storedRows.map((row, index) => ({
+  const mappedRows = storedRows.map((row, index) => ({
     month: initialRows[index].month,
     isParalisacao: initialRows[index].isParalisacao,
     remOriginal: Number.parseFloat(row.remOriginal || "0") || 0,
     selic: Number.parseFloat(row.selic || "0") || 0,
   }));
+
+  const storedBasis = reducaoResult && reducaoResult.basis;
+  const currentBasis = getCurrentCalculationBasis();
+  if (storedBasis && !isSameCalculationBasis(storedBasis, currentBasis)) return null;
+  if (!storedBasis && !isRowsCompatibleWithRmtGoal(mappedRows)) return null;
+
+  return mappedRows;
+}
+
+function getCurrentCalculationBasis() {
+  return {
+    receitaCalculatedAt: receitaResult.calculatedAt || "",
+    rmt: round(receitaResult.rmt || 0),
+    areaTotal: round(receitaResult.areaTotal || 0),
+    dateInitial: receitaResult.dateInitial || formData.dataInicioObra || "",
+    dateFinal: receitaResult.dateFinal || formData.dataFimObra || "",
+  };
+}
+
+function isSameCalculationBasis(a, b) {
+  return a
+    && b
+    && a.receitaCalculatedAt === b.receitaCalculatedAt
+    && round(a.rmt || 0) === round(b.rmt || 0)
+    && round(a.areaTotal || 0) === round(b.areaTotal || 0)
+    && a.dateInitial === b.dateInitial
+    && a.dateFinal === b.dateFinal;
+}
+
+function getRmtGoal() {
+  const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 0.5 : 0.7;
+  return round((receitaResult.rmt || 0) * metaPercentual);
+}
+
+function getUpdatedRemunerationTotal(rows) {
+  return round(rows.reduce((sum, row) => (
+    row.isParalisacao ? sum : sum + round(row.remOriginal * (1 + (row.selic / 100)))
+  ), 0));
+}
+
+function isRowsCompatibleWithRmtGoal(rows) {
+  const goal = getRmtGoal();
+  if (goal <= 0) return true;
+  const total = getUpdatedRemunerationTotal(rows);
+  const tolerance = Math.max(1, goal * 0.005);
+  return Math.abs(total - goal) <= tolerance;
 }
 
 function updateTotals(rows) {
@@ -472,6 +518,7 @@ function finalizeCalculation() {
   const result = recalculate(true);
   localStorage.setItem("reducaoResult", JSON.stringify({
     calculatedAt: new Date().toISOString(),
+    basis: getCurrentCalculationBasis(),
     rows: result.rows,
     totals: result.totals,
   }));

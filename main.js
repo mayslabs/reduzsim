@@ -15,8 +15,31 @@ const areaCoberta = document.getElementById("area-comp-coberta");
 const areaDescoberta = document.getElementById("area-comp-descoberta");
 const areaFields = [areaConstrucao, areaReforma, areaDemolicao, areaCoberta, areaDescoberta];
 
+function parseLocaleNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const cleaned = String(value || "").replace(/[^\d,.-]/g, "").trim();
+  if (!cleaned) return 0;
+
+  const lastComma = cleaned.lastIndexOf(",");
+  const lastDot = cleaned.lastIndexOf(".");
+  let normalized = cleaned;
+
+  if (lastComma >= 0 && lastDot >= 0) {
+    normalized = lastComma > lastDot
+      ? cleaned.replace(/\./g, "").replace(",", ".")
+      : cleaned.replace(/,/g, "");
+  } else if (lastComma >= 0) {
+    normalized = cleaned.replace(/\./g, "").replace(",", ".");
+  } else if (/^-?\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+    normalized = cleaned.replace(/\./g, "");
+  }
+
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function parseArea(input) {
-  return Number.parseFloat(input.value || "0") || 0;
+  return parseLocaleNumber(input.value);
 }
 
 function todayISO() {

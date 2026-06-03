@@ -80,14 +80,50 @@ const CONCRETO_DATA = [
 
 let formData = {};
 
+function parseLocaleNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const cleaned = String(value || "").replace(/[^\d,.-]/g, "").trim();
+  if (!cleaned) return 0;
+
+  const lastComma = cleaned.lastIndexOf(",");
+  const lastDot = cleaned.lastIndexOf(".");
+  let normalized = cleaned;
+
+  if (lastComma >= 0 && lastDot >= 0) {
+    normalized = lastComma > lastDot
+      ? cleaned.replace(/\./g, "").replace(",", ".")
+      : cleaned.replace(/,/g, "");
+  } else if (lastComma >= 0) {
+    normalized = cleaned.replace(/\./g, "").replace(",", ".");
+  } else if (/^-?\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+    normalized = cleaned.replace(/\./g, "");
+  }
+
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeFormData(data) {
+  const normalized = { ...data };
+  ["areaConstrucao", "areaReforma", "areaDemolicao", "areaCoberta", "areaDescoberta"].forEach((key) => {
+    normalized[key] = parseLocaleNumber(normalized[key]);
+  });
+  normalized.areaTotal = normalized.areaConstrucao
+    + normalized.areaReforma
+    + normalized.areaDemolicao
+    + normalized.areaCoberta
+    + normalized.areaDescoberta;
+  return normalized;
+}
+
 function calcCOD(data, VAU) {
   const destinacao = data.destinacao;
 
-  let areaConstrucao = Number.parseFloat(data.areaConstrucao) || 0;
-  let areaReforma = Number.parseFloat(data.areaReforma) || 0;
-  let areaDemolicao = Number.parseFloat(data.areaDemolicao) || 0;
-  let areaCoberta = Number.parseFloat(data.areaCoberta) || 0;
-  let areaDescoberta = Number.parseFloat(data.areaDescoberta) || 0;
+  let areaConstrucao = parseLocaleNumber(data.areaConstrucao);
+  let areaReforma = parseLocaleNumber(data.areaReforma);
+  let areaDemolicao = parseLocaleNumber(data.areaDemolicao);
+  let areaCoberta = parseLocaleNumber(data.areaCoberta);
+  let areaDescoberta = parseLocaleNumber(data.areaDescoberta);
 
   switch (destinacao) {
     case "RES":
@@ -238,6 +274,7 @@ function setOptionalBlock(blockId, valueId, value) {
 }
 
 function updateValues() {
+  formData = normalizeFormData(formData);
   const totalAreaFatorSocial = formData.areaConstrucao + formData.areaCoberta + formData.areaDescoberta;
   const areaRef = formData.areaReforma;
   const areaDem = formData.areaDemolicao;

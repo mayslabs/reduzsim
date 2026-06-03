@@ -46,12 +46,12 @@
   }
 
   function initIndexPage() {
-    const form = document.getElementById("simForm");
+    const form = document.getElementById("form") || document.getElementById("simForm");
     if (!form) return;
 
     try {
       window.parseArea = function (input) {
-        return Number(String(input || "").replace(",", ".")) || 0;
+        return parseMoney(input?.value ?? input);
       };
     } catch (error) {
       console.warn("Nao foi possivel ajustar parseArea.", error);
