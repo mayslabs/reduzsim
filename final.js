@@ -190,41 +190,16 @@ async function copyText(text) {
 
 function renderCommercialAndLegal(totals) {
   const commercial = reducaoResult.commercial || {};
-  const indices = reducaoResult.indices || {};
-  const honorariosDescription = totals.honorariosDescription || `${fmtPercent(totals.honorariosPercent)}% sobre economia obtida`;
+  const honorariosDescription = totals.honorariosDescription || `${fmtPercent(totals.honorariosPercent)}% sobre a economia obtida`;
 
   const honorariosLabel = document.getElementById("honorarios-label");
   if (honorariosLabel) {
-    honorariosLabel.textContent = totals.honorariosMode === "fixo" ? "(fixos)" : `(${honorariosDescription})`;
+    honorariosLabel.textContent = totals.honorariosMode === "fixo" ? "fixos" : honorariosDescription;
   }
-  setText("honorarios-note", `Observação: ${honorariosDescription}.`);
 
   if (commercial.validade) {
     setText("proposal-validity", `Validade da proposta: ${fmtDate(commercial.validade)}. Valores sujeitos à atualização de índices, dados da obra e documentação apresentada.`);
   }
-
-  const consultorInfo = document.getElementById("consultor-info");
-  if (consultorInfo && commercial.consultor) {
-    consultorInfo.hidden = false;
-    consultorInfo.querySelector("span").textContent = commercial.consultor;
-  }
-
-  const observations = document.getElementById("commercial-observations");
-  if (observations && commercial.observacoes) {
-    observations.hidden = false;
-    observations.textContent = `Observações comerciais: ${commercial.observacoes}`;
-  }
-
-  const selic = indices.selic || {};
-  const vau = indices.vau || receitaResult.indices?.vau || {};
-  const selicUpdated = fmtDateTime(selic.updatedAt);
-  const vauUpdated = fmtDateTime(vau.updatedAt);
-  const indexText = [
-    `SELIC: ${selicUpdated ? `atualizada em ${selicUpdated}` : "último índice válido/tabela local"}; fonte: ${selic.source || "Tabela local do sistema"}.`,
-    `VAU: ${vau.period || receitaResult.vauPeriodo || "-"}${vauUpdated ? `, atualizado em ${vauUpdated}` : ""}; fonte: ${vau.source || "Tabela local do sistema"}.`,
-    `Juros de mora: ${indices.jurosMora?.rule || "Selic do mês seguinte ao vencimento até o mês anterior ao pagamento, mais 1% no mês do pagamento."} Fonte: ${indices.jurosMora?.source || "Receita Federal - juros de mora"}.`,
-  ].join(" ");
-  setText("indices-info", indexText);
 }
 
 (() => {
@@ -256,7 +231,6 @@ function renderCommercialAndLegal(totals) {
   setText("honorarios", fmt(totals.honorarios));
   setText("economia-liquida", fmt(totals.economiaLiquida));
   setText("total-com-honorarios", fmt(totalComHonorarios));
-  setText("honorarios-percent", fmtPercent(totals.honorariosPercent));
   setText("cliente-nome", formData.clienteNome || "-");
   setText("cliente-telefone", formData.clienteTelefone || "-");
   setText("uf", ufNames[formData.UF] || formData.UF || "-");

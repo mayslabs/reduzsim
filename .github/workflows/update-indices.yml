@@ -2,9 +2,9 @@ name: Atualizar SELIC e VAU
 
 on:
   schedule:
-    # Atualiza diariamente às 08:00 no horário de Brasília.
-    - cron: "0 8 * * *"
-      timezone: "America/Sao_Paulo"
+    # Tentativas diárias em horário de Brasília/Araguaína: 08h, 11h, 14h, 17h e 19h.
+    # O cron do GitHub Actions usa UTC.
+    - cron: "0 11,14,17,20,22 * * *"
   workflow_dispatch:
 
 permissions:

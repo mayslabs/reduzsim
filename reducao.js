@@ -466,9 +466,9 @@ function getHonorariosBaseValue(base, values) {
 }
 
 function getHonorariosBaseLabel(base) {
-  if (base === "debito-original") return "débito original";
-  if (base === "debito-reduzido") return "débito com redução";
-  return "economia obtida";
+  if (base === "debito-original") return "o débito original";
+  if (base === "debito-reduzido") return "o débito com redução";
+  return "a economia obtida";
 }
 
 function getHonorariosConfig(values) {
@@ -759,7 +759,7 @@ function finalizeCalculation() {
     updateHonorariosMode();
     updateMonthlyCalculation();
   });
-  document.getElementById("honorarios-base").addEventListener("change", updateMonthlyCalculation);
+  document.getElementById("honorarios-base")?.addEventListener("change", updateMonthlyCalculation);
   document.getElementById("honorarios-fixed").addEventListener("input", updateMonthlyCalculation);
   document.getElementById("aplicar-maed").addEventListener("change", updateMonthlyCalculation);
   document.getElementById("data-referencia").addEventListener("change", refreshSelic);

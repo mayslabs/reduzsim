@@ -1517,10 +1517,23 @@ body {
   line-height: 1.2;
 }
 
+.rs-proposal-bar-label {
+  display: flex;
+  flex-direction: column;
+  gap: .12rem;
+}
+
+.rs-proposal-bar-label strong {
+  font-size: inherit;
+  line-height: inherit;
+}
+
 .rs-proposal-bar-row small {
   color: var(--green-dark);
+  display: block;
   font-size: .72rem;
   font-weight: 800;
+  line-height: 1.16;
 }
 
 .rs-proposal-bar-row strong {
@@ -1530,6 +1543,13 @@ body {
   line-height: 1.15;
   text-align: right;
   white-space: nowrap;
+}
+
+.rs-proposal-bar-row > .rs-proposal-bar-label strong {
+  font-size: inherit;
+  line-height: inherit;
+  text-align: left;
+  white-space: normal;
 }
 
 .rs-proposal-bar-track {

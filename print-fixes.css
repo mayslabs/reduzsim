@@ -1,14 +1,15 @@
 @page {
   size: A4 portrait;
-  margin: 7mm;
+  margin: 5mm;
 }
 
 @media print {
   html,
   body {
     background: #fff !important;
-    min-height: 297mm;
-    width: 210mm;
+    margin: 0 !important;
+    min-height: auto !important;
+    width: auto !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -25,20 +26,21 @@
   .rs-final-page,
   .rs-proposal-page {
     margin: 0 auto !important;
-    max-width: none !important;
+    max-width: 200mm !important;
     padding: 0 !important;
-    width: 100% !important;
+    width: 200mm !important;
   }
 
   .rs-proposal-sheet {
     border-radius: 8px !important;
+    box-sizing: border-box !important;
     box-shadow: none !important;
     margin: 0 auto !important;
-    max-width: 196mm !important;
+    max-width: 200mm !important;
     min-height: auto !important;
     overflow: hidden;
-    padding: 6mm !important;
-    width: 196mm !important;
+    padding: 5mm !important;
+    width: 200mm !important;
   }
 
   .rs-card,
@@ -60,7 +62,7 @@
   }
 
   .rs-proposal-heading h1 {
-    font-size: 17pt !important;
+    font-size: 19pt !important;
   }
 
   .rs-proposal-heading p,
@@ -73,8 +75,8 @@
   }
 
   .rs-proposal-layout {
-    gap: 5mm !important;
-    grid-template-columns: minmax(58mm, .92fr) minmax(0, 1.58fr) !important;
+    gap: 4mm !important;
+    grid-template-columns: minmax(58mm, .9fr) minmax(0, 1.62fr) !important;
   }
 
   .rs-proposal-sidebar,
@@ -85,7 +87,7 @@
   .rs-proposal-panel,
   .rs-proposal-calcs,
   .rs-proposal-note-panel {
-    padding: 3.5mm !important;
+    padding: 3.2mm !important;
   }
 
   .rs-proposal-bar-track {
