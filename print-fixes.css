@@ -74,6 +74,13 @@
     text-size-adjust: none;
   }
 
+  .rs-proposal-note-panel p {
+    font-size: 9.5pt !important;
+    line-height: 1.38 !important;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+  }
+
   .rs-proposal-layout {
     gap: 4mm !important;
     grid-template-columns: minmax(58mm, .9fr) minmax(0, 1.62fr) !important;

@@ -149,16 +149,6 @@ function saveHistory(record) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 30)));
 }
 
-function downloadJson(filename, data) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
-
 function buildWhatsappSummary(totals, totalComHonorarios) {
   const commercial = reducaoResult.commercial || {};
   return [
@@ -260,9 +250,6 @@ function renderCommercialAndLegal(totals) {
   const record = getSimulationRecord();
   saveHistory(record);
   document.getElementById("print-btn").addEventListener("click", () => window.print());
-  document.getElementById("download-json-btn").addEventListener("click", () => {
-    downloadJson(`reduzsim-${record.id}.json`, record);
-  });
   document.getElementById("copy-whatsapp-btn").addEventListener("click", async (event) => {
     await copyText(buildWhatsappSummary(totals, totalComHonorarios));
     event.currentTarget.textContent = "Resumo copiado";

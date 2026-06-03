@@ -131,16 +131,6 @@ function readHistory() {
   }
 }
 
-function writeDownload(filename, data) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
-
 function renderHistory() {
   const card = document.getElementById("history-card");
   const list = document.getElementById("history-list");
@@ -163,7 +153,6 @@ function renderHistory() {
       </div>
       <div class="rs-history-item-actions">
         <button class="rs-btn-outline" type="button" data-history-load="${item.id}">Abrir</button>
-        <button class="rs-btn-outline" type="button" data-history-export="${item.id}">JSON</button>
         <button class="rs-btn-outline" type="button" data-history-delete="${item.id}">Excluir</button>
       </div>
     `;
@@ -177,12 +166,11 @@ function bindHistoryActions() {
 
   list.addEventListener("click", (event) => {
     const loadId = event.target.dataset.historyLoad;
-    const exportId = event.target.dataset.historyExport;
     const deleteId = event.target.dataset.historyDelete;
-    if (!loadId && !exportId && !deleteId) return;
+    if (!loadId && !deleteId) return;
 
     const history = readHistory();
-    const item = history.find((entry) => entry.id === (loadId || exportId || deleteId));
+    const item = history.find((entry) => entry.id === (loadId || deleteId));
     if (!item) return;
 
     if (loadId) {
@@ -193,20 +181,12 @@ function bindHistoryActions() {
       return;
     }
 
-    if (exportId) {
-      writeDownload(`reduzsim-simulacao-${item.id}.json`, item);
-      return;
-    }
-
     if (deleteId) {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(history.filter((entry) => entry.id !== deleteId)));
       renderHistory();
     }
   });
 
-  document.getElementById("export-history-btn")?.addEventListener("click", () => {
-    writeDownload("reduzsim-historico.json", readHistory());
-  });
   document.getElementById("clear-history-btn")?.addEventListener("click", () => {
     localStorage.removeItem(HISTORY_KEY);
     renderHistory();
