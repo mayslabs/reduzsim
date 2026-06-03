@@ -12,6 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="main.css?v=20260511-mobile-print-fit">
+  <link rel="stylesheet" href="print-fixes.css?v=20260603-a4">
 </head>
 <body>
   <nav class="rs-navbar no-print">
@@ -106,7 +107,7 @@
           </section>
 
           <section class="rs-proposal-note-panel">
-            <p><strong>Observação:</strong> os honorários são calculados sobre a economia obtida.</p>
+            <p id="honorarios-note"><strong>Observação:</strong> os honorários são calculados sobre a economia obtida.</p>
             <p><strong>Validade:</strong> os valores podem mudar conforme atualização de índices, dados da obra ou documentação apresentada.</p>
           </section>
 
@@ -207,7 +208,7 @@
               <strong>R$ <span id="economia-bruta">0,00</span></strong>
             </div>
             <div class="rs-proposal-bar-row">
-              <span>Honorários <small>(<span id="honorarios-percent">0,0</span>%)</small></span>
+              <span>Honorários <small id="honorarios-label">(<span id="honorarios-percent">0,0</span>%)</small></span>
               <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--taupe" id="bar-honorarios"></div></div>
               <strong>R$ <span id="honorarios">0,00</span></strong>
             </div>
@@ -273,5 +274,6 @@
   </main>
 
   <script src="final.js?v=20260521-print-filename"></script>
+  <script src="app-patches.js?v=20260603-auto-8h"></script>
 </body>
 </html>

@@ -1,0 +1,95 @@
+@page {
+  size: A4;
+  margin: 6mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    min-height: 297mm;
+    width: 210mm;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print,
+  .rs-navbar,
+  .rs-hero,
+  .rs-foot-buttons {
+    display: none !important;
+  }
+
+  .rs-container,
+  .rs-print-page,
+  .rs-final-page,
+  .rs-proposal-page {
+    margin: 0 auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .rs-proposal-sheet {
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    min-height: 284mm;
+    overflow: hidden;
+    padding: 7mm !important;
+  }
+
+  .rs-card,
+  .rs-total-card,
+  .rs-summary-card,
+  .rs-proposal-panel,
+  .rs-proposal-calcs {
+    break-inside: avoid;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  .rs-proposal-header {
+    margin-bottom: 5mm !important;
+  }
+
+  .rs-proposal-logo {
+    max-height: 24mm !important;
+  }
+
+  .rs-proposal-heading h1 {
+    font-size: 17pt !important;
+  }
+
+  .rs-proposal-heading p,
+  .rs-proposal-info strong,
+  .rs-proposal-bar-row strong,
+  .rs-proposal-services li,
+  .rs-proposal-note-panel p {
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+
+  .rs-proposal-layout {
+    gap: 5mm !important;
+    grid-template-columns: minmax(58mm, .92fr) minmax(0, 1.58fr) !important;
+  }
+
+  .rs-proposal-sidebar,
+  .rs-proposal-main {
+    gap: 4mm !important;
+  }
+
+  .rs-proposal-panel,
+  .rs-proposal-calcs {
+    padding: 4mm !important;
+  }
+
+  .rs-proposal-bar-track {
+    height: 16mm !important;
+  }
+
+  .rs-final-contact {
+    break-inside: avoid;
+    margin-top: 4mm !important;
+  }
+}

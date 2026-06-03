@@ -11,6 +11,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="main.css?v=20260521-paralisacoes">
+  <link rel="stylesheet" href="print-fixes.css?v=20260603-a4">
 </head>
 <body>
   <nav class="rs-navbar no-print">
@@ -35,8 +36,19 @@
       </div>
       <div class="row g-3">
         <div class="col-md-4">
+          <label class="rs-label" for="honorarios-mode">Forma dos honorários</label>
+          <select class="rs-select" id="honorarios-mode">
+            <option value="percentual">Percentual</option>
+            <option value="fixo">Valor fixo</option>
+          </select>
+        </div>
+        <div class="col-md-4" id="honorarios-percent-block">
           <label class="rs-label" for="honorarios-percent">Honorários (%)</label>
           <input class="rs-input" id="honorarios-percent" type="number" min="0" step="0.01" value="30">
+        </div>
+        <div class="col-md-4" id="honorarios-fixed-block" hidden>
+          <label class="rs-label" for="honorarios-fixed">Honorários fixos (R$)</label>
+          <input class="rs-input" id="honorarios-fixed" type="text" inputmode="decimal" placeholder="Ex.: 1.500,00">
         </div>
         <div class="col-md-4">
           <label class="rs-label" for="aplicar-maed">Aplicar multa MAED?</label>
@@ -152,11 +164,14 @@
 
     <div class="rs-foot-buttons no-print">
       <a class="rs-btn-outline" href="result.html">Voltar para o cálculo prévio</a>
+      <button class="rs-btn-outline" type="button" id="refresh-indices-btn">Atualizar índices</button>
       <button class="rs-btn-outline" type="button" id="print-reducao-btn">Imprimir cálculo</button>
       <button class="rs-btn-primary" type="button" id="recalc-btn">Atualizar cálculo</button>
     </div>
   </main>
 
+  <script src="indices.js?v=20260603-auto-8h"></script>
   <script src="reducao.js?v=202606031225"></script>
+  <script src="app-patches.js?v=20260603-auto-8h"></script>
 </body>
 </html>
