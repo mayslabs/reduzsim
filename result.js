@@ -305,6 +305,7 @@ function renderRemuneracaoRows(rows) {
   body.innerHTML = "";
 
   validRows.forEach((row) => {
+    const concretePercent = calculoCore.toNumber(row.concreteCategoryPercent);
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${row.destinationLabel || "-"}</td>
@@ -312,7 +313,10 @@ function renderRemuneracaoRows(rows) {
       <td>${fmt(row.area || 0)} m²</td>
       <td>R$ ${fmt(row.cod || 0)}</td>
       <td>R$ ${fmt(row.rmt || 0)}</td>
-      <td>R$ ${fmt(row.concreteCredit || 0)}</td>
+      <td>
+        R$ ${fmt(row.concreteCredit || 0)}
+        <small class="rs-table-detail">${fmt(concretePercent)}% da categoria</small>
+      </td>
     `;
     body.appendChild(tr);
   });
@@ -324,6 +328,22 @@ function setOptionalBlock(blockId, valueId, value) {
 
   if (block) block.hidden = !safeValue;
   setText(valueId, safeValue || "-");
+}
+
+function buildConcreteSummary(calculation) {
+  if (!formData.isUsoConcreto) return "Não";
+  const categoryLabels = {
+    construcao: "obra nova/complementares 100%",
+    reforma: "reforma 35%",
+    demolicao: "demolição 0%",
+  };
+  const categories = [...new Set(
+    calculation.lines
+      .filter((line) => line.area > 0)
+      .map((line) => categoryLabels[line.key])
+      .filter(Boolean),
+  )];
+  return `Sim - ${categories.join("; ")}`;
 }
 
 async function updateValues(forceRefresh = false) {
@@ -388,7 +408,7 @@ async function updateValues(forceRefresh = false) {
   setOptionalBlock("cliente-nome-block", "cliente-nome", formData.clienteNome);
   setOptionalBlock("cliente-telefone-block", "cliente-telefone", formData.clienteTelefone);
   setText("responsavel-obra", typeResponsavel[formData.responsavelObra]);
-  setText("concreto-str", formData.isUsoConcreto ? "Sim" : "Não");
+  setText("concreto-str", buildConcreteSummary(calculation));
   setText("total-area-str", buildAreaLabel());
   setText("UF", UF);
   setText("VAU", formData.destinacoes.filter((destination) => (

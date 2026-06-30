@@ -2012,6 +2012,24 @@ body {
   background: #f0fdf9;
 }
 
+.rs-monthly-row .rs-monthly-money small {
+  color: var(--gray);
+  display: block;
+  font-size: .68rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: .25rem;
+}
+
+.rs-table-detail {
+  color: var(--gray);
+  display: block;
+  font-size: .72rem;
+  font-weight: 600;
+  margin-top: .2rem;
+  white-space: nowrap;
+}
+
 .rs-monthly-row--decadent {
   border-color: rgba(104, 116, 131, .38);
 }

@@ -75,6 +75,10 @@ function fmt(value) {
   return (Number(value) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function fmtRate(value) {
+  return (Number(value) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function fmtDateTime(value) {
   if (!value) return "";
   const date = new Date(value);
@@ -325,9 +329,14 @@ function calculateRows(baseRows) {
     const cpp = round(remOriginal * 0.20);
     const latePayment = calculoCore.calculateLatePaymentFine(row.month, paymentDate, cpp);
     const multaMora = latePayment.value;
-    const juros = latePayment.daysLate > 0 ? round(cpp * (row.selic / 100)) : 0;
+    const jurosPercent = latePayment.daysLate > 0 ? row.selic : 0;
+    const juros = calculoCore.calculateLatePaymentInterest(cpp, jurosPercent, latePayment.daysLate);
     const maed = applyMaed
-      ? calculoCore.calculateMaed(row.month, transmissionDate, cpp, { withMovement: true, spontaneous: true }).value
+      ? calculoCore.calculateMaed(row.month, transmissionDate, cpp, {
+        withMovement: true,
+        spontaneous: true,
+        fixedValue: 100,
+      }).value
       : 0;
     const total = round(cpp + multaMora + juros + maed);
     return {
@@ -339,6 +348,7 @@ function calculateRows(baseRows) {
       multaMoraPercent: latePayment.rate * 100,
       diasAtraso: latePayment.daysLate,
       juros,
+      jurosPercent,
       maed,
       total,
     };
@@ -381,6 +391,7 @@ function renderRows(rows) {
       <div class="rs-monthly-money">
         <span>Multa mora</span>
         <strong data-output="multaMora">R$ ${fmt(row.multaMora)}</strong>
+        <small data-detail="multaMora">${row.diasAtraso || 0} dias · ${fmtRate(row.multaMoraPercent)}%</small>
       </div>
       <label>
         <span>SELIC acum. (%)</span>
@@ -389,10 +400,12 @@ function renderRows(rows) {
       <div class="rs-monthly-money">
         <span>Juros mora</span>
         <strong data-output="juros">R$ ${fmt(row.juros)}</strong>
+        <small data-detail="juros">SELIC ${fmtRate(row.jurosPercent)}%</small>
       </div>
       <div class="rs-monthly-money">
         <span>MAED</span>
         <strong data-output="maed">R$ ${fmt(row.maed)}</strong>
+        <small>Valor fixo quando aplicável</small>
       </div>
       <div class="rs-monthly-total">
         <span>Total</span>
@@ -646,6 +659,10 @@ function updateRenderedMonthlyValues(rows) {
       const output = rowElement.querySelector(`[data-output="${field}"]`);
       if (output) output.textContent = `R$ ${fmt(row[field])}`;
     });
+    const fineDetail = rowElement.querySelector("[data-detail='multaMora']");
+    const interestDetail = rowElement.querySelector("[data-detail='juros']");
+    if (fineDetail) fineDetail.textContent = `${row.diasAtraso || 0} dias · ${fmtRate(row.multaMoraPercent)}%`;
+    if (interestDetail) interestDetail.textContent = `SELIC ${fmtRate(row.jurosPercent)}%`;
   });
 }
 

@@ -142,6 +142,26 @@ test("separa concreto por categoria e aplica decadencia antes dos creditos", () 
   assert.equal(result.taxableRmt, 14465.68);
   assert.equal(result.estimatedContribution, 5323.37);
   assert.equal(result.adjustmentTarget, 7496.33);
+  const construction = result.lines.find((line) => line.key === "construcao");
+  const reform = result.lines.find((line) => line.key === "reforma");
+  assert.equal(construction.concreteCategoryPercent, 100);
+  assert.equal(reform.concreteCategoryPercent, 35);
+
+  const demolitionResult = calc.calculateConstruction({
+    UF: "TO",
+    responsavelObra: "PF",
+    isUsoConcreto: true,
+    dataInicioObra: "2021-01-01",
+    dataFimObra: "2021-12-31",
+    dataAfericao: "2026-06-30",
+    destinacoes: [{
+      destinacao: "RES",
+      tipoObra: "ALV",
+      areaDemolicao: 100,
+    }],
+  }, vauRows, concreteRows);
+  assert.equal(demolitionResult.lines[0].concreteCategoryPercent, 0);
+  assert.equal(demolitionResult.lines[0].concreteCredit, 0);
 });
 
 test("aplica reducao de vinte por cento ao edificio de garagens", () => {
@@ -172,11 +192,14 @@ test("calcula multa de mora por dia, limitada a vinte por cento", () => {
   const longDelay = calc.calculateLatePaymentFine("2025-01", "2026-03-02", 1000);
   assert.equal(longDelay.rate, 0.20);
   assert.equal(longDelay.value, 200);
+  assert.equal(calc.calculateLatePaymentInterest(1000, 12.5, 10), 125);
+  assert.equal(calc.calculateLatePaymentInterest(1000, 12.5, 0), 0);
 });
 
-test("nao calcula MAED DCTFWeb para competencias anteriores a outubro de 2021", () => {
+test("mantem MAED fixa em cem reais quando aplicavel", () => {
   assert.equal(calc.calculateMaed("2021-09", "2026-06-30", 100).value, 0);
-  assert.equal(calc.calculateMaed("2021-10", "2026-06-30", 100).value, 250);
+  assert.equal(calc.calculateMaed("2021-10", "2026-06-30", 100).value, 100);
+  assert.equal(calc.calculateMaed("2024-01", "2024-02-15", 1000).value, 0);
   assert.equal(calc.dctfDueDate("2021-10").toISOString().slice(0, 10), "2021-11-19");
   assert.equal(calc.dctfDueDate("2024-01").toISOString().slice(0, 10), "2024-02-15");
   assert.equal(calc.dctfDueDate("2025-01").toISOString().slice(0, 10), "2025-03-31");

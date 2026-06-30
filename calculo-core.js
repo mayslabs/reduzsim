@@ -296,6 +296,7 @@
           vau,
           rmt,
           concreteCredit,
+          concreteCategoryPercent: line.concreteCategoryFactor * 100,
         });
       });
     });
@@ -391,6 +392,11 @@
     };
   }
 
+  function calculateLatePaymentInterest(contribution, selicPercent, daysLate) {
+    if (toNumber(daysLate) <= 0) return 0;
+    return roundMoney(toNumber(contribution) * (Math.max(toNumber(selicPercent), 0) / 100));
+  }
+
   function calculateMaed(month, transmissionDateValue, declaredTaxes, options = {}) {
     if (month < "2021-10") return { dueDate: null, monthsLate: 0, rate: 0, value: 0 };
     const dueDate = dctfDueDate(month);
@@ -410,8 +416,9 @@
     const rate = Math.min(Math.max(monthsLate, 1) * 0.02, 0.20);
     const minimum = options.withMovement === false ? 200 : 500;
     const spontaneousReduction = options.spontaneous === false ? 1 : 0.50;
-    const value = roundMoney(Math.max(toNumber(declaredTaxes) * rate, minimum) * spontaneousReduction);
-    return { dueDate, monthsLate, rate, value };
+    const calculatedValue = roundMoney(Math.max(toNumber(declaredTaxes) * rate, minimum) * spontaneousReduction);
+    const value = roundMoney(options.fixedValue ?? 100);
+    return { dueDate, monthsLate, rate, calculatedValue, value, policy: "fixed" };
   }
 
   return {
@@ -423,6 +430,7 @@
     calculateConstruction,
     calculateDecay,
     calculateLatePaymentFine,
+    calculateLatePaymentInterest,
     calculateMaed,
     calculateProposalValidity,
     dctfDueDate,
