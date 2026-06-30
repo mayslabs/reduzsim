@@ -560,22 +560,31 @@ function updateTotals(rows) {
   const totalReducao = round(rows.reduce((sum, row) => sum + row.total, 0));
   const totalRemOriginal = round(rows.reduce((sum, row) => sum + row.remOriginal, 0));
   const totalRemAtualizada = round(rows.reduce((sum, row) => sum + row.remAtualizada, 0));
-  const receita = round(receitaResult.inssEstimado || 0);
+  const receitaAposDecadencia = round(receitaResult.inssEstimado || 0);
+  const receitaSemDecadencia = round(
+    receitaResult.inssSemDecadencia ?? receitaResult.inssEstimado ?? 0,
+  );
+  const comparison = calculoCore.calculateCommercialComparison(
+    receitaSemDecadencia,
+    totalReducao,
+  );
+  const receita = comparison.baseline;
   const rmtSero = round(receitaResult.rmtNaoDecadente || receitaResult.rmt || 0);
   const metaPercentual = Number(receitaResult.metaPercentual)
     || ((receitaResult.areaTotal || 0) <= 350 ? 50 : 70);
   const rmtMeta = getRmtGoal();
   const percentualAtingido = rmtSero > 0 ? round((totalRemAtualizada / rmtSero) * 100) : 0;
   const faltaMeta = round(Math.max(rmtMeta - totalRemAtualizada, 0));
-  const economiaBruta = round(Math.max(receita - totalReducao, 0));
+  const economiaBruta = comparison.grossSavings;
   updateHonorariosMode();
   const honorariosConfig = getHonorariosConfig({ receita, totalReducao, economiaBruta });
   const honorarios = honorariosConfig.value;
   const economiaLiquida = round(Math.max(economiaBruta - honorarios, 0));
-  const percentualReducao = receita > 0 ? round((economiaBruta / receita) * 100) : 0;
+  const percentualReducao = comparison.savingsPercent;
 
   setText("inss-receita", fmt(receita));
   setText("receita-total", fmt(receita));
+  setText("receita-apos-decadencia", fmt(receitaAposDecadencia));
   setText("reducao-total", fmt(totalReducao));
   setText("economia-bruta", fmt(economiaBruta));
   setText("honorarios", fmt(honorarios));
@@ -591,6 +600,7 @@ function updateTotals(rows) {
 
   return {
     receita,
+    receitaAposDecadencia,
     totalReducao,
     totalRemOriginal,
     totalRemAtualizada,
@@ -731,9 +741,7 @@ async function refreshSelic(renderAfterRefresh = true) {
 }
 
 function defaultValidityDate() {
-  const date = new Date();
-  date.setDate(date.getDate() + 7);
-  return date.toISOString().slice(0, 10);
+  return calculoCore.calculateProposalValidity();
 }
 
 function initCommercialFields() {
@@ -743,7 +751,7 @@ function initCommercialFields() {
   const validade = document.getElementById("proposta-validade");
   const observacoes = document.getElementById("observacoes-comerciais");
   if (consultor) consultor.value = commercial.consultor || "";
-  if (validade) validade.value = commercial.validade || defaultValidityDate();
+  if (validade) validade.value = defaultValidityDate();
   if (observacoes) observacoes.value = commercial.observacoes || "";
   document.getElementById("data-referencia").value = settings.paymentDate || calculoCore.formatLocalISO();
   document.getElementById("data-transmissao").value = settings.transmissionDate || calculoCore.formatLocalISO();

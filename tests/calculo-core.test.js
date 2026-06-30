@@ -33,6 +33,47 @@ test("calcula decadencia parcial por meses completos", () => {
   assert.ok(Math.abs(result.nonDecadentRatio - (29 / 61)) < 1e-12);
 });
 
+test("mantem COD e RMT integrais quando toda a obra esta decadente", () => {
+  const result = calc.calculateConstruction({
+    UF: "TO",
+    responsavelObra: "PF",
+    isUsoConcreto: false,
+    dataInicioObra: "2020-01-01",
+    dataFimObra: "2020-12-31",
+    dataAfericao: "2026-06-30",
+    destinacoes: [{
+      destinacao: "RES",
+      tipoObra: "ALV",
+      areaConstrucao: 700,
+    }],
+  }, vauRows, concreteRows);
+
+  assert.equal(result.decay.totalMonths, 12);
+  assert.equal(result.decay.decadentCount, 12);
+  assert.equal(result.areaTotal, 700);
+  assert.equal(result.codTotal, 1738219.84);
+  assert.equal(result.rmtIntegral, 312879.57);
+  assert.equal(result.rmtNonDecadent, 0);
+  assert.equal(result.estimatedContribution, 0);
+  assert.equal(result.estimatedContributionWithoutDecay, 115139.68);
+});
+
+test("limita validade de cinco dias uteis ao mes corrente", () => {
+  assert.equal(calc.calculateProposalValidity("2026-06-01"), "2026-06-08");
+  assert.equal(calc.calculateProposalValidity("2026-06-26"), "2026-06-30");
+  assert.equal(calc.calculateProposalValidity("2026-06-30"), "2026-06-30");
+});
+
+test("calcula economia integral quando a decadencia zera o INSS", () => {
+  const result = calc.calculateCommercialComparison(115139.68, 0);
+  assert.deepEqual(result, {
+    baseline: 115139.68,
+    reduced: 0,
+    grossSavings: 115139.68,
+    savingsPercent: 100,
+  });
+});
+
 test("usa a area principal total da destinacao para equivalencia", () => {
   const result = calc.calculateConstruction({
     UF: "TO",

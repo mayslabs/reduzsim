@@ -846,6 +846,13 @@ body {
   font-weight: 800;
 }
 
+.rs-summary-sub {
+  color: var(--gray);
+  font-size: .76rem;
+  font-weight: 600;
+  margin-top: .35rem;
+}
+
 .rs-inline-percent {
   color: var(--green-dark);
 }

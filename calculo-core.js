@@ -88,6 +88,37 @@
     return `${year}-${month}-${day}`;
   }
 
+  function calculateProposalValidity(referenceDateValue = new Date()) {
+    const referenceDate = referenceDateValue instanceof Date
+      ? new Date(referenceDateValue)
+      : parseDate(referenceDateValue);
+    const start = referenceDate && !Number.isNaN(referenceDate.getTime())
+      ? referenceDate
+      : new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const validity = new Date(start);
+    let businessDays = 0;
+    while (businessDays < 5) {
+      validity.setDate(validity.getDate() + 1);
+      if (validity.getDay() !== 0 && validity.getDay() !== 6) businessDays += 1;
+    }
+
+    const endOfMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+    return formatLocalISO(validity > endOfMonth ? endOfMonth : validity);
+  }
+
+  function calculateCommercialComparison(inssWithoutDecay, reducedInss) {
+    const baseline = roundMoney(Math.max(toNumber(inssWithoutDecay), 0));
+    const reduced = roundMoney(Math.max(toNumber(reducedInss), 0));
+    const grossSavings = roundMoney(Math.max(baseline - reduced, 0));
+    const savingsPercent = baseline > 0
+      ? roundMoney((grossSavings / baseline) * 100)
+      : 0;
+
+    return { baseline, reduced, grossSavings, savingsPercent };
+  }
+
   function calculateDecay(startValue, endValue, assessmentDateValue) {
     const months = listMonths(startValue, endValue);
     const assessmentDate = parseDate(assessmentDateValue) || new Date();
@@ -388,10 +419,12 @@
     DESTINATION_LABELS,
     TYPE_LABELS,
     addMonths,
+    calculateCommercialComparison,
     calculateConstruction,
     calculateDecay,
     calculateLatePaymentFine,
     calculateMaed,
+    calculateProposalValidity,
     dctfDueDate,
     formatLocalISO,
     getEquivalenceFactor,

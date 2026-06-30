@@ -280,7 +280,7 @@ function getDestinationAreaTotal(destination) {
     "areaDemolicao",
     "areaCoberta",
     "areaDescoberta",
-  ].reduce((total, field) => total + toNumber(destination[field]), 0);
+  ].reduce((total, field) => total + calculoCore.toNumber(destination[field]), 0);
 }
 
 function buildAreaLabel() {
@@ -409,6 +409,7 @@ async function updateValues(forceRefresh = false) {
   setText("parcela-60", fmt(calculation.estimatedContribution / 60));
   setText("total", fmt(calculation.estimatedContribution));
   setText("total-2", fmt(calculation.estimatedContribution));
+  setText("total-sem-decadencia", fmt(calculation.estimatedContributionWithoutDecay));
 
 }
 

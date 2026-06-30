@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/reduzsim-favicon-64.png?v=20260516-green-only">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css?v=20260603-full-audit">
+  <link rel="stylesheet" href="main.css?v=20260630-decay-report">
   <link rel="stylesheet" href="print-fixes.css?v=20260603-full-audit">
 </head>
 <body>
@@ -181,13 +181,6 @@
                   <strong id="tipo-obra">-</strong>
                 </div>
               </div>
-              <div class="rs-proposal-info rs-proposal-info--with-icon">
-                <span class="rs-proposal-info-icon" aria-hidden="true">%</span>
-                <div class="rs-proposal-info-copy">
-                  <span>Período não decadente</span>
-                  <strong id="decadencia-resumo">-</strong>
-                </div>
-              </div>
             </div>
           </section>
 
@@ -199,7 +192,7 @@
 
           <div class="rs-proposal-bars">
             <div class="rs-proposal-bar-row">
-              <span>INSS após decadência</span>
+              <span>INSS sem decadência</span>
               <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--gray" id="bar-sem-reducao"></div></div>
               <strong>R$ <span id="sem-reducao">0,00</span></strong>
             </div>
@@ -209,7 +202,7 @@
               <strong>R$ <span id="com-reducao">0,00</span></strong>
             </div>
             <div class="rs-proposal-bar-row">
-              <span>Economia bruta</span>
+              <span class="rs-proposal-bar-label"><strong>Economia bruta</strong><small><span id="economia-bruta-percent">0%</span> do INSS sem decadência</small></span>
               <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--darkgreen" id="bar-economia-bruta"></div></div>
               <strong>R$ <span id="economia-bruta">0,00</span></strong>
             </div>
@@ -281,6 +274,6 @@
     </div>
   </main>
 
-  <script src="final.js?v=20260630-decadas"></script>
+  <script src="final.js?v=20260630-decay-report"></script>
 </body>
 </html>

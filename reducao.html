@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/reduzsim-favicon-64.png?v=20260516-green-only">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css?v=20260603-full-audit">
+  <link rel="stylesheet" href="main.css?v=20260630-decay-report">
   <link rel="stylesheet" href="print-fixes.css?v=20260603-full-audit">
 </head>
 <body>
@@ -103,7 +103,8 @@
         </div>
         <div class="col-md-4">
           <label class="rs-label" for="proposta-validade">Validade da proposta</label>
-          <input class="rs-input" id="proposta-validade" type="date">
+          <input class="rs-input" id="proposta-validade" type="date" readonly>
+          <small class="rs-hint">Cinco dias úteis, limitada ao último dia do mês atual.</small>
         </div>
         <div class="col-md-4">
           <label class="rs-label" for="observacoes-comerciais">Observações comerciais</label>
@@ -128,8 +129,9 @@
 
     <section class="rs-summary-grid">
       <div class="rs-summary-card">
-        <div class="rs-summary-label">Após decadência</div>
+        <div class="rs-summary-label">INSS sem decadência</div>
         <div class="rs-summary-value">R$ <span id="receita-total">0,00</span></div>
+        <div class="rs-summary-sub">Após decadência: R$ <span id="receita-apos-decadencia">0,00</span></div>
       </div>
       <div class="rs-summary-card rs-summary-card--accent">
         <div class="rs-summary-label">Com redução</div>
@@ -202,7 +204,7 @@
   </main>
 
   <script src="indices.js?v=20260630-decadas"></script>
-  <script src="calculo-core.js?v=20260630-decadas"></script>
-  <script src="reducao.js?v=202606301533"></script>
+  <script src="calculo-core.js?v=20260630-decay-report"></script>
+  <script src="reducao.js?v=20260630-decay-report"></script>
 </body>
 </html>

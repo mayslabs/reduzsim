@@ -160,9 +160,10 @@ function buildWhatsappSummary(totals, totalComHonorarios) {
   const commercial = reducaoResult.commercial || {};
   return [
     `Resumo ReduzSim - ${formData.clienteNome || "cliente"}`,
-    `INSS após decadência: R$ ${fmt(totals.receita)}`,
+    `INSS sem decadência: R$ ${fmt(totals.receita)}`,
+    `INSS após decadência: R$ ${fmt(totals.receitaAposDecadencia)}`,
     `INSS com redução: R$ ${fmt(totals.totalReducao)}`,
-    `Economia bruta: R$ ${fmt(totals.economiaBruta)}`,
+    `Economia bruta: R$ ${fmt(totals.economiaBruta)} (${fmtPercent(totals.percentualReducao)}%)`,
     `Honorários: R$ ${fmt(totals.honorarios)} (${totals.honorariosDescription || `${fmtPercent(totals.honorariosPercent)}% sobre economia obtida`})`,
     `Total com honorários: R$ ${fmt(totalComHonorarios)}`,
     `Economia líquida estimada: R$ ${fmt(totals.economiaLiquida)}`,
@@ -226,6 +227,7 @@ function renderCommercialAndLegal(totals) {
   setPrintTitle("Redução de INSS de obra", formData.clienteNome);
   setText("final-date", new Date(reducaoResult.calculatedAt || Date.now()).toLocaleString("pt-BR"));
   setText("percentual-reducao", `${fmtPercentInt(totals.percentualReducao)}%`);
+  setText("economia-bruta-percent", `${fmtPercentInt(totals.percentualReducao)}%`);
   setText("sem-reducao", fmt(totals.receita));
   setText("com-reducao", fmt(totals.totalReducao));
   setText("economia-bruta", fmt(totals.economiaBruta));
@@ -251,11 +253,6 @@ function renderCommercialAndLegal(totals) {
   setText("tipo-obra", [...new Set(destinations.map((item) => typeTipoObra[item.tipoObra]).filter(Boolean))].join(" · ") || "-");
   setText("data-inicio-obra", fmtDate(formData.dataInicioObra));
   setText("data-fim-obra", fmtDate(formData.dataFimObra));
-  const decay = receitaResult.decadencia || {};
-  setText(
-    "decadencia-resumo",
-    `${fmtPercent(decay.nonDecadentPercent || 0)}% (${decay.nonDecadentCount || 0} de ${decay.totalMonths || 0} meses)`,
-  );
   renderCommercialAndLegal(totals);
 
   const chartMax = Math.max(
