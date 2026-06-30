@@ -1,4 +1,19 @@
 const SELIC_ACUMULADA = {
+  "2018-01": 72.47, "2018-02": 71.94, "2018-03": 71.42,
+  "2018-04": 70.90, "2018-05": 70.38, "2018-06": 69.84,
+  "2018-07": 69.27, "2018-08": 68.80, "2018-09": 68.26,
+  "2018-10": 67.77, "2018-11": 67.28, "2018-12": 66.74,
+  "2019-01": 66.25, "2019-02": 65.78, "2019-03": 65.26,
+  "2019-04": 64.72, "2019-05": 64.25, "2019-06": 63.68,
+  "2019-07": 63.18, "2019-08": 62.72, "2019-09": 62.24,
+  "2019-10": 61.86, "2019-11": 61.49, "2019-12": 61.11,
+  "2020-01": 60.82, "2020-02": 60.48, "2020-03": 60.20,
+  "2020-04": 59.96, "2020-05": 59.75, "2020-06": 59.56,
+  "2020-07": 59.40, "2020-08": 59.24, "2020-09": 59.08,
+  "2020-10": 58.93, "2020-11": 58.77, "2020-12": 58.62,
+  "2021-01": 58.49, "2021-02": 58.29, "2021-03": 58.08,
+  "2021-04": 57.81, "2021-05": 57.50, "2021-06": 57.14,
+  "2021-07": 56.71, "2021-08": 56.27, "2021-09": 55.78,
   "2021-10": 55.19, "2021-11": 54.42, "2021-12": 53.69,
   "2022-01": 52.93, "2022-02": 52.00, "2022-03": 51.17,
   "2022-04": 50.14, "2022-05": 49.12, "2022-06": 48.09,
@@ -20,8 +35,9 @@ const SELIC_ACUMULADA = {
   "2026-04": 1.00, "2026-05": 1.00, "2026-06": 0.00,
 };
 
-const INDICES_UPDATED_AT = "30/06/2026 às 13:24";
+const INDICES_UPDATED_AT = "30/06/2026 às 15:33";
 const PARALISACOES_STORAGE_KEY = "reducaoParalisacoes";
+const calculoCore = window.ReduzSimCalculo;
 
 let formData = {};
 let receitaResult = {};
@@ -117,6 +133,18 @@ function periodLabel(period) {
 
 function getWorkMonths() {
   return listMonths(formData.dataInicioObra, formData.dataFimObra);
+}
+
+function getDecayData() {
+  return receitaResult.decadencia || calculoCore.calculateDecay(
+    formData.dataInicioObra,
+    formData.dataFimObra,
+    formData.dataAfericao,
+  );
+}
+
+function getDecadentMonths() {
+  return new Set(getDecayData().decadentMonths || []);
 }
 
 function getParalisacaoMonths() {
@@ -267,6 +295,7 @@ function readMonthlyRows() {
   return Array.from(document.querySelectorAll("[data-month-row]")).map((row) => ({
     month: row.dataset.monthRow,
     isParalisacao: row.dataset.paralisacao === "true",
+    isDecadente: row.dataset.decadente === "true",
     remOriginal: parseLocaleNumber(row.querySelector("[data-field='remOriginal']").value),
     selic: parseLocaleNumber(row.querySelector("[data-field='selic']").value),
   }));
@@ -274,10 +303,11 @@ function readMonthlyRows() {
 
 function calculateRows(baseRows) {
   const applyMaed = document.getElementById("aplicar-maed").value === "true";
-  const referenceDate = document.getElementById("data-referencia").value || new Date().toISOString().slice(0, 10);
+  const paymentDate = document.getElementById("data-referencia").value || calculoCore.formatLocalISO();
+  const transmissionDate = document.getElementById("data-transmissao").value || paymentDate;
 
   return baseRows.map((row) => {
-    if (row.isParalisacao) {
+    if (row.isParalisacao || row.isDecadente) {
       return {
         ...row,
         remOriginal: 0,
@@ -290,15 +320,28 @@ function calculateRows(baseRows) {
       };
     }
 
-    const noDelay = isCurrentOrFuture(row.month, referenceDate) || isPreviousMonthWithinGrace(row.month, referenceDate);
     const remOriginal = round(row.remOriginal || 0);
     const remAtualizada = round(remOriginal * (1 + (row.selic / 100)));
     const cpp = round(remOriginal * 0.20);
-    const multaMora = noDelay ? 0 : round(cpp * 0.20);
-    const juros = noDelay ? 0 : round(cpp * (row.selic / 100));
-    const maed = applyMaed && !noDelay ? 100 : 0;
+    const latePayment = calculoCore.calculateLatePaymentFine(row.month, paymentDate, cpp);
+    const multaMora = latePayment.value;
+    const juros = latePayment.daysLate > 0 ? round(cpp * (row.selic / 100)) : 0;
+    const maed = applyMaed
+      ? calculoCore.calculateMaed(row.month, transmissionDate, cpp, { withMovement: true, spontaneous: true }).value
+      : 0;
     const total = round(cpp + multaMora + juros + maed);
-    return { ...row, remOriginal, remAtualizada, cpp, multaMora, juros, maed, total };
+    return {
+      ...row,
+      remOriginal,
+      remAtualizada,
+      cpp,
+      multaMora,
+      multaMoraPercent: latePayment.rate * 100,
+      diasAtraso: latePayment.daysLate,
+      juros,
+      maed,
+      total,
+    };
   });
 }
 
@@ -308,14 +351,20 @@ function renderRows(rows) {
 
   rows.forEach((row) => {
     const item = document.createElement("div");
-    item.className = `rs-monthly-row${row.isParalisacao ? " rs-monthly-row--paused" : ""}`;
+    item.className = `rs-monthly-row${row.isParalisacao ? " rs-monthly-row--paused" : ""}${row.isDecadente ? " rs-monthly-row--decadent" : ""}`;
     item.dataset.monthRow = row.month;
     item.dataset.paralisacao = row.isParalisacao ? "true" : "false";
+    item.dataset.decadente = row.isDecadente ? "true" : "false";
+    const isBlocked = row.isParalisacao || row.isDecadente;
+    const status = [
+      row.isDecadente ? "Decadente" : "",
+      row.isParalisacao ? "Paralisação" : "",
+    ].filter(Boolean).join(" · ");
     item.innerHTML = `
       <div class="rs-monthly-competencia">
         <span>Competência</span>
         <strong>${row.month}</strong>
-        ${row.isParalisacao ? '<small>Paralisação</small>' : ""}
+        ${status ? `<small>${status}</small>` : ""}
       </div>
       <label>
         <span>Rem. atualizada</span>
@@ -323,19 +372,19 @@ function renderRows(rows) {
       </label>
       <label>
         <span>Rem. original</span>
-        <input class="rs-table-input" data-field="remOriginal" type="number" step="0.01" value="${row.remOriginal}" ${row.isParalisacao ? "disabled" : ""}>
+        <input class="rs-table-input" data-field="remOriginal" type="number" step="0.01" value="${row.remOriginal}" ${isBlocked ? "disabled" : ""}>
       </label>
       <div class="rs-monthly-money">
         <span>CPP 20%</span>
         <strong data-output="cpp">R$ ${fmt(row.cpp)}</strong>
       </div>
       <div class="rs-monthly-money">
-        <span>Multa 20%</span>
+        <span>Multa mora</span>
         <strong data-output="multaMora">R$ ${fmt(row.multaMora)}</strong>
       </div>
       <label>
         <span>SELIC acum. (%)</span>
-        <input class="rs-table-input" data-field="selic" type="number" step="0.01" value="${row.selic}" ${row.isParalisacao ? "disabled" : ""}>
+        <input class="rs-table-input" data-field="selic" type="number" step="0.01" value="${row.selic}" ${isBlocked ? "disabled" : ""}>
       </label>
       <div class="rs-monthly-money">
         <span>Juros mora</span>
@@ -357,9 +406,9 @@ function renderRows(rows) {
 function buildInitialRows() {
   const months = getWorkMonths();
   const pausedMonths = getParalisacaoMonths();
-  const activeMonths = months.filter((month) => !pausedMonths.has(month));
-  const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 0.5 : 0.7;
-  const rmtMeta = round((receitaResult.rmt || 0) * metaPercentual);
+  const decadentMonths = getDecadentMonths();
+  const activeMonths = months.filter((month) => !pausedMonths.has(month) && !decadentMonths.has(month));
+  const rmtMeta = getRmtGoal();
   const selicFactors = activeMonths.map((month) => 1 + ((SELIC_ACUMULADA[month] ?? 0) / 100));
   const totalFactor = selicFactors.reduce((sum, factor) => sum + factor, 0);
   const remMensalOriginal = totalFactor > 0 ? round(rmtMeta / totalFactor) : 0;
@@ -368,10 +417,11 @@ function buildInitialRows() {
     month,
     selic: SELIC_ACUMULADA[month] ?? 0,
     isParalisacao: pausedMonths.has(month),
-    remOriginal: pausedMonths.has(month) ? 0 : remMensalOriginal,
+    isDecadente: decadentMonths.has(month),
+    remOriginal: pausedMonths.has(month) || decadentMonths.has(month) ? 0 : remMensalOriginal,
   }));
 
-  const activeRows = rows.filter((row) => !row.isParalisacao);
+  const activeRows = rows.filter((row) => !row.isParalisacao && !row.isDecadente);
   if (activeRows.length) {
     const totalAtualizado = activeRows.reduce((sum, row) => sum + round(row.remOriginal * (1 + (row.selic / 100))), 0);
     const diff = round(rmtMeta - totalAtualizado);
@@ -392,12 +442,14 @@ function getStoredRows() {
 
   const isCompatible = storedRows.every((row, index) => row
     && row.month === initialRows[index].month
-    && Boolean(row.isParalisacao) === Boolean(initialRows[index].isParalisacao));
+    && Boolean(row.isParalisacao) === Boolean(initialRows[index].isParalisacao)
+    && Boolean(row.isDecadente) === Boolean(initialRows[index].isDecadente));
   if (!isCompatible) return null;
 
   const mappedRows = storedRows.map((row, index) => ({
     month: initialRows[index].month,
     isParalisacao: initialRows[index].isParalisacao,
+    isDecadente: initialRows[index].isDecadente,
     remOriginal: parseLocaleNumber(row.remOriginal),
     selic: parseLocaleNumber(row.selic),
   }));
@@ -412,32 +464,39 @@ function getStoredRows() {
 
 function getCurrentCalculationBasis() {
   return {
+    calculationVersion: 2,
     receitaCalculatedAt: receitaResult.calculatedAt || "",
-    rmt: round(receitaResult.rmt || 0),
+    rmt: round(receitaResult.rmtNaoDecadente || receitaResult.rmt || 0),
     areaTotal: round(receitaResult.areaTotal || 0),
     dateInitial: receitaResult.dateInitial || formData.dataInicioObra || "",
     dateFinal: receitaResult.dateFinal || formData.dataFimObra || "",
+    assessmentDate: receitaResult.assessmentDate || formData.dataAfericao || "",
   };
 }
 
 function isSameCalculationBasis(a, b) {
   return a
     && b
+    && a.calculationVersion === b.calculationVersion
     && a.receitaCalculatedAt === b.receitaCalculatedAt
     && round(a.rmt || 0) === round(b.rmt || 0)
     && round(a.areaTotal || 0) === round(b.areaTotal || 0)
     && a.dateInitial === b.dateInitial
-    && a.dateFinal === b.dateFinal;
+    && a.dateFinal === b.dateFinal
+    && a.assessmentDate === b.assessmentDate;
 }
 
 function getRmtGoal() {
+  if (Number.isFinite(Number(receitaResult.metaFatorAjuste))) {
+    return round(receitaResult.metaFatorAjuste);
+  }
   const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 0.5 : 0.7;
-  return round((receitaResult.rmt || 0) * metaPercentual);
+  return round((receitaResult.rmtNaoDecadente || receitaResult.rmt || 0) * metaPercentual);
 }
 
 function getUpdatedRemunerationTotal(rows) {
   return round(rows.reduce((sum, row) => (
-    row.isParalisacao ? sum : sum + round(row.remOriginal * (1 + (row.selic / 100)))
+    row.isParalisacao || row.isDecadente ? sum : sum + round(row.remOriginal * (1 + (row.selic / 100)))
   ), 0));
 }
 
@@ -502,9 +561,10 @@ function updateTotals(rows) {
   const totalRemOriginal = round(rows.reduce((sum, row) => sum + row.remOriginal, 0));
   const totalRemAtualizada = round(rows.reduce((sum, row) => sum + row.remAtualizada, 0));
   const receita = round(receitaResult.inssEstimado || 0);
-  const rmtSero = round(receitaResult.rmt || 0);
-  const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 50 : 70;
-  const rmtMeta = round(rmtSero * (metaPercentual / 100));
+  const rmtSero = round(receitaResult.rmtNaoDecadente || receitaResult.rmt || 0);
+  const metaPercentual = Number(receitaResult.metaPercentual)
+    || ((receitaResult.areaTotal || 0) <= 350 ? 50 : 70);
+  const rmtMeta = getRmtGoal();
   const percentualAtingido = rmtSero > 0 ? round((totalRemAtualizada / rmtSero) * 100) : 0;
   const faltaMeta = round(Math.max(rmtMeta - totalRemAtualizada, 0));
   const economiaBruta = round(Math.max(receita - totalReducao, 0));
@@ -586,10 +646,11 @@ function updateMonthlyCalculation() {
 }
 
 function copyFirstRemuneracaoToAll() {
-  const firstInput = document.querySelector("[data-month-row]:not([data-paralisacao='true']) [data-field='remOriginal']");
+  const selector = "[data-month-row]:not([data-paralisacao='true']):not([data-decadente='true']) [data-field='remOriginal']";
+  const firstInput = document.querySelector(selector);
   if (!firstInput) return;
 
-  document.querySelectorAll("[data-month-row]:not([data-paralisacao='true']) [data-field='remOriginal']").forEach((input) => {
+  document.querySelectorAll(selector).forEach((input) => {
     input.value = firstInput.value;
   });
 
@@ -643,14 +704,14 @@ function updateIndicesNote(message) {
 function applyCurrentSelicToRows() {
   const baseRows = readMonthlyRows().map((row) => ({
     ...row,
-    selic: row.isParalisacao ? 0 : (SELIC_ACUMULADA[row.month] ?? row.selic),
+    selic: row.isParalisacao || row.isDecadente ? 0 : (SELIC_ACUMULADA[row.month] ?? row.selic),
   }));
   const rows = calculateRows(baseRows);
   renderRows(rows);
   return { rows, totals: updateTotals(rows) };
 }
 
-async function refreshSelic() {
+async function refreshSelic(renderAfterRefresh = true) {
   if (!window.ReduzSimIndices) {
     updateIndicesNote(`Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
     return;
@@ -661,7 +722,7 @@ async function refreshSelic() {
     const months = typeof getWorkMonths === "function" ? getWorkMonths() : Object.keys(SELIC_ACUMULADA);
     const reference = document.getElementById("data-referencia")?.value;
     Object.assign(SELIC_ACUMULADA, window.ReduzSimIndices.calculateSelicMap(months, reference));
-    applyCurrentSelicToRows();
+    if (renderAfterRefresh && document.querySelector("[data-month-row]")) applyCurrentSelicToRows();
     updateIndicesNote("Índices atualizados para este cálculo.");
   } catch (error) {
     console.warn("Falha ao atualizar SELIC.", error);
@@ -677,12 +738,22 @@ function defaultValidityDate() {
 
 function initCommercialFields() {
   const commercial = reducaoResult?.commercial || {};
+  const settings = reducaoResult?.settings || {};
   const consultor = document.getElementById("consultor-nome");
   const validade = document.getElementById("proposta-validade");
   const observacoes = document.getElementById("observacoes-comerciais");
   if (consultor) consultor.value = commercial.consultor || "";
   if (validade) validade.value = commercial.validade || defaultValidityDate();
   if (observacoes) observacoes.value = commercial.observacoes || "";
+  document.getElementById("data-referencia").value = settings.paymentDate || calculoCore.formatLocalISO();
+  document.getElementById("data-transmissao").value = settings.transmissionDate || calculoCore.formatLocalISO();
+  document.getElementById("aplicar-maed").value = settings.applyMaed === false ? "false" : "true";
+  if (settings.honorariosMode) document.getElementById("honorarios-mode").value = settings.honorariosMode;
+  if (settings.honorariosPercent !== undefined) document.getElementById("honorarios-percent").value = settings.honorariosPercent;
+  if (settings.honorariosBase && document.getElementById("honorarios-base")) {
+    document.getElementById("honorarios-base").value = settings.honorariosBase;
+  }
+  if (settings.honorariosFixed !== undefined) document.getElementById("honorarios-fixed").value = settings.honorariosFixed;
 }
 
 function getCommercialData() {
@@ -693,12 +764,35 @@ function getCommercialData() {
   };
 }
 
+function getCalculationSettings() {
+  return {
+    paymentDate: document.getElementById("data-referencia").value,
+    transmissionDate: document.getElementById("data-transmissao").value,
+    applyMaed: document.getElementById("aplicar-maed").value === "true",
+    honorariosMode: document.getElementById("honorarios-mode").value,
+    honorariosPercent: parseLocaleNumber(document.getElementById("honorarios-percent").value),
+    honorariosBase: document.getElementById("honorarios-base")?.value || "economia",
+    honorariosFixed: parseLocaleNumber(document.getElementById("honorarios-fixed").value),
+  };
+}
+
+function renderDecaySummary() {
+  const decay = getDecayData();
+  const summary = document.getElementById("decadencia-summary");
+  if (!summary) return;
+  summary.textContent = decay.decadentCount
+    ? `Decadência automática: ${decay.decadentCount} de ${decay.totalMonths} competências decadentes até ${monthLabel(decay.lastDecadentMonth)}. Percentual não decadente: ${decay.nonDecadentPercent.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%.`
+    : `Decadência automática: nenhuma competência decadente na data de aferição de ${formData.dataAfericao?.split("-").reverse().join("/") || "-"}.`;
+  document.getElementById("pj-premise-note").hidden = formData.responsavelObra !== "PJ";
+}
+
 function finalizeCalculation() {
   const result = recalculate(true);
   localStorage.setItem("reducaoResult", JSON.stringify({
     calculatedAt: new Date().toISOString(),
     basis: getCurrentCalculationBasis(),
     commercial: getCommercialData(),
+    settings: getCalculationSettings(),
     indices: getIndicesMeta(),
     rows: result.rows,
     totals: result.totals,
@@ -706,7 +800,7 @@ function finalizeCalculation() {
   window.location.href = "final.html";
 }
 
-(() => {
+(async () => {
   try {
     formData = JSON.parse(localStorage.getItem("formData"));
     receitaResult = JSON.parse(localStorage.getItem("receitaResult"));
@@ -722,13 +816,14 @@ function finalizeCalculation() {
     return;
   }
 
+  formData.dataAfericao = formData.dataAfericao || receitaResult.assessmentDate || calculoCore.formatLocalISO();
   setPrintTitle("Cálculo de redução", formData.clienteNome);
   setParalisacaoInputRange();
   paralisacoes = loadParalisacoes();
   renderParalisacoes();
-  document.getElementById("data-referencia").value = new Date().toISOString().slice(0, 10);
   initCommercialFields();
   updateHonorariosMode();
+  renderDecaySummary();
   updateIndicesNote(`Os índices foram atualizados pela última vez no dia ${INDICES_UPDATED_AT}.`);
   document.getElementById("recalc-btn").addEventListener("click", finalizeCalculation);
   document.getElementById("print-reducao-btn").addEventListener("click", () => window.print());
@@ -737,12 +832,13 @@ function finalizeCalculation() {
     event.currentTarget.textContent = "Atualizando...";
     try {
       await window.ReduzSimIndices?.refreshAll([]);
-      await refreshSelic();
+      await refreshSelic(true);
     } finally {
       event.currentTarget.disabled = false;
       event.currentTarget.textContent = "Atualizar índices";
     }
   });
+  document.getElementById("redistribute-remuneracao").addEventListener("click", () => recalculate(false));
   document.getElementById("copy-first-remuneracao").addEventListener("click", copyFirstRemuneracaoToAll);
   document.getElementById("add-paralisacao-btn").addEventListener("click", addParalisacao);
   document.getElementById("paralisacao-list").addEventListener("click", (event) => {
@@ -762,9 +858,10 @@ function finalizeCalculation() {
   document.getElementById("honorarios-base")?.addEventListener("change", updateMonthlyCalculation);
   document.getElementById("honorarios-fixed").addEventListener("input", updateMonthlyCalculation);
   document.getElementById("aplicar-maed").addEventListener("change", updateMonthlyCalculation);
-  document.getElementById("data-referencia").addEventListener("change", refreshSelic);
+  document.getElementById("data-referencia").addEventListener("change", () => refreshSelic(true));
+  document.getElementById("data-transmissao").addEventListener("change", updateMonthlyCalculation);
 
+  await refreshSelic(false);
   restoreMonthlyCalculation();
-  refreshSelic();
-  window.ReduzSimIndices?.scheduleAutoUpdates([], refreshSelic);
+  window.ReduzSimIndices?.scheduleAutoUpdates([], () => refreshSelic(true));
 })();

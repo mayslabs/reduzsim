@@ -60,33 +60,14 @@
             <option value="PJ">Pessoa jurídica</option>
           </select>
         </div>
-        <div class="col-md-6">
-          <label class="rs-label" for="destinacao">Destinação</label>
-          <select class="rs-select" name="destinacao" id="destinacao" required>
-            <option value="RES">Residencial unifamiliar</option>
-            <option value="RMUL">Residencial multifamiliar</option>
-            <option value="COM">Comercial salas e lojas</option>
-            <option value="GALP">Galpão industrial</option>
-            <option value="RPOP">Casa popular</option>
-            <option value="CHAB">Conjunto habitacional popular</option>
-            <option value="EGAR">Edifício de garagens</option>
-          </select>
-        </div>
-        <div class="col-md-6">
-          <label class="rs-label" for="tipo-obra">Tipo de obra</label>
-          <select class="rs-select" name="tipo-obra" id="tipo-obra" required>
-            <option value="ALV">Alvenaria</option>
-            <option value="MAD">Madeira ou mista</option>
-          </select>
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
           <label class="rs-label" for="uso-concreto">Usou concreto usinado?</label>
           <select class="rs-select" name="uso-concreto" id="uso-concreto" required>
             <option value="false" selected>Não</option>
             <option value="true">Sim</option>
           </select>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
           <label class="rs-label" for="UF">Estado (UF)</label>
           <select class="rs-select" name="UF" id="UF" required>
             <option disabled selected value="">-- Selecione --</option>
@@ -121,6 +102,11 @@
           <input class="rs-input" type="date" name="data-fim-obra" id="data-fim-obra" required>
           <div class="invalid-feedback">Informe a data final da obra.</div>
         </div>
+        <div class="col-md-4">
+          <label class="rs-label" for="data-afericao">Data prevista da aferição</label>
+          <input class="rs-input" type="date" name="data-afericao" id="data-afericao" required>
+          <div class="invalid-feedback">Informe a data prevista da aferição.</div>
+        </div>
       </div>
 
       <div class="rs-divider"></div>
@@ -129,49 +115,14 @@
         <div class="rs-section-icon">4</div>
         Áreas para aferição
       </div>
-      <p class="rs-hint">Preencha somente o que existir na obra.</p>
+      <p class="rs-hint">Adicione uma destinação para cada parte do projeto e preencha somente as áreas existentes.</p>
 
       <div id="msg-erro" class="rs-alert" hidden>
         Informe ao menos uma área para calcular.
       </div>
 
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="rs-label" for="area-construcao">Construção / obra nova</label>
-          <div class="rs-input-group">
-            <input class="rs-input" type="text" inputmode="decimal" name="area-construcao" id="area-construcao" value="0" required>
-            <span class="rs-input-unit">m²</span>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <label class="rs-label" for="area-reforma">Reforma</label>
-          <div class="rs-input-group">
-            <input class="rs-input" type="text" inputmode="decimal" name="area-reforma" id="area-reforma" value="0" required>
-            <span class="rs-input-unit">m²</span>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <label class="rs-label" for="area-demolicao">Demolição</label>
-          <div class="rs-input-group">
-            <input class="rs-input" type="text" inputmode="decimal" name="area-demolicao" id="area-demolicao" value="0" required>
-            <span class="rs-input-unit">m²</span>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <label class="rs-label" for="area-comp-coberta">Área complementar coberta</label>
-          <div class="rs-input-group">
-            <input class="rs-input" type="text" inputmode="decimal" name="area-comp-coberta" id="area-comp-coberta" value="0" required>
-            <span class="rs-input-unit">m²</span>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <label class="rs-label" for="area-comp-descoberta">Área complementar descoberta</label>
-          <div class="rs-input-group">
-            <input class="rs-input" type="text" inputmode="decimal" name="area-comp-descoberta" id="area-comp-descoberta" value="0" required>
-            <span class="rs-input-unit">m²</span>
-          </div>
-        </div>
-      </div>
+      <div class="rs-destination-list" id="destination-list"></div>
+      <button class="rs-btn-outline rs-add-destination" type="button" id="add-destination-btn">Adicionar destinação</button>
 
       <div class="rs-submit-row">
         <button class="rs-btn-primary" type="submit">
@@ -187,12 +138,81 @@
       </div>
       <div class="rs-history-list" id="history-list"></div>
       <div class="rs-foot-buttons rs-history-actions">
+        <button class="rs-btn-outline" type="button" id="save-base-btn">Salvar base no OneDrive</button>
+        <button class="rs-btn-outline" type="button" id="open-base-btn">Abrir base do OneDrive</button>
         <button class="rs-btn-outline" type="button" id="clear-history-btn">Limpar histórico</button>
       </div>
+      <input type="file" id="base-file-input" accept="application/json,.json" hidden>
     </section>
   </main>
 
+  <template id="destination-template">
+    <section class="rs-destination-item" data-destination-item>
+      <div class="rs-destination-header">
+        <strong data-destination-title>Destinação</strong>
+        <button class="rs-icon-action" type="button" data-remove-destination aria-label="Remover destinação" title="Remover destinação">&times;</button>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="rs-label">Destinação</label>
+          <select class="rs-select" data-destination-field="destinacao" required>
+            <option value="RES">Residencial unifamiliar</option>
+            <option value="RMUL">Residencial multifamiliar</option>
+            <option value="COM">Comercial salas e lojas</option>
+            <option value="GALP">Galpão industrial</option>
+            <option value="RPOP">Casa popular</option>
+            <option value="CHAB">Conjunto habitacional popular</option>
+            <option value="EGAR">Edifício de garagens</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label">Tipo de obra</label>
+          <select class="rs-select" data-destination-field="tipoObra" required>
+            <option value="ALV">Alvenaria</option>
+            <option value="MAD">Madeira ou mista</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="rs-label">Construção / obra nova</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="areaConstrucao">
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="rs-label">Reforma</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="areaReforma">
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="rs-label">Demolição</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="areaDemolicao">
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label">Área complementar coberta</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="areaCoberta">
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="rs-label">Área complementar descoberta</label>
+          <div class="rs-input-group">
+            <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="areaDescoberta">
+            <span class="rs-input-unit">m²</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="main.js?v=20260603-full-audit"></script>
+  <script src="calculo-core.js?v=20260630-decadas"></script>
+  <script src="main.js?v=20260630-decadas"></script>
 </body>
 </html>

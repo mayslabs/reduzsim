@@ -36,14 +36,22 @@
       <div class="rs-total-sub">Valor principal estimado antes do cálculo de redução</div>
     </section>
 
-    <section class="rs-summary-grid rs-summary-grid--two">
+    <section class="rs-summary-grid">
       <div class="rs-summary-card">
         <div class="rs-summary-label">COD</div>
         <div class="rs-summary-value">R$ <span id="COD">0,00</span></div>
       </div>
       <div class="rs-summary-card">
-        <div class="rs-summary-label">RMT 100% SERO</div>
+        <div class="rs-summary-label">RMT integral</div>
         <div class="rs-summary-value">R$ <span id="RMT">0,00</span></div>
+      </div>
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">RMT não decadente</div>
+        <div class="rs-summary-value">R$ <span id="RMT-NAO-DECADENTE">0,00</span></div>
+      </div>
+      <div class="rs-summary-card">
+        <div class="rs-summary-label">RMT tributável</div>
+        <div class="rs-summary-value">R$ <span id="RMT-TRIBUTAVEL">0,00</span></div>
       </div>
     </section>
 
@@ -68,6 +76,12 @@
           <div class="rs-info-block">
             <div class="rs-info-label">Responsável</div>
             <div class="rs-info-value" id="responsavel-obra">-</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="rs-info-block">
+            <div class="rs-info-label">Aferição prevista</div>
+            <div class="rs-info-value" id="data-afericao">-</div>
           </div>
         </div>
         <div class="col-6 col-md-3">
@@ -103,8 +117,8 @@
           <div class="rs-calc-val" id="date">--/----</div>
         </div>
         <div class="rs-calc-item">
-          <div class="rs-calc-label">VAU (R$/m²)</div>
-          <div class="rs-calc-val">R$ <span id="VAU">0,00</span></div>
+          <div class="rs-calc-label">VAU por destinação</div>
+          <div class="rs-calc-val" id="VAU">-</div>
         </div>
         <div class="rs-calc-item">
           <div class="rs-calc-label">Concreto usinado</div>
@@ -114,6 +128,15 @@
 
       <div class="rs-alert-info" id="indices-status">
         VAU: usando tabela local.
+      </div>
+
+      <div class="rs-decay-summary" id="decay-summary">
+        <div><span>Meses da obra</span><strong id="decay-total-months">0</strong></div>
+        <div><span>Meses decadentes</span><strong id="decay-months">0</strong></div>
+        <div><span>Meses não decadentes</span><strong id="non-decay-months">0</strong></div>
+        <div><span>Percentual não decadente</span><strong id="non-decay-percent">0,00%</strong></div>
+        <div><span>Crédito de concreto não decadente</span><strong>R$ <span id="concrete-credit">0,00</span></strong></div>
+        <div><span>Redução estimada pela decadência</span><strong>R$ <span id="decay-savings">0,00</span></strong></div>
       </div>
 
     </section>
@@ -127,10 +150,12 @@
         <table class="rs-table">
           <thead>
             <tr>
+              <th>Destinação</th>
               <th>Base</th>
               <th>Área</th>
               <th>COD</th>
               <th>RMT</th>
+              <th>Crédito concreto</th>
             </tr>
           </thead>
           <tbody id="remuneracao-rows"></tbody>
@@ -150,7 +175,8 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="indices.js?v=20260603-selic-decimal"></script>
-  <script src="result.js?v=20260603-full-audit"></script>
+  <script src="indices.js?v=20260630-decadas"></script>
+  <script src="calculo-core.js?v=20260630-decadas"></script>
+  <script src="result.js?v=20260630-decadas"></script>
 </body>
 </html>

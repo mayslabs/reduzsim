@@ -3,6 +3,8 @@
   PJ: "Pessoa jurídica",
 };
 
+const calculoCore = window.ReduzSimCalculo;
+
 const typeDestinacao = {
   RES: "Residencial unifamiliar",
   RMUL: "Residencial multifamiliar",
@@ -106,14 +108,23 @@ function parseLocaleNumber(value) {
 
 function normalizeFormData(data) {
   const normalized = { ...data };
-  ["areaConstrucao", "areaReforma", "areaDemolicao", "areaCoberta", "areaDescoberta"].forEach((key) => {
-    normalized[key] = parseLocaleNumber(normalized[key]);
-  });
-  normalized.areaTotal = normalized.areaConstrucao
-    + normalized.areaReforma
-    + normalized.areaDemolicao
-    + normalized.areaCoberta
-    + normalized.areaDescoberta;
+  const legacyDestination = {
+    id: "dest-1",
+    destinacao: normalized.destinacao || "RES",
+    tipoObra: normalized.tipoObra || "ALV",
+    areaConstrucao: normalized.areaConstrucao,
+    areaReforma: normalized.areaReforma,
+    areaDemolicao: normalized.areaDemolicao,
+    areaCoberta: normalized.areaCoberta,
+    areaDescoberta: normalized.areaDescoberta,
+  };
+  normalized.destinacoes = calculoCore.normalizeDestinations(
+    normalized.destinacoes?.length ? normalized.destinacoes : [legacyDestination],
+  );
+  normalized.dataAfericao = normalized.dataAfericao || calculoCore.formatLocalISO();
+  normalized.areaTotal = calculoCore.roundMoney(normalized.destinacoes.reduce((sum, destination) => (
+    sum + calculoCore.AREA_KEYS.reduce((areaSum, key) => areaSum + destination[key], 0)
+  ), 0));
   return normalized;
 }
 
@@ -262,16 +273,26 @@ function setText(id, value) {
   if (element) element.textContent = value;
 }
 
+function getDestinationAreaTotal(destination) {
+  return [
+    "areaConstrucao",
+    "areaReforma",
+    "areaDemolicao",
+    "areaCoberta",
+    "areaDescoberta",
+  ].reduce((total, field) => total + toNumber(destination[field]), 0);
+}
+
 function buildAreaLabel() {
-  const labels = [];
-
-  if (formData.areaConstrucao > 0) labels.push(`Construção ${fmt(formData.areaConstrucao)} m²`);
-  if (formData.areaReforma > 0) labels.push(`Reforma ${fmt(formData.areaReforma)} m²`);
-  if (formData.areaDemolicao > 0) labels.push(`Demolição ${fmt(formData.areaDemolicao)} m²`);
-  if (formData.areaCoberta > 0) labels.push(`Área comp. coberta ${fmt(formData.areaCoberta)} m²`);
-  if (formData.areaDescoberta > 0) labels.push(`Área comp. descoberta ${fmt(formData.areaDescoberta)} m²`);
-
-  return labels.join(" | ");
+  return formData.destinacoes.filter((destination) => getDestinationAreaTotal(destination) > 0).map((destination) => {
+    const areas = [];
+    if (destination.areaConstrucao > 0) areas.push(`obra nova ${fmt(destination.areaConstrucao)} m²`);
+    if (destination.areaReforma > 0) areas.push(`reforma ${fmt(destination.areaReforma)} m²`);
+    if (destination.areaDemolicao > 0) areas.push(`demolição ${fmt(destination.areaDemolicao)} m²`);
+    if (destination.areaCoberta > 0) areas.push(`complementar coberta ${fmt(destination.areaCoberta)} m²`);
+    if (destination.areaDescoberta > 0) areas.push(`complementar descoberta ${fmt(destination.areaDescoberta)} m²`);
+    return `${typeDestinacao[destination.destinacao]}: ${areas.join(", ")}`;
+  }).join(" | ");
 }
 
 function renderRemuneracaoRows(rows) {
@@ -286,10 +307,12 @@ function renderRemuneracaoRows(rows) {
   validRows.forEach((row) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
+      <td>${row.destinationLabel || "-"}</td>
       <td>${row.label || "-"}</td>
       <td>${fmt(row.area || 0)} m²</td>
       <td>R$ ${fmt(row.cod || 0)}</td>
       <td>R$ ${fmt(row.rmt || 0)}</td>
+      <td>R$ ${fmt(row.concreteCredit || 0)}</td>
     `;
     body.appendChild(tr);
   });
@@ -305,73 +328,45 @@ function setOptionalBlock(blockId, valueId, value) {
 
 async function updateValues(forceRefresh = false) {
   formData = normalizeFormData(formData);
-  const totalAreaFatorSocial = formData.areaConstrucao + formData.areaCoberta + formData.areaDescoberta;
-  const areaRef = formData.areaReforma;
-  const areaDem = formData.areaDemolicao;
-
   const UF = formData.UF;
   const vauMeta = await getVauMeta(forceRefresh);
   const vauRows = vauMeta.rows?.length ? vauMeta.rows : VAU_BASE_DATA;
   const vauRow = vauRows.find((row) => row.UF === UF);
   const concretoRow = CONCRETO_DATA.find((row) => row.UF === UF);
 
-  if (!vauRow || !concretoRow || !vauRow[formData.destinacao]) {
+  const hasAllIndices = formData.destinacoes.every((destination) => (
+    vauRow?.[destination.destinacao] && concretoRow?.[destination.destinacao] !== undefined
+  ));
+  if (!vauRow || !concretoRow || !hasAllIndices) {
     window.location.href = "index.html";
     return;
   }
 
-  const VAU = vauRow[formData.destinacao];
-  const COD = calcCOD(formData, VAU);
-  const CODSum = COD.reduce((sum, current) => sum + current, 0);
+  const calculation = calculoCore.calculateConstruction(formData, vauRows, CONCRETO_DATA);
+  renderRemuneracaoRows(calculation.lines);
 
-  const rmtRows = [
-    {
-      label: "Construção / obra nova",
-      area: formData.areaConstrucao,
-      cod: COD[0],
-      rmt: calcRMT(COD[0], formData.areaConstrucao, totalAreaFatorSocial, formData.responsavelObra, 1),
-    },
-    {
-      label: "Reforma",
-      area: formData.areaReforma,
-      cod: COD[1],
-      rmt: calcRMT(COD[1], formData.areaReforma, areaRef, formData.responsavelObra, 0.35),
-    },
-    {
-      label: "Demolição",
-      area: formData.areaDemolicao,
-      cod: COD[2],
-      rmt: calcRMT(COD[2], formData.areaDemolicao, areaDem, formData.responsavelObra, 0.1),
-    },
-    {
-      label: "Área complementar coberta",
-      area: formData.areaCoberta,
-      cod: COD[3],
-      rmt: calcRMT(COD[3], formData.areaCoberta, totalAreaFatorSocial, formData.responsavelObra, 1),
-    },
-    {
-      label: "Área complementar descoberta",
-      area: formData.areaDescoberta,
-      cod: COD[4],
-      rmt: calcRMT(COD[4], formData.areaDescoberta, totalAreaFatorSocial, formData.responsavelObra, 1),
-    },
-  ];
-  renderRemuneracaoRows(rmtRows);
-
-  const rmtBeforeConcreto = rmtRows.reduce((sum, row) => sum + row.rmt, 0);
-  const percentConcreto = formData.isUsoConcreto ? concretoRow[formData.destinacao] : 0;
-  const ajusteAreaReforma = formData.areaReforma > 0 ? 0.35 : 1;
-  const concretoCredit = round(calcAjusteConcreto(CODSum, percentConcreto, ajusteAreaReforma));
-  const RMT = round(Math.max(rmtBeforeConcreto - concretoCredit, 0));
-  const total = calcTotal(RMT);
   const receitaResult = {
     calculatedAt: formData.calculatedAt,
-    cod: CODSum,
-    rmt: RMT,
-    inssEstimado: total,
-    areaTotal: formData.areaTotal,
+    calculationVersion: 2,
+    cod: calculation.codTotal,
+    rmt: calculation.rmtIntegral,
+    rmtIntegral: calculation.rmtIntegral,
+    rmtNaoDecadente: calculation.rmtNonDecadent,
+    creditoConcretoIntegral: calculation.concreteCreditIntegral,
+    creditoConcretoNaoDecadente: calculation.concreteCreditNonDecadent,
+    rmtTributavel: calculation.taxableRmt,
+    metaFatorAjuste: calculation.adjustmentTarget,
+    metaPercentual: calculation.adjustmentRate * 100,
+    inssEstimado: calculation.estimatedContribution,
+    inssSemDecadencia: calculation.estimatedContributionWithoutDecay,
+    economiaDecadencia: calculation.decaySavings,
+    areaTotal: calculation.areaTotal,
     dateInitial: formData.dataInicioObra,
     dateFinal: formData.dataFimObra,
+    assessmentDate: formData.dataAfericao,
+    decadencia: calculation.decay,
+    destinations: calculation.destinations,
+    rmtRows: calculation.lines,
     vauPeriodo: vauRow.data,
     indices: {
       vau: {
@@ -389,20 +384,31 @@ async function updateValues(forceRefresh = false) {
   setText("calc-date", fmtDate(formData.calculatedAt));
   setText("data-inicio-obra", fmtInputDate(formData.dataInicioObra));
   setText("data-fim-obra", fmtInputDate(formData.dataFimObra));
+  setText("data-afericao", fmtInputDate(formData.dataAfericao));
   setOptionalBlock("cliente-nome-block", "cliente-nome", formData.clienteNome);
   setOptionalBlock("cliente-telefone-block", "cliente-telefone", formData.clienteTelefone);
   setText("responsavel-obra", typeResponsavel[formData.responsavelObra]);
-  setText("tipo-obra", typeTipoObra[formData.tipoObra]);
   setText("concreto-str", formData.isUsoConcreto ? "Sim" : "Não");
   setText("total-area-str", buildAreaLabel());
-  setText("destinacao", typeDestinacao[formData.destinacao]);
   setText("UF", UF);
-  setText("VAU", fmt(VAU));
-  setText("COD", fmt(CODSum));
-  setText("RMT", fmt(RMT));
-  setText("parcela-60", fmt(total / 60));
-  setText("total", fmt(total));
-  setText("total-2", fmt(total));
+  setText("VAU", formData.destinacoes.filter((destination) => (
+    getDestinationAreaTotal(destination) > 0
+  )).map((destination) => (
+    `${typeDestinacao[destination.destinacao]}: R$ ${fmt(vauRow[destination.destinacao])}`
+  )).join(" | "));
+  setText("COD", fmt(calculation.codTotal));
+  setText("RMT", fmt(calculation.rmtIntegral));
+  setText("RMT-NAO-DECADENTE", fmt(calculation.rmtNonDecadent));
+  setText("RMT-TRIBUTAVEL", fmt(calculation.taxableRmt));
+  setText("concrete-credit", fmt(calculation.concreteCreditNonDecadent));
+  setText("decay-savings", fmt(calculation.decaySavings));
+  setText("decay-total-months", calculation.decay.totalMonths.toLocaleString("pt-BR"));
+  setText("decay-months", calculation.decay.decadentCount.toLocaleString("pt-BR"));
+  setText("non-decay-months", calculation.decay.nonDecadentCount.toLocaleString("pt-BR"));
+  setText("non-decay-percent", fmtPercent(calculation.decay.nonDecadentPercent));
+  setText("parcela-60", fmt(calculation.estimatedContribution / 60));
+  setText("total", fmt(calculation.estimatedContribution));
+  setText("total-2", fmt(calculation.estimatedContribution));
 
 }
 

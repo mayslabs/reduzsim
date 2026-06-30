@@ -1,5 +1,5 @@
 const ReduzSimIndices = (() => {
-  const AUTO_UPDATE_HOURS = [8, 10, 12, 15, 17, 19];
+  const AUTO_UPDATE_HOURS = [8];
   const STORAGE_KEY = "reduzsim_indices_cache_v3";
   const ATTEMPT_KEY = "reduzsim_indices_attempts_v3";
   const BCB_SELIC_URL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4390/dados";
@@ -18,7 +18,8 @@ const ReduzSimIndices = (() => {
   }
 
   function todayKey() {
-    return new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   }
 
   function parseNumberBR(value) {
@@ -169,9 +170,14 @@ const ReduzSimIndices = (() => {
     const referenceDate = referenceDateValue ? new Date(`${referenceDateValue}T00:00:00`) : new Date();
     const paymentMonth = `${referenceDate.getFullYear()}-${String(referenceDate.getMonth() + 1).padStart(2, "0")}`;
     const previousMonth = addMonths(paymentMonth, -1);
+    const previousParts = previousMonth.split("-").map(Number);
+    const previousDueDate = new Date(previousParts[0], previousParts[1], 20);
+    while (previousDueDate.getDay() === 0 || previousDueDate.getDay() === 6) {
+      previousDueDate.setDate(previousDueDate.getDate() - 1);
+    }
 
     return Object.fromEntries(months.map((month) => {
-      if (month >= paymentMonth || (month === previousMonth && referenceDate.getDate() <= 15)) {
+      if (month >= paymentMonth || (month === previousMonth && referenceDate <= previousDueDate)) {
         return [month, 0];
       }
 

@@ -52,6 +52,14 @@ def add_month(year: int, month: int, delta: int) -> tuple[int, int]:
     return index // 12, index % 12 + 1
 
 
+def payment_due_date(year: int, month: int) -> dt.date:
+    due_year, due_month = add_month(year, month, 1)
+    due = dt.date(due_year, due_month, 20)
+    while due.weekday() >= 5:
+        due -= dt.timedelta(days=1)
+    return due
+
+
 def iter_months(start: tuple[int, int], end: tuple[int, int]):
     year, month = start
     while (year, month) <= end:
@@ -120,16 +128,16 @@ def fetch_selic_monthly(start: dt.date, end: dt.date) -> dict[str, float]:
 
 
 def build_selic_accumulated(reference: dt.date) -> dict[str, float]:
-    start = dt.date(2021, 10, 1)
+    start = dt.date(reference.year - 8, 1, 1)
     monthly = fetch_selic_monthly(start, reference)
     ref_month = (reference.year, reference.month)
     previous_month = add_month(reference.year, reference.month, -1)
     accumulated: dict[str, float] = {}
 
-    for year, month in iter_months((2021, 10), ref_month):
+    for year, month in iter_months((start.year, start.month), ref_month):
         key = month_key(year, month)
         is_current_or_future = (year, month) >= ref_month
-        is_previous_with_grace = (year, month) == previous_month and reference.day <= 15
+        is_previous_with_grace = (year, month) == previous_month and reference <= payment_due_date(year, month)
 
         if is_current_or_future or is_previous_with_grace:
             accumulated[key] = 0.0

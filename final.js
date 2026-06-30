@@ -125,12 +125,19 @@ function fmtDateTime(value) {
 }
 
 function getSimulationRecord() {
+  let paralisacoes = [];
+  try {
+    paralisacoes = JSON.parse(localStorage.getItem("reducaoParalisacoes")) || [];
+  } catch (error) {
+    paralisacoes = [];
+  }
   return {
     id: reducaoResult.historyId || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
     savedAt: new Date().toISOString(),
     formData,
     receitaResult,
     reducaoResult,
+    paralisacoes,
   };
 }
 
@@ -153,7 +160,7 @@ function buildWhatsappSummary(totals, totalComHonorarios) {
   const commercial = reducaoResult.commercial || {};
   return [
     `Resumo ReduzSim - ${formData.clienteNome || "cliente"}`,
-    `INSS sem redução: R$ ${fmt(totals.receita)}`,
+    `INSS após decadência: R$ ${fmt(totals.receita)}`,
     `INSS com redução: R$ ${fmt(totals.totalReducao)}`,
     `Economia bruta: R$ ${fmt(totals.economiaBruta)}`,
     `Honorários: R$ ${fmt(totals.honorarios)} (${totals.honorariosDescription || `${fmtPercent(totals.honorariosPercent)}% sobre economia obtida`})`,
@@ -189,6 +196,10 @@ function renderCommercialAndLegal(totals) {
 
   if (commercial.validade) {
     setText("proposal-validity", `Validade da proposta: ${fmtDate(commercial.validade)}. Valores sujeitos à atualização de índices, dados da obra e documentação apresentada.`);
+  }
+  if (formData.responsavelObra === "PJ") {
+    const current = document.getElementById("proposal-validity")?.textContent || "";
+    setText("proposal-validity", `${current} Para pessoa jurídica, a meta utiliza a mesma metodologia da pessoa física como premissa comercial da simulação.`);
   }
 }
 
@@ -226,10 +237,25 @@ function renderCommercialAndLegal(totals) {
   setText("uf", ufNames[formData.UF] || formData.UF || "-");
   setText("area-total", fmt(formData.areaTotal));
   setText("responsavel-obra", typeResponsavel[formData.responsavelObra] || "-");
-  setText("destinacao", typeDestinacao[formData.destinacao] || "-");
-  setText("tipo-obra", typeTipoObra[formData.tipoObra] || "-");
+  const destinationsWithArea = formData.destinacoes?.filter((item) => [
+    "areaConstrucao",
+    "areaReforma",
+    "areaDemolicao",
+    "areaCoberta",
+    "areaDescoberta",
+  ].some((field) => toNumber(item[field]) > 0));
+  const destinations = destinationsWithArea?.length
+    ? destinationsWithArea
+    : [{ destinacao: formData.destinacao, tipoObra: formData.tipoObra }];
+  setText("destinacao", [...new Set(destinations.map((item) => typeDestinacao[item.destinacao]).filter(Boolean))].join(" · ") || "-");
+  setText("tipo-obra", [...new Set(destinations.map((item) => typeTipoObra[item.tipoObra]).filter(Boolean))].join(" · ") || "-");
   setText("data-inicio-obra", fmtDate(formData.dataInicioObra));
   setText("data-fim-obra", fmtDate(formData.dataFimObra));
+  const decay = receitaResult.decadencia || {};
+  setText(
+    "decadencia-resumo",
+    `${fmtPercent(decay.nonDecadentPercent || 0)}% (${decay.nonDecadentCount || 0} de ${decay.totalMonths || 0} meses)`,
+  );
   renderCommercialAndLegal(totals);
 
   const chartMax = Math.max(

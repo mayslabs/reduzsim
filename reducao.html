@@ -56,10 +56,15 @@
             <option value="true">Sim</option>
             <option value="false">Não</option>
           </select>
+          <small class="rs-hint">Estimativa sujeita a feriados e prorrogações oficiais.</small>
         </div>
         <div class="col-md-4">
-          <label class="rs-label" for="data-referencia">Data de referência</label>
+          <label class="rs-label" for="data-referencia">Data prevista do pagamento</label>
           <input class="rs-input" id="data-referencia" type="date">
+        </div>
+        <div class="col-md-4">
+          <label class="rs-label" for="data-transmissao">Data prevista da transmissão</label>
+          <input class="rs-input" id="data-transmissao" type="date">
         </div>
       </div>
 
@@ -123,7 +128,7 @@
 
     <section class="rs-summary-grid">
       <div class="rs-summary-card">
-        <div class="rs-summary-label">Sem redução</div>
+        <div class="rs-summary-label">Após decadência</div>
         <div class="rs-summary-value">R$ <span id="receita-total">0,00</span></div>
       </div>
       <div class="rs-summary-card rs-summary-card--accent">
@@ -147,14 +152,19 @@
       </div>
 
       <div class="rs-actions-row no-print">
+        <button class="rs-btn-outline" type="button" id="redistribute-remuneracao">Redistribuir automaticamente</button>
         <button class="rs-btn-outline" type="button" id="copy-first-remuneracao">Usar a primeira remuneração em todas</button>
       </div>
 
       <div class="rs-stop-summary" id="paralisacao-summary" hidden></div>
+      <div class="rs-stop-summary rs-decay-note" id="decadencia-summary"></div>
+      <div class="rs-alert-info" id="pj-premise-note" hidden>
+        Para pessoa jurídica, esta simulação utiliza por premissa comercial a mesma metodologia de meta aplicada à pessoa física.
+      </div>
 
       <div class="rs-rmt-tracker">
         <div class="rs-rmt-card">
-          <span>RMT 100% SERO</span>
+          <span>RMT não decadente</span>
           <strong>R$ <span id="rmt-sero">0,00</span></strong>
         </div>
         <div class="rs-rmt-card">
@@ -180,7 +190,7 @@
     </section>
 
     <div class="rs-alert-info rs-indices-update" id="indices-update-note">
-      Os índices foram atualizados pela última vez no dia 30/06/2026 às 13:24.
+      Os índices foram atualizados pela última vez no dia 30/06/2026 às 15:33.
     </div>
 
     <div class="rs-foot-buttons no-print">
@@ -191,7 +201,8 @@
     </div>
   </main>
 
-  <script src="indices.js?v=20260603-selic-decimal"></script>
-  <script src="reducao.js?v=202606301324"></script>
+  <script src="indices.js?v=20260630-decadas"></script>
+  <script src="calculo-core.js?v=20260630-decadas"></script>
+  <script src="reducao.js?v=202606301533"></script>
 </body>
 </html>
