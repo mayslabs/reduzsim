@@ -285,7 +285,7 @@ test("calcula multa de mora por dia, limitada a vinte por cento", () => {
   assert.equal(calc.calculateLatePaymentInterest(1000, 12.5, 0), 0);
 });
 
-test("mantem MAED fixa em cem reais quando aplicavel", () => {
+test("mantem cem reais como valor padrão da MAED quando aplicável", () => {
   assert.equal(calc.calculateMaed("2021-09", "2026-06-30", 100).value, 0);
   assert.equal(calc.calculateMaed("2021-10", "2026-06-30", 100).value, 100);
   assert.equal(calc.calculateMaed("2024-01", "2024-02-15", 1000).value, 0);

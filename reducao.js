@@ -306,6 +306,7 @@ function readMonthlyRows() {
     isDecadente: row.dataset.decadente === "true",
     remOriginal: parseLocaleNumber(row.querySelector("[data-field='remOriginal']").value),
     selic: parseLocaleNumber(row.querySelector("[data-field='selic']").value),
+    maedInput: parseLocaleNumber(row.querySelector("[data-field='maedInput']").value),
   }));
 }
 
@@ -323,7 +324,9 @@ function calculateRows(baseRows) {
         cpp: 0,
         multaMora: 0,
         juros: 0,
+        maedInput: 0,
         maed: 0,
+        maedApplicable: false,
         total: 0,
       };
     }
@@ -335,13 +338,14 @@ function calculateRows(baseRows) {
     const multaMora = latePayment.value;
     const jurosPercent = latePayment.daysLate > 0 ? row.selic : 0;
     const juros = calculoCore.calculateLatePaymentInterest(cpp, jurosPercent, latePayment.daysLate);
-    const maed = applyMaed
-      ? calculoCore.calculateMaed(row.month, transmissionDate, cpp, {
-        withMovement: true,
-        spontaneous: true,
-        fixedValue: 100,
-      }).value
-      : 0;
+    const calculatedMaed = calculoCore.calculateMaed(row.month, transmissionDate, cpp, {
+      withMovement: true,
+      spontaneous: true,
+      fixedValue: 100,
+    });
+    const maedApplicable = applyMaed && calculatedMaed.value > 0;
+    const maedInput = round(Math.max(row.maedInput ?? 100, 0));
+    const maed = maedApplicable ? maedInput : 0;
     const total = round(cpp + multaMora + juros + maed);
     return {
       ...row,
@@ -353,7 +357,9 @@ function calculateRows(baseRows) {
       diasAtraso: latePayment.daysLate,
       juros,
       jurosPercent,
+      maedInput,
       maed,
+      maedApplicable,
       total,
     };
   });
@@ -407,11 +413,11 @@ function renderRows(rows) {
         <strong data-output="juros">R$ ${fmt(row.juros)}</strong>
         <small data-detail="juros">SELIC ${fmtRate(row.jurosPercent)}%</small>
       </div>
-      <div class="rs-monthly-money">
-        <span>MAED</span>
-        <strong data-output="maed">R$ ${fmt(row.maed)}</strong>
-        <small data-detail="maed">${row.maed > 0 ? "Valor fixo aplicado" : "Não aplicável"}</small>
-      </div>
+      <label class="rs-monthly-money">
+        <span>MAED (R$)</span>
+        <input class="rs-table-input" data-field="maedInput" type="number" min="0" step="0.01" value="${isBlocked ? 0 : row.maedInput}" ${isBlocked || !row.maedApplicable ? "disabled" : ""}>
+        <small data-detail="maed">${row.maedApplicable ? "Valor editável" : "Não aplicável"}</small>
+      </label>
       <div class="rs-monthly-total">
         <span>Total</span>
         <strong data-output="total">R$ ${fmt(row.total)}</strong>
@@ -463,6 +469,7 @@ function buildInitialRows() {
     isParalisacao: pausedMonths.has(month),
     isDecadente: decadentMonths.has(month),
     remOriginal: pausedMonths.has(month) || decadentMonths.has(month) ? 0 : remMensalOriginal,
+    maedInput: pausedMonths.has(month) || decadentMonths.has(month) ? 0 : 100,
   }));
 
   const activeRows = rows.filter((row) => !row.isParalisacao && !row.isDecadente);
@@ -496,6 +503,7 @@ function getStoredRows() {
     isDecadente: initialRows[index].isDecadente,
     remOriginal: parseLocaleNumber(row.remOriginal),
     selic: parseLocaleNumber(row.selic),
+    maedInput: row.maedInput === undefined ? 100 : parseLocaleNumber(row.maedInput),
   }));
 
   const storedBasis = reducaoResult && reducaoResult.basis;
@@ -686,16 +694,21 @@ function updateRenderedMonthlyValues(rows) {
     const rowElement = rowElements[index];
     if (!rowElement || rowElement.dataset.monthRow !== row.month) return;
 
-    ["remAtualizada", "cpp", "multaMora", "juros", "maed", "total"].forEach((field) => {
+    ["remAtualizada", "cpp", "multaMora", "juros", "total"].forEach((field) => {
       const output = rowElement.querySelector(`[data-output="${field}"]`);
       if (output) output.textContent = `R$ ${fmt(row[field])}`;
     });
     const fineDetail = rowElement.querySelector("[data-detail='multaMora']");
     const interestDetail = rowElement.querySelector("[data-detail='juros']");
     const maedDetail = rowElement.querySelector("[data-detail='maed']");
+    const maedInput = rowElement.querySelector("[data-field='maedInput']");
     if (fineDetail) fineDetail.textContent = `${row.diasAtraso || 0} dias · ${fmtRate(row.multaMoraPercent)}%`;
     if (interestDetail) interestDetail.textContent = `SELIC ${fmtRate(row.jurosPercent)}%`;
-    if (maedDetail) maedDetail.textContent = row.maed > 0 ? "Valor fixo aplicado" : "Não aplicável";
+    if (maedInput) {
+      maedInput.value = row.isParalisacao || row.isDecadente ? 0 : row.maedInput;
+      maedInput.disabled = row.isParalisacao || row.isDecadente || !row.maedApplicable;
+    }
+    if (maedDetail) maedDetail.textContent = row.maedApplicable ? "Valor editável" : "Não aplicável";
   });
 }
 
@@ -707,6 +720,18 @@ function updateMonthlyCalculation() {
 
 function copyFirstRemuneracaoToAll() {
   const selector = "[data-month-row]:not([data-paralisacao='true']):not([data-decadente='true']) [data-field='remOriginal']";
+  const firstInput = document.querySelector(selector);
+  if (!firstInput) return;
+
+  document.querySelectorAll(selector).forEach((input) => {
+    input.value = firstInput.value;
+  });
+
+  updateMonthlyCalculation();
+}
+
+function copyFirstMaedToAll() {
+  const selector = "[data-field='maedInput']:not(:disabled)";
   const firstInput = document.querySelector(selector);
   if (!firstInput) return;
 
@@ -900,13 +925,14 @@ function finalizeCalculation() {
   });
   document.getElementById("redistribute-remuneracao").addEventListener("click", () => recalculate(false));
   document.getElementById("copy-first-remuneracao").addEventListener("click", copyFirstRemuneracaoToAll);
+  document.getElementById("copy-first-maed").addEventListener("click", copyFirstMaedToAll);
   document.getElementById("add-paralisacao-btn").addEventListener("click", addParalisacao);
   document.getElementById("paralisacao-list").addEventListener("click", (event) => {
     const removeButton = event.target.closest("[data-remove-paralisacao]");
     if (removeButton) removeParalisacao(Number.parseInt(removeButton.dataset.removeParalisacao, 10));
   });
   document.getElementById("monthly-rows").addEventListener("input", (event) => {
-    if (event.target.matches("[data-field='remOriginal'], [data-field='selic']")) {
+    if (event.target.matches("[data-field='remOriginal'], [data-field='selic'], [data-field='maedInput']")) {
       updateMonthlyCalculation();
     }
   });

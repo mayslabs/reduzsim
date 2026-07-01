@@ -62,7 +62,17 @@ test("declara premissas comerciais sem exibir período decadente no orçamento",
   const final = read("final.html");
 
   assert.match(reduction, /Premissa comercial/);
-  assert.match(reduction, /MAED fixa de R\$ 100,00/);
+  assert.match(reduction, /MAED iniciada em R\$ 100,00/);
   assert.doesNotMatch(final, /Período não decadente/);
   assert.doesNotMatch(final, /class="rs-navbar/);
+});
+
+test("permite editar e replicar a MAED entre competências aplicáveis", () => {
+  const reductionHtml = read("reducao.html");
+  const reductionJs = read("reducao.js");
+
+  assert.match(reductionHtml, /id="copy-first-maed"/);
+  assert.match(reductionJs, /data-field='maedInput'/);
+  assert.match(reductionJs, /function copyFirstMaedToAll/);
+  assert.match(reductionJs, /maedInput: row\.maedInput === undefined \? 100/);
 });
