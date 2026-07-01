@@ -119,7 +119,7 @@ test("soma mais de uma destinacao na mesma obra", () => {
   );
 });
 
-test("não aplica fator social nem fator de ajuste à pessoa jurídica", () => {
+test("não aplica fator social, mas usa meta de 50%/70% para pessoa jurídica", () => {
   const julyVau = [{
     ...vauRows[0],
     RES: 2799.57,
@@ -150,13 +150,24 @@ test("não aplica fator social nem fator de ajuste à pessoa jurídica", () => {
   assert.equal(company.rmtIntegral, 34758.06);
   assert.equal(company.taxableRmt, 34758.06);
   assert.equal(company.estimatedContribution, 12790.97);
-  assert.equal(company.adjustmentRate, 1);
-  assert.equal(company.adjustmentTarget, 34758.06);
+  assert.equal(company.adjustmentRate, 0.50);
+  assert.equal(company.adjustmentTarget, 17379.03);
 
   assert.equal(individual.rmtIntegral, 6951.61);
   assert.equal(individual.estimatedContribution, 2558.19);
   assert.equal(individual.adjustmentRate, 0.50);
   assert.equal(individual.adjustmentTarget, 3475.81);
+
+  const largeCompany = calc.calculateConstruction({
+    ...common,
+    responsavelObra: "PJ",
+    destinacoes: [{
+      destinacao: "RES",
+      tipoObra: "ALV",
+      areaConstrucao: 400,
+    }],
+  }, julyVau, concreteRows);
+  assert.equal(largeCompany.adjustmentRate, 0.70);
 });
 
 test("usa periodo e areas do projeto na afericao parcial", () => {

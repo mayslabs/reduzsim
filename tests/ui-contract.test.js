@@ -100,9 +100,10 @@ test("distingue corretamente os cálculos de pessoa física e jurídica", () => 
   const final = read("final.js");
 
   assert.match(core, /if \(responsibleType !== "PF"\) return 1/);
-  assert.match(core, /data\.responsavelObra === "PF"/);
+  assert.match(core, /adjustmentArea <= 350 \? 0\.50 : 0\.70/);
   assert.match(result, /Fator social não aplicado \(pessoa jurídica\)/);
-  assert.match(reduction, /fator social e fator de ajuste de 50%\/70% não se aplicam/);
+  assert.match(reduction, /meta de comprovação usa 50% da RMT até 350 m² e 70% acima/);
+  assert.match(final, /meta comercial de comprovação considera 50%\/70% da RMT/);
   assert.doesNotMatch(final, /mesma metodologia da pessoa física/);
 });
 

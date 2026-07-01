@@ -400,9 +400,7 @@
     const estimatedContribution = roundMoney(taxableRmt * 0.368);
     const estimatedContributionWithoutDecay = roundMoney(taxableRmtWithoutDecay * 0.368);
     const adjustmentArea = useProjectAreas ? projectAreaTotal : areaTotal;
-    const adjustmentRate = data.responsavelObra === "PF"
-      ? (adjustmentArea <= 350 ? 0.50 : 0.70)
-      : 1;
+    const adjustmentRate = adjustmentArea <= 350 ? 0.50 : 0.70;
     const adjustmentTarget = roundMoney(rmtNonDecadent * adjustmentRate);
 
     return {

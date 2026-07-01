@@ -517,7 +517,7 @@ function getStoredRows() {
 
 function getCurrentCalculationBasis() {
   return {
-    calculationVersion: 4,
+    calculationVersion: 5,
     receitaCalculatedAt: receitaResult.calculatedAt || "",
     rmt: round(receitaResult.rmtNaoDecadente || receitaResult.rmt || 0),
     areaTotal: round(receitaResult.areaTotal || 0),
@@ -540,12 +540,7 @@ function isSameCalculationBasis(a, b) {
 }
 
 function getRmtGoal() {
-  if (Number.isFinite(Number(receitaResult.metaFatorAjuste))) {
-    return round(receitaResult.metaFatorAjuste);
-  }
-  const metaPercentual = formData.responsavelObra === "PF"
-    ? ((receitaResult.areaTotal || 0) <= 350 ? 0.5 : 0.7)
-    : 1;
+  const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 0.5 : 0.7;
   return round((receitaResult.rmtNaoDecadente || receitaResult.rmt || 0) * metaPercentual);
 }
 
@@ -625,10 +620,7 @@ function updateTotals(rows) {
   );
   const receita = comparison.baseline;
   const rmtSero = round(receitaResult.rmtNaoDecadente || receitaResult.rmt || 0);
-  const metaPercentual = Number(receitaResult.metaPercentual)
-    || (formData.responsavelObra === "PF"
-      ? ((receitaResult.areaTotal || 0) <= 350 ? 50 : 70)
-      : 100);
+  const metaPercentual = (receitaResult.areaTotal || 0) <= 350 ? 50 : 70;
   const rmtMeta = getRmtGoal();
   const percentualAtingido = rmtSero > 0 ? round((totalRemAtualizada / rmtSero) * 100) : 0;
   const faltaMeta = round(Math.max(rmtMeta - totalRemAtualizada, 0));
@@ -649,7 +641,7 @@ function updateTotals(rows) {
   setText("percentual-reducao", percentualReducao.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
   setText("rmt-sero", fmt(rmtSero));
   setText("rmt-meta", fmt(rmtMeta));
-  setText("rmt-meta-label", formData.responsavelObra === "PJ" ? "Base integral a comprovar" : "Meta de comprovação");
+  setText("rmt-meta-label", "Meta de comprovação");
   setText("rmt-meta-percent", metaPercentual.toLocaleString("pt-BR"));
   setText("rmt-percentual-atingido", percentualAtingido.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
   setText("rmt-comprovado", fmt(totalRemAtualizada));

@@ -285,7 +285,7 @@ async function updateValues(forceRefresh = false) {
 
   const receitaResult = {
     calculatedAt: formData.calculatedAt,
-    calculationVersion: 4,
+    calculationVersion: 5,
     cod: calculation.codTotal,
     rmt: calculation.rmtIntegral,
     rmtIntegral: calculation.rmtIntegral,
@@ -378,7 +378,7 @@ async function updateValues(forceRefresh = false) {
     : " Fator social não aplicado (pessoa jurídica).";
   setText(
     "calculation-meta",
-    `VAU ${receitaResult.indices.vau.period || "-"}, cálculo v4, aferição em ${fmtInputDate(formData.dataAfericao)}.${responsibleMeta}${precastMeta}`,
+    `VAU ${receitaResult.indices.vau.period || "-"}, cálculo v5, aferição em ${fmtInputDate(formData.dataAfericao)}.${responsibleMeta}${precastMeta}`,
   );
 
 }

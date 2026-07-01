@@ -216,7 +216,7 @@ function renderCommercialAndLegal(totals) {
   }
   if (formData.responsavelObra === "PJ") {
     const current = document.getElementById("proposal-validity")?.textContent || "";
-    setText("proposal-validity", `${current} Para pessoa jurídica, o cálculo indireto não aplica fator social nem fator de ajuste de 50%/70%.`);
+    setText("proposal-validity", `${current} Para pessoa jurídica, o fator social não se aplica; a meta comercial de comprovação considera 50%/70% da RMT.`);
   }
   if ((formData.tipoAfericao || "TOTAL") !== "TOTAL") {
     const current = document.getElementById("proposal-validity")?.textContent || "";
