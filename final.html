@@ -185,7 +185,7 @@
 
           <div class="rs-proposal-bars">
             <div class="rs-proposal-bar-row">
-              <span>INSS sem decadência</span>
+              <span id="proposal-baseline-label">INSS estimado</span>
               <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--gray" id="bar-sem-reducao"></div></div>
               <strong>R$ <span id="sem-reducao">0,00</span></strong>
             </div>
@@ -195,7 +195,7 @@
               <strong>R$ <span id="com-reducao">0,00</span></strong>
             </div>
             <div class="rs-proposal-bar-row">
-              <span class="rs-proposal-bar-label"><strong>Economia bruta</strong><small><span id="economia-bruta-percent">0%</span> do INSS sem decadência</small></span>
+              <span class="rs-proposal-bar-label"><strong>Economia bruta</strong><small><span id="economia-bruta-percent">0%</span> <span id="economia-baseline-label">do INSS estimado</span></small></span>
               <div class="rs-proposal-bar-track"><div class="rs-proposal-bar rs-proposal-bar--darkgreen" id="bar-economia-bruta"></div></div>
               <strong>R$ <span id="economia-bruta">0,00</span></strong>
             </div>
@@ -267,6 +267,6 @@
     </div>
   </main>
 
-  <script src="final.js?v=20260701-special-cases"></script>
+  <script src="final.js?v=20260701-conditional-decay"></script>
 </body>
 </html>

@@ -280,6 +280,7 @@ async function updateValues(forceRefresh = false) {
   }
 
   const calculation = calculoCore.calculateConstruction(formData, vauRows, CONCRETO_DATA);
+  const hasDecay = calculation.decay.decadentCount > 0;
   renderRemuneracaoRows(calculation.lines);
 
   const receitaResult = {
@@ -351,6 +352,11 @@ async function updateValues(forceRefresh = false) {
   )).join(" | "));
   setText("COD", fmt(calculation.codTotal));
   setText("RMT", fmt(calculation.rmtIntegral));
+  setText("result-total-label", hasDecay ? "INSS estimado após decadência" : "INSS estimado");
+  document.getElementById("total-sem-decadencia-block").hidden = !hasDecay;
+  document.getElementById("rmt-nao-decadente-card").hidden = !hasDecay;
+  document.getElementById("decay-summary").hidden = !hasDecay;
+  document.querySelector(".rs-summary-grid").classList.toggle("rs-summary-grid--three", !hasDecay);
   setText("RMT-NAO-DECADENTE", fmt(calculation.rmtNonDecadent));
   setText("RMT-TRIBUTAVEL", fmt(calculation.taxableRmt));
   setText("concrete-credit", fmt(calculation.concreteCreditNonDecadent));

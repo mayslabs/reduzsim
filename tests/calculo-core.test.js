@@ -166,6 +166,28 @@ test("mantem a data original na primeira afericao parcial", () => {
   assert.equal(result.assessmentStartDate, "2021-01-01");
 });
 
+test("ignora estado residual de aferição anterior em obra total", () => {
+  const result = calc.calculateConstruction({
+    UF: "TO",
+    responsavelObra: "PF",
+    isUsoConcreto: false,
+    tipoAfericao: "TOTAL",
+    inicioAfericaoOpcao: "APOS_ULTIMA",
+    dataFimAfericaoAnterior: "2022-12-31",
+    dataInicioObra: "2018-01-01",
+    dataFimObra: "2023-05-31",
+    dataAfericao: "2026-07-01",
+    destinacoes: [{
+      destinacao: "RES",
+      tipoObra: "ALV",
+      areaConstrucao: 100,
+    }],
+  }, vauRows, concreteRows);
+
+  assert.equal(result.assessmentStartDate, "2018-01-01");
+  assert.ok(result.decay.decadentCount > 0);
+});
+
 test("aplica notas de pre-moldado conforme relacao com o COD", () => {
   const common = {
     UF: "TO",

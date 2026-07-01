@@ -112,6 +112,11 @@
   }
 
   function calculateAssessmentStartDate(data = {}) {
+    const allowsAlternativeStart = (
+      (data.tipoAfericao && data.tipoAfericao !== "TOTAL")
+      || data.mudancaResponsabilidade === true
+    );
+    if (!allowsAlternativeStart) return data.dataInicioObra || "";
     if (data.inicioAfericaoOpcao === "APOS_ULTIMA" && data.dataFimAfericaoAnterior) {
       return addDays(data.dataFimAfericaoAnterior, 1);
     }

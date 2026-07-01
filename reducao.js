@@ -865,9 +865,22 @@ function renderDecaySummary() {
   const decay = getDecayData();
   const summary = document.getElementById("decadencia-summary");
   if (!summary) return;
-  summary.textContent = decay.decadentCount
+  const hasDecay = decay.decadentCount > 0;
+  summary.hidden = !hasDecay;
+  summary.textContent = hasDecay
     ? `Decadência automática: ${decay.decadentCount} de ${decay.totalMonths} competências decadentes até ${monthLabel(decay.lastDecadentMonth)}. Percentual não decadente: ${decay.nonDecadentPercent.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%.`
-    : `Decadência automática: nenhuma competência decadente na data de aferição de ${formData.dataAfericao?.split("-").reverse().join("/") || "-"}.`;
+    : "";
+  document.getElementById("decadent-filter-button").hidden = !hasDecay;
+  document.getElementById("receita-apos-decadencia-block").hidden = !hasDecay;
+  setText("baseline-inss-label", hasDecay ? "INSS sem decadência" : "INSS estimado");
+  setText("rmt-tracker-label", hasDecay ? "RMT não decadente" : "RMT da obra");
+  setText(
+    "maed-premise",
+    hasDecay
+      ? "Premissa comercial editável do simulador. Meses sem atraso, decadentes ou paralisados permanecem zerados."
+      : "Premissa comercial editável do simulador. Meses sem atraso ou paralisados permanecem zerados.",
+  );
+  if (!hasDecay && currentMonthFilter === "decadent") currentMonthFilter = "active";
   document.getElementById("pj-premise-note").hidden = formData.responsavelObra !== "PJ";
 }
 

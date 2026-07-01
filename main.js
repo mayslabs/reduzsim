@@ -131,6 +131,7 @@ function updateSpecialControls() {
   if (!hasTransfer && inicioAfericaoOpcao.value === "TRANSFERENCIA") {
     inicioAfericaoOpcao.value = "OBRA";
   }
+  if (!isPartial && !hasTransfer) inicioAfericaoOpcao.value = "OBRA";
 
   const needsPreviousEnd = inicioAfericaoOpcao.value === "APOS_ULTIMA";
   document.querySelector("[data-special-field='previous-end']").hidden = !needsPreviousEnd;

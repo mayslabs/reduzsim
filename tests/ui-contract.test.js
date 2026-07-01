@@ -76,3 +76,19 @@ test("permite editar e replicar a MAED entre competências aplicáveis", () => {
   assert.match(reductionJs, /function copyFirstMaedToAll/);
   assert.match(reductionJs, /maedInput: row\.maedInput === undefined \? 100/);
 });
+
+test("mostra decadência apenas quando existem competências decadentes", () => {
+  const resultHtml = read("result.html");
+  const resultJs = read("result.js");
+  const reductionHtml = read("reducao.html");
+  const reductionJs = read("reducao.js");
+  const finalHtml = read("final.html");
+  const finalJs = read("final.js");
+
+  assert.match(resultHtml, /id="decay-summary"/);
+  assert.match(resultJs, /const hasDecay = calculation\.decay\.decadentCount > 0/);
+  assert.match(reductionHtml, /id="decadent-filter-button"/);
+  assert.match(reductionJs, /summary\.hidden = !hasDecay/);
+  assert.match(finalHtml, /id="proposal-baseline-label"/);
+  assert.match(finalJs, /function hasDecadence/);
+});

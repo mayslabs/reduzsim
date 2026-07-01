@@ -57,7 +57,7 @@
             <option value="false">Não</option>
           </select>
           <small class="rs-hint">O valor inicial é R$ 100,00 por competência e pode ser editado na lista mensal.</small>
-          <small class="rs-premise">Premissa comercial editável do simulador. Meses sem atraso, decadentes ou paralisados permanecem zerados.</small>
+          <small class="rs-premise" id="maed-premise">Premissa comercial editável do simulador. Meses sem atraso ou paralisados permanecem zerados.</small>
         </div>
         <div class="col-md-4">
           <label class="rs-label" for="data-referencia">Data prevista do pagamento</label>
@@ -130,9 +130,9 @@
 
     <section class="rs-summary-grid">
       <div class="rs-summary-card">
-        <div class="rs-summary-label">INSS sem decadência</div>
+        <div class="rs-summary-label" id="baseline-inss-label">INSS estimado</div>
         <div class="rs-summary-value">R$ <span id="receita-total">0,00</span></div>
-        <div class="rs-summary-sub">Após decadência: R$ <span id="receita-apos-decadencia">0,00</span></div>
+        <div class="rs-summary-sub" id="receita-apos-decadencia-block" hidden>Após decadência: R$ <span id="receita-apos-decadencia">0,00</span></div>
       </div>
       <div class="rs-summary-card rs-summary-card--accent">
         <div class="rs-summary-label">Com redução</div>
@@ -162,7 +162,7 @@
       <div class="rs-segmented no-print" id="month-filters" aria-label="Filtrar competências">
         <button type="button" data-month-filter="active" aria-pressed="true">Ativos <span id="active-month-count">0</span></button>
         <button type="button" data-month-filter="paused" aria-pressed="false">Paralisados <span id="paused-month-count">0</span></button>
-        <button type="button" data-month-filter="decadent" aria-pressed="false">Decadentes <span id="decadent-month-count">0</span></button>
+        <button type="button" id="decadent-filter-button" data-month-filter="decadent" aria-pressed="false" hidden>Decadentes <span id="decadent-month-count">0</span></button>
         <button type="button" data-month-filter="all" aria-pressed="false">Todos <span id="all-month-count">0</span></button>
       </div>
 
@@ -179,7 +179,7 @@
 
       <div class="rs-rmt-tracker">
         <div class="rs-rmt-card">
-          <span>RMT não decadente</span>
+          <span id="rmt-tracker-label">RMT da obra</span>
           <strong>R$ <span id="rmt-sero">0,00</span></strong>
         </div>
         <div class="rs-rmt-card">
@@ -221,7 +221,7 @@
   </main>
 
   <script src="indices.js?v=20260701-special-cases"></script>
-  <script src="calculo-core.js?v=20260701-special-cases"></script>
-  <script src="reducao.js?v=20260701-editable-maed"></script>
+  <script src="calculo-core.js?v=20260701-conditional-decay"></script>
+  <script src="reducao.js?v=20260701-conditional-decay"></script>
 </body>
 </html>

@@ -102,6 +102,10 @@ function setPrintTitle(prefix, clientName) {
   document.title = safeClientName ? `${prefix} - ${safeClientName}` : prefix;
 }
 
+function hasDecadence() {
+  return toNumber(receitaResult?.decadencia?.decadentCount) > 0;
+}
+
 function setBar(id, value, max) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -165,10 +169,15 @@ function saveHistory(record) {
 
 function buildWhatsappSummary(totals, totalComHonorarios) {
   const commercial = reducaoResult.commercial || {};
+  const baselineLines = hasDecadence()
+    ? [
+      `INSS sem decadência: R$ ${fmt(totals.receita)}`,
+      `INSS após decadência: R$ ${fmt(totals.receitaAposDecadencia)}`,
+    ]
+    : [`INSS estimado: R$ ${fmt(totals.receita)}`];
   return [
     `Resumo ReduzSim - ${formData.clienteNome || "cliente"}`,
-    `INSS sem decadência: R$ ${fmt(totals.receita)}`,
-    `INSS após decadência: R$ ${fmt(totals.receitaAposDecadencia)}`,
+    ...baselineLines,
     `INSS com redução: R$ ${fmt(totals.totalReducao)}`,
     `Economia bruta: R$ ${fmt(totals.economiaBruta)} (${fmtPercent(totals.percentualReducao)}%)`,
     `Honorários: R$ ${fmt(totals.honorarios)} (${totals.honorariosDescription || `${fmtPercent(totals.honorariosPercent)}% sobre economia obtida`})`,
@@ -234,6 +243,7 @@ function renderCommercialAndLegal(totals) {
 
   const totals = reducaoResult.totals || {};
   const totalComHonorarios = toNumber(totals.totalReducao) + toNumber(totals.honorarios);
+  const hasDecay = hasDecadence();
 
   setPrintTitle("Redução de INSS de obra", formData.clienteNome);
   setText("final-date", new Date(reducaoResult.calculatedAt || Date.now()).toLocaleString("pt-BR", {
@@ -245,6 +255,8 @@ function renderCommercialAndLegal(totals) {
   }));
   setText("percentual-reducao", `${fmtPercentInt(totals.percentualReducao)}%`);
   setText("economia-bruta-percent", `${fmtPercentInt(totals.percentualReducao)}%`);
+  setText("proposal-baseline-label", hasDecay ? "INSS sem decadência" : "INSS estimado");
+  setText("economia-baseline-label", hasDecay ? "do INSS sem decadência" : "do INSS estimado");
   setText("sem-reducao", fmt(totals.receita));
   setText("com-reducao", fmt(totals.totalReducao));
   setText("economia-bruta", fmt(totals.economiaBruta));
