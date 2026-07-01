@@ -43,6 +43,7 @@ let formData = {};
 let receitaResult = {};
 let reducaoResult = {};
 let paralisacoes = [];
+let currentMonthFilter = "active";
 
 function round(value) {
   return Math.round((Number(value) || 0) * 100) / 100;
@@ -136,7 +137,10 @@ function periodLabel(period) {
 }
 
 function getWorkMonths() {
-  return listMonths(formData.dataInicioObra, formData.dataFimObra);
+  return listMonths(
+    receitaResult.dateInitial || formData.dataInicioAfericao || formData.dataInicioObra,
+    receitaResult.dateFinal || formData.dataFimObra,
+  );
 }
 
 function getDecayData() {
@@ -365,6 +369,7 @@ function renderRows(rows) {
     item.dataset.monthRow = row.month;
     item.dataset.paralisacao = row.isParalisacao ? "true" : "false";
     item.dataset.decadente = row.isDecadente ? "true" : "false";
+    item.dataset.active = !row.isParalisacao && !row.isDecadente ? "true" : "false";
     const isBlocked = row.isParalisacao || row.isDecadente;
     const status = [
       row.isDecadente ? "Decadente" : "",
@@ -395,7 +400,7 @@ function renderRows(rows) {
       </div>
       <label>
         <span>SELIC acum. (%)</span>
-        <input class="rs-table-input" data-field="selic" type="number" step="0.01" value="${row.selic}" ${isBlocked ? "disabled" : ""}>
+        <input class="rs-table-input" data-field="selic" type="number" step="0.01" value="${isBlocked ? 0 : row.selic}" ${isBlocked ? "disabled" : ""}>
       </label>
       <div class="rs-monthly-money">
         <span>Juros mora</span>
@@ -405,7 +410,7 @@ function renderRows(rows) {
       <div class="rs-monthly-money">
         <span>MAED</span>
         <strong data-output="maed">R$ ${fmt(row.maed)}</strong>
-        <small>Valor fixo quando aplicável</small>
+        <small data-detail="maed">${row.maed > 0 ? "Valor fixo aplicado" : "Não aplicável"}</small>
       </div>
       <div class="rs-monthly-total">
         <span>Total</span>
@@ -414,6 +419,32 @@ function renderRows(rows) {
     `;
     body.appendChild(item);
   });
+  updateMonthFilters(rows);
+}
+
+function updateMonthFilters(rows) {
+  const counts = {
+    active: rows.filter((row) => !row.isParalisacao && !row.isDecadente).length,
+    paused: rows.filter((row) => row.isParalisacao).length,
+    decadent: rows.filter((row) => row.isDecadente).length,
+    all: rows.length,
+  };
+  Object.entries(counts).forEach(([key, value]) => setText(`${key}-month-count`, value));
+  document.querySelectorAll("[data-month-row]").forEach((row) => {
+    const visible = currentMonthFilter === "all"
+      || (currentMonthFilter === "active" && row.dataset.active === "true")
+      || (currentMonthFilter === "paused" && row.dataset.paralisacao === "true")
+      || (currentMonthFilter === "decadent" && row.dataset.decadente === "true");
+    row.hidden = !visible;
+  });
+  document.querySelectorAll("[data-month-filter]").forEach((button) => {
+    button.setAttribute("aria-pressed", button.dataset.monthFilter === currentMonthFilter ? "true" : "false");
+  });
+}
+
+function setMonthFilter(filter) {
+  currentMonthFilter = ["active", "paused", "decadent", "all"].includes(filter) ? filter : "active";
+  updateMonthFilters(calculateRows(readMonthlyRows()));
 }
 
 function buildInitialRows() {
@@ -428,7 +459,7 @@ function buildInitialRows() {
 
   const rows = months.map((month) => ({
     month,
-    selic: SELIC_ACUMULADA[month] ?? 0,
+    selic: pausedMonths.has(month) || decadentMonths.has(month) ? 0 : (SELIC_ACUMULADA[month] ?? 0),
     isParalisacao: pausedMonths.has(month),
     isDecadente: decadentMonths.has(month),
     remOriginal: pausedMonths.has(month) || decadentMonths.has(month) ? 0 : remMensalOriginal,
@@ -477,7 +508,7 @@ function getStoredRows() {
 
 function getCurrentCalculationBasis() {
   return {
-    calculationVersion: 2,
+    calculationVersion: 3,
     receitaCalculatedAt: receitaResult.calculatedAt || "",
     rmt: round(receitaResult.rmtNaoDecadente || receitaResult.rmt || 0),
     areaTotal: round(receitaResult.areaTotal || 0),
@@ -661,8 +692,10 @@ function updateRenderedMonthlyValues(rows) {
     });
     const fineDetail = rowElement.querySelector("[data-detail='multaMora']");
     const interestDetail = rowElement.querySelector("[data-detail='juros']");
+    const maedDetail = rowElement.querySelector("[data-detail='maed']");
     if (fineDetail) fineDetail.textContent = `${row.diasAtraso || 0} dias · ${fmtRate(row.multaMoraPercent)}%`;
     if (interestDetail) interestDetail.textContent = `SELIC ${fmtRate(row.jurosPercent)}%`;
+    if (maedDetail) maedDetail.textContent = row.maed > 0 ? "Valor fixo aplicado" : "Não aplicável";
   });
 }
 
@@ -779,6 +812,7 @@ function initCommercialFields() {
     document.getElementById("honorarios-base").value = settings.honorariosBase;
   }
   if (settings.honorariosFixed !== undefined) document.getElementById("honorarios-fixed").value = settings.honorariosFixed;
+  currentMonthFilter = settings.monthFilter || "active";
 }
 
 function getCommercialData() {
@@ -798,6 +832,7 @@ function getCalculationSettings() {
     honorariosPercent: parseLocaleNumber(document.getElementById("honorarios-percent").value),
     honorariosBase: document.getElementById("honorarios-base")?.value || "economia",
     honorariosFixed: parseLocaleNumber(document.getElementById("honorarios-fixed").value),
+    monthFilter: currentMonthFilter,
   };
 }
 
@@ -875,6 +910,10 @@ function finalizeCalculation() {
       updateMonthlyCalculation();
     }
   });
+  document.getElementById("month-filters").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-month-filter]");
+    if (button) setMonthFilter(button.dataset.monthFilter);
+  });
   document.getElementById("honorarios-percent").addEventListener("input", updateMonthlyCalculation);
   document.getElementById("honorarios-mode").addEventListener("change", () => {
     updateHonorariosMode();
@@ -886,7 +925,11 @@ function finalizeCalculation() {
   document.getElementById("data-referencia").addEventListener("change", () => refreshSelic(true));
   document.getElementById("data-transmissao").addEventListener("change", updateMonthlyCalculation);
 
-  await refreshSelic(false);
-  restoreMonthlyCalculation();
+  try {
+    await refreshSelic(false);
+    restoreMonthlyCalculation();
+  } finally {
+    document.getElementById("calculation-loading").hidden = true;
+  }
   window.ReduzSimIndices?.scheduleAutoUpdates([], () => refreshSelic(true));
 })();

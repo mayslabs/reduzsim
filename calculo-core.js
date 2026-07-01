@@ -26,6 +26,22 @@
     "areaDescoberta",
   ];
 
+  const PROJECT_AREA_KEYS = [
+    "projetoAreaConstrucao",
+    "projetoAreaReforma",
+    "projetoAreaDemolicao",
+    "projetoAreaCoberta",
+    "projetoAreaDescoberta",
+  ];
+
+  const PROJECT_AREA_MAP = {
+    areaConstrucao: "projetoAreaConstrucao",
+    areaReforma: "projetoAreaReforma",
+    areaDemolicao: "projetoAreaDemolicao",
+    areaCoberta: "projetoAreaCoberta",
+    areaDescoberta: "projetoAreaDescoberta",
+  };
+
   function roundMoney(value) {
     return Math.round(((Number(value) || 0) + Number.EPSILON) * 100) / 100;
   }
@@ -86,6 +102,23 @@
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
+  }
+
+  function addDays(value, amount) {
+    const date = parseDate(value);
+    if (!date) return "";
+    date.setDate(date.getDate() + amount);
+    return formatLocalISO(date);
+  }
+
+  function calculateAssessmentStartDate(data = {}) {
+    if (data.inicioAfericaoOpcao === "APOS_ULTIMA" && data.dataFimAfericaoAnterior) {
+      return addDays(data.dataFimAfericaoAnterior, 1);
+    }
+    if (data.inicioAfericaoOpcao === "TRANSFERENCIA" && data.dataTransferencia) {
+      return data.dataTransferencia;
+    }
+    return data.dataInicioObra || "";
   }
 
   function calculateProposalValidity(referenceDateValue = new Date()) {
@@ -152,6 +185,10 @@
     AREA_KEYS.forEach((key) => {
       normalized[key] = Math.max(toNumber(item?.[key]), 0);
     });
+    PROJECT_AREA_KEYS.forEach((key) => {
+      normalized[key] = Math.max(toNumber(item?.[key]), 0);
+    });
+    normalized.preMoldadoValor = Math.max(toNumber(item?.preMoldadoValor), 0);
     return normalized;
   }
 
@@ -189,16 +226,30 @@
     return destination === "EGAR" ? 0.80 : 1;
   }
 
-  function getCategoryTotals(destinations) {
+  function getAreaValue(destination, areaKey, useProjectAreas) {
+    const projectValue = toNumber(destination[PROJECT_AREA_MAP[areaKey]]);
+    return useProjectAreas && projectValue > 0
+      ? projectValue
+      : toNumber(destination[areaKey]);
+  }
+
+  function getCategoryTotals(destinations, useProjectAreas = false) {
     return destinations.reduce((totals, item) => ({
-      construcao: totals.construcao + item.areaConstrucao + item.areaCoberta + item.areaDescoberta,
-      reforma: totals.reforma + item.areaReforma,
-      demolicao: totals.demolicao + item.areaDemolicao,
+      construcao: totals.construcao
+        + getAreaValue(item, "areaConstrucao", useProjectAreas)
+        + getAreaValue(item, "areaCoberta", useProjectAreas)
+        + getAreaValue(item, "areaDescoberta", useProjectAreas),
+      reforma: totals.reforma + getAreaValue(item, "areaReforma", useProjectAreas),
+      demolicao: totals.demolicao + getAreaValue(item, "areaDemolicao", useProjectAreas),
     }), { construcao: 0, reforma: 0, demolicao: 0 });
   }
 
-  function buildAreaLines(destination, vau) {
-    const totalMainArea = destination.areaConstrucao + destination.areaReforma + destination.areaDemolicao;
+  function buildAreaLines(destination, vau, useProjectAreas = false) {
+    const totalMainArea = (
+      getAreaValue(destination, "areaConstrucao", useProjectAreas)
+      + getAreaValue(destination, "areaReforma", useProjectAreas)
+      + getAreaValue(destination, "areaDemolicao", useProjectAreas)
+    );
     const equivalence = getEquivalenceFactor(destination.destinacao, totalMainArea);
     return [
       {
@@ -249,16 +300,23 @@
 
   function calculateConstruction(data, vauRows, concreteRows) {
     const destinations = normalizeDestinations(data?.destinacoes);
-    const categoryTotals = getCategoryTotals(destinations);
-    const decay = calculateDecay(data?.dataInicioObra, data?.dataFimObra, data?.dataAfericao);
+    const useProjectAreas = Boolean(data?.tipoAfericao && data.tipoAfericao !== "TOTAL");
+    const categoryTotals = getCategoryTotals(destinations, useProjectAreas);
+    const assessmentStartDate = calculateAssessmentStartDate(data);
+    const decay = calculateDecay(assessmentStartDate, data?.dataFimObra, data?.dataAfericao);
     const lines = [];
+    const precastSummaries = [];
     let areaTotal = 0;
+    let projectAreaTotal = 0;
     let codTotal = 0;
     let rmtIntegral = 0;
     let concreteCreditIntegral = 0;
 
     destinations.forEach((destination) => {
       AREA_KEYS.forEach((key) => { areaTotal += destination[key]; });
+      AREA_KEYS.forEach((key) => {
+        projectAreaTotal += getAreaValue(destination, key, useProjectAreas);
+      });
       const vauRow = (vauRows || []).find((row) => row.UF === data.UF);
       const concreteRow = (concreteRows || []).find((row) => row.UF === data.UF);
       const vau = toNumber(vauRow?.[destination.destinacao]);
@@ -268,17 +326,43 @@
         reforma: getSocialFactor(categoryTotals.reforma, data.responsavelObra),
         demolicao: getSocialFactor(categoryTotals.demolicao, data.responsavelObra),
       };
-      const laborRate = getLaborRate(destination.destinacao, destination.tipoObra);
       const destinationReduction = getDestinationReduction(destination.destinacao);
+      const areaLines = buildAreaLines(destination, vau, useProjectAreas);
+      const eligiblePrecastCod = roundMoney(areaLines
+        .filter((line) => line.key !== "demolicao")
+        .reduce((sum, line) => sum + line.cod, 0));
+      const precastValue = destination.preMoldadoValor;
+      const precastRatio = eligiblePrecastCod > 0 ? precastValue / eligiblePrecastCod : 0;
+      let precastStatus = "NAO_INFORMADO";
+      if (precastValue > 0 && destination.tipoObra !== "ALV") precastStatus = "TIPO_INELEGIVEL";
+      else if (precastValue > 0 && precastRatio >= 0.40) precastStatus = "REDUCAO_70";
+      else if (precastValue > 0) precastStatus = "CALCULO_MISTO";
 
-      buildAreaLines(destination, vau).forEach((line) => {
+      precastSummaries.push({
+        destinationId: destination.id,
+        destination: destination.destinacao,
+        destinationLabel: DESTINATION_LABELS[destination.destinacao],
+        invoiceValue: roundMoney(precastValue),
+        eligibleCod: eligiblePrecastCod,
+        ratio: roundMoney(precastRatio * 100),
+        status: precastStatus,
+      });
+
+      areaLines.forEach((line) => {
         if (line.area <= 0) return;
+        const hasPrecastBenefit = line.key !== "demolicao" && destination.tipoObra === "ALV";
+        const effectiveConstructionType = hasPrecastBenefit && precastStatus === "CALCULO_MISTO"
+          ? "MAD"
+          : destination.tipoObra;
+        const precastFactor = hasPrecastBenefit && precastStatus === "REDUCAO_70" ? 0.30 : 1;
+        const laborRate = getLaborRate(destination.destinacao, effectiveConstructionType);
         const rmt = roundMoney(
           line.cod
           * socialByCategory[line.key]
           * line.categoryFactor
           * laborRate
-          * destinationReduction,
+          * destinationReduction
+          * precastFactor,
         );
         const concreteCredit = roundMoney(
           line.cod * concretePercent * 0.05 * line.concreteCategoryFactor,
@@ -293,6 +377,9 @@
           destinationLabel: DESTINATION_LABELS[destination.destinacao],
           constructionType: destination.tipoObra,
           constructionTypeLabel: TYPE_LABELS[destination.tipoObra],
+          effectiveConstructionType,
+          precastFactor,
+          precastStatus,
           vau,
           rmt,
           concreteCredit,
@@ -307,14 +394,17 @@
     const taxableRmtWithoutDecay = roundMoney(Math.max(rmtIntegral - concreteCreditIntegral, 0));
     const estimatedContribution = roundMoney(taxableRmt * 0.368);
     const estimatedContributionWithoutDecay = roundMoney(taxableRmtWithoutDecay * 0.368);
-    const adjustmentRate = areaTotal <= 350 ? 0.50 : 0.70;
+    const adjustmentArea = useProjectAreas ? projectAreaTotal : areaTotal;
+    const adjustmentRate = adjustmentArea <= 350 ? 0.50 : 0.70;
     const adjustmentTarget = roundMoney(rmtNonDecadent * adjustmentRate);
 
     return {
       destinations,
       lines,
       categoryTotals,
+      assessmentStartDate,
       areaTotal: roundMoney(areaTotal),
+      projectAreaTotal: roundMoney(projectAreaTotal),
       codTotal,
       rmtIntegral,
       rmtNonDecadent,
@@ -328,6 +418,7 @@
       adjustmentRate,
       adjustmentTarget,
       decay,
+      precastSummaries,
     };
   }
 
@@ -423,9 +514,12 @@
 
   return {
     AREA_KEYS,
+    PROJECT_AREA_KEYS,
     DESTINATION_LABELS,
     TYPE_LABELS,
     addMonths,
+    addDays,
+    calculateAssessmentStartDate,
     calculateCommercialComparison,
     calculateConstruction,
     calculateDecay,

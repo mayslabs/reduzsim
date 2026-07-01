@@ -8,8 +8,8 @@
   --border: #e5e7eb;
   --bg: #f5f7fa;
   --white: #ffffff;
-  --radius: 12px;
-  --shadow: 0 2px 16px rgba(0, 0, 0, .08);
+  --radius: 8px;
+  --shadow: 0 1px 5px rgba(15, 23, 42, .07);
 }
 
 *, *::before, *::after {
@@ -27,11 +27,9 @@ body {
 .rs-navbar {
   background: var(--white);
   border-bottom: 1px solid var(--border);
-  padding: .85rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, .06);
+  padding: .55rem 0;
+  position: static;
+  box-shadow: none;
 }
 
 .rs-navbar .container {
@@ -50,7 +48,7 @@ body {
 .rs-brand-logo {
   display: block;
   height: auto;
-  max-height: 44px;
+  max-height: 36px;
   width: min(260px, 72vw);
 }
 
@@ -71,9 +69,10 @@ body {
 }
 
 .rs-hero {
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  background: #26363d;
+  border-bottom: 4px solid var(--green);
   color: white;
-  padding: 2.5rem 0 2rem;
+  padding: 2rem 0 1.7rem;
 }
 
 .rs-hero-title {
@@ -96,6 +95,7 @@ body {
 
 .rs-card {
   background: var(--white);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   margin-bottom: 1.25rem;
@@ -198,6 +198,21 @@ body {
 
 .rs-input-group .rs-input {
   padding-right: 2.5rem;
+}
+
+.rs-input-prefix {
+  color: var(--gray);
+  font-size: .85rem;
+  font-weight: 700;
+  left: .9rem;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.rs-input-group:has(.rs-input-prefix) .rs-input {
+  padding-left: 2.6rem;
 }
 
 .rs-hint {
@@ -330,9 +345,10 @@ body {
 }
 
 .rs-total-card {
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  background: #176b57;
+  border: 1px solid #125645;
   border-radius: var(--radius);
-  box-shadow: 0 4px 20px rgba(26, 160, 123, .35);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .12);
   color: white;
   margin-bottom: 1.25rem;
   padding: 2rem;
@@ -353,7 +369,7 @@ body {
 .rs-total-badge {
   background: rgba(255, 255, 255, .16);
   border: 1px solid rgba(255, 255, 255, .34);
-  border-radius: 10px;
+  border-radius: 8px;
   min-width: 190px;
   padding: 1rem 1.25rem;
   text-align: center;
@@ -606,7 +622,7 @@ body {
   align-items: center;
   background: var(--green-light);
   border: 1px solid rgba(26, 160, 123, .2);
-  border-radius: 12px;
+  border-radius: 8px;
   display: flex;
   flex: 0 0 72px;
   height: 72px;
@@ -662,7 +678,7 @@ body {
 
 .rs-final-main {
   align-items: center;
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  background: #176b57;
   border-radius: var(--radius);
   box-shadow: 0 4px 20px rgba(26, 160, 123, .25);
   color: white;
@@ -844,6 +860,127 @@ body {
   color: var(--dark);
   font-size: 1.35rem;
   font-weight: 800;
+}
+
+.rs-premise {
+  color: #6b4f21;
+  display: block;
+  font-size: .74rem;
+  line-height: 1.4;
+  margin-top: .35rem;
+}
+
+.rs-special-panel,
+.rs-project-areas {
+  background: #f7f9fa;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.rs-special-panel > strong,
+.rs-project-areas > strong,
+.rs-project-areas > small {
+  display: block;
+}
+
+.rs-special-panel > strong,
+.rs-project-areas > strong {
+  color: var(--dark);
+  margin-bottom: .75rem;
+}
+
+.rs-project-areas > small {
+  color: var(--gray);
+  font-size: .8rem;
+  margin-bottom: .85rem;
+}
+
+.rs-commercial-premise {
+  margin-top: 1rem;
+}
+
+.rs-nowrap {
+  white-space: nowrap;
+}
+
+.rs-calculation-meta {
+  align-items: center;
+  color: var(--gray);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: .72rem;
+  gap: .35rem .65rem;
+  justify-content: center;
+  margin: .75rem 0 1rem;
+  text-align: center;
+}
+
+.rs-calculation-meta strong {
+  color: var(--green-dark);
+}
+
+.rs-segmented {
+  background: #eef2f3;
+  border-radius: 8px;
+  display: inline-flex;
+  gap: 2px;
+  margin-bottom: 1rem;
+  padding: 3px;
+}
+
+.rs-segmented button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #53606a;
+  font-size: .8rem;
+  font-weight: 700;
+  min-height: 34px;
+  padding: .45rem .7rem;
+}
+
+.rs-segmented button[aria-pressed="true"] {
+  background: var(--white);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .1);
+  color: var(--green-dark);
+}
+
+.rs-segmented button span {
+  background: #dbe3e6;
+  border-radius: 999px;
+  display: inline-block;
+  font-size: .68rem;
+  margin-left: .2rem;
+  min-width: 20px;
+  padding: .08rem .3rem;
+  text-align: center;
+}
+
+.rs-loading-state {
+  align-items: center;
+  background: #f7f9fa;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #53606a;
+  display: flex;
+  gap: .75rem;
+  margin: 1rem 0;
+  padding: 1rem;
+}
+
+.rs-spinner {
+  animation: rs-spin .8s linear infinite;
+  border: 3px solid #d8e2df;
+  border-radius: 50%;
+  border-top-color: var(--green);
+  height: 22px;
+  width: 22px;
+}
+
+@keyframes rs-spin {
+  to { transform: rotate(360deg); }
 }
 
 .rs-summary-sub {
@@ -1224,7 +1361,7 @@ body {
 .rs-proposal-sheet {
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
   overflow: hidden;
   padding: 1.35rem;
@@ -1285,7 +1422,7 @@ body {
 .rs-proposal-panel,
 .rs-proposal-calcs {
   border: 1.5px solid var(--green);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 1rem;
 }
 
@@ -1547,7 +1684,7 @@ body {
 
 .rs-proposal-note-panel {
   background: var(--green);
-  border-radius: 12px;
+  border-radius: 8px;
   color: #fff;
   display: grid;
   gap: .75rem;
@@ -1733,7 +1870,7 @@ body {
   align-items: center;
   background: var(--green-light);
   border: 1px solid rgba(26, 160, 123, .35);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   gap: 1rem;
   justify-content: space-between;
@@ -1859,7 +1996,7 @@ body {
 .rs-rmt-card {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 1.05rem 1.1rem;
 }
 
@@ -1940,7 +2077,7 @@ body {
   align-items: stretch;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   display: grid;
   gap: .55rem;
   grid-template-columns: 100px 140px 132px 112px 112px 118px 112px 112px 120px;
@@ -2010,6 +2147,15 @@ body {
 .rs-monthly-row--paused > div,
 .rs-monthly-row--paused > label {
   background: #f0fdf9;
+}
+
+.rs-proposal-info-copy > small {
+  color: #5b6f69;
+  display: block;
+  font-size: .68rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: .2rem;
 }
 
 .rs-monthly-row .rs-monthly-money small {
@@ -2235,6 +2381,21 @@ body {
   .rs-foot-buttons button {
     flex: 1;
     justify-content: center;
+  }
+
+  .rs-segmented {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .rs-segmented button {
+    min-width: 0;
+  }
+
+  .rs-special-panel,
+  .rs-project-areas {
+    padding: .85rem;
   }
 }
 
@@ -2527,7 +2688,7 @@ body {
 
   .rs-proposal-sheet {
     border: 1px solid #d7dee4;
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: none;
     display: flex;
     flex-direction: column;

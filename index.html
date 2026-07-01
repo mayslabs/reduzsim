@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/reduzsim-favicon-64.png?v=20260516-green-only">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="main.css?v=20260630-charges-concrete">
+  <link rel="stylesheet" href="main.css?v=20260701-special-cases">
 </head>
 <body>
   <nav class="rs-navbar">
@@ -53,7 +53,7 @@
       </div>
 
       <div class="row g-3">
-        <div class="col-md-6">
+        <div class="col-md-4">
           <label class="rs-label" for="responsavel-obra">Responsável pela obra</label>
           <select class="rs-select" name="responsavel-obra" id="responsavel-obra" required>
             <option value="PF">Pessoa física</option>
@@ -61,11 +61,12 @@
           </select>
         </div>
         <div class="col-md-4">
-          <label class="rs-label" for="uso-concreto">Usou concreto usinado, massa asfáltica ou argamassa usinada?</label>
+          <label class="rs-label" for="uso-concreto">Materiais usinados</label>
           <select class="rs-select" name="uso-concreto" id="uso-concreto" required>
             <option value="false" selected>Não</option>
             <option value="true">Sim</option>
           </select>
+          <small class="rs-hint">Concreto, massa asfáltica ou argamassa usinada. O crédito será calculado por categoria.</small>
         </div>
         <div class="col-md-4">
           <label class="rs-label" for="UF">Estado (UF)</label>
@@ -113,9 +114,97 @@
 
       <div class="rs-section-title">
         <div class="rs-section-icon">4</div>
+        Situação da aferição
+      </div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="rs-label" for="tipo-afericao">Tipo da aferição</label>
+          <select class="rs-select" id="tipo-afericao">
+            <option value="TOTAL">Obra total</option>
+            <option value="PARCIAL_HABITESE">Parte da obra com habite-se parcial</option>
+            <option value="PARCIAL_DECLARADA">Parte declarada sem habite-se</option>
+            <option value="INACABADA">Obra inacabada com laudo técnico</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="rs-label" for="mudanca-responsabilidade">Mudança de responsável</label>
+          <select class="rs-select" id="mudanca-responsabilidade">
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="rs-label" for="uso-pre-moldado">Notas de pré-moldados</label>
+          <select class="rs-select" id="uso-pre-moldado">
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
+        <div class="col-md-4" data-special-field="previous-end" hidden>
+          <label class="rs-label" for="data-fim-afericao-anterior">Fim da aferição anterior</label>
+          <input class="rs-input" type="date" id="data-fim-afericao-anterior">
+        </div>
+        <div class="col-md-4" data-special-field="transfer-date" hidden>
+          <label class="rs-label" for="data-transferencia">Data da transferência</label>
+          <input class="rs-input" type="date" id="data-transferencia">
+        </div>
+        <div class="col-md-4" data-special-field="start-option" hidden>
+          <label class="rs-label" for="inicio-afericao-opcao">Início do período atual</label>
+          <select class="rs-select" id="inicio-afericao-opcao">
+            <option value="OBRA">Data de início da obra</option>
+            <option value="APOS_ULTIMA">Dia seguinte à última aferição</option>
+            <option value="TRANSFERENCIA">Data da transferência</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="rs-special-panel" id="laudo-panel" hidden>
+        <strong>Laudo técnico da obra inacabada</strong>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="rs-label" for="laudo-data">Data do laudo</label>
+            <input class="rs-input" type="date" id="laudo-data">
+          </div>
+          <div class="col-md-4">
+            <label class="rs-label" for="laudo-conselho">Conselho profissional</label>
+            <select class="rs-select" id="laudo-conselho">
+              <option value="CREA">CREA</option>
+              <option value="CAU">CAU</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="rs-label" for="laudo-registro">Registro profissional</label>
+            <input class="rs-input" type="text" id="laudo-registro" maxlength="40">
+          </div>
+          <div class="col-md-6">
+            <label class="rs-label" for="laudo-art-rrt">Número da ART/RRT</label>
+            <input class="rs-input" type="text" id="laudo-art-rrt" maxlength="50">
+          </div>
+          <div class="col-md-3">
+            <label class="rs-label" for="laudo-medida">Medição do laudo</label>
+            <select class="rs-select" id="laudo-medida">
+              <option value="AREA">Área concluída (m²)</option>
+              <option value="PERCENTUAL">Percentual concluído</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="rs-label" for="laudo-valor">Área ou percentual</label>
+            <input class="rs-input" type="text" inputmode="decimal" id="laudo-valor">
+          </div>
+        </div>
+      </div>
+
+      <div class="rs-alert-info rs-commercial-premise" id="special-case-note" hidden>
+        Casos especiais dependem dos dados do CNO, habite-se, laudo e aferições anteriores. O resultado permanece uma simulação prévia para conferência no Sero.
+      </div>
+
+      <div class="rs-divider"></div>
+
+      <div class="rs-section-title">
+        <div class="rs-section-icon">5</div>
         Áreas para aferição
       </div>
-      <p class="rs-hint">Adicione uma destinação para cada parte do projeto e preencha somente as áreas existentes.</p>
+      <p class="rs-hint">Informe a parte aferida agora. Em casos parciais, informe também as áreas totais do projeto.</p>
 
       <div id="msg-erro" class="rs-alert" hidden>
         Informe ao menos uma área para calcular.
@@ -133,7 +222,7 @@
 
     <section class="rs-card rs-history-card" id="history-card" hidden>
       <div class="rs-section-title rs-section-title--compact">
-        <div class="rs-section-icon">5</div>
+        <div class="rs-section-icon">6</div>
         Histórico de simulações
       </div>
       <div class="rs-history-list" id="history-list"></div>
@@ -164,7 +253,6 @@
             <option value="CHAB">Conjunto habitacional popular</option>
             <option value="EGAR">Edifício de garagens</option>
           </select>
-          <small class="rs-hint">O crédito será aplicado automaticamente por categoria: 100% obra nova/acréscimo, 35% reforma e 0% demolição.</small>
         </div>
         <div class="col-md-6">
           <label class="rs-label">Tipo de obra</label>
@@ -172,6 +260,14 @@
             <option value="ALV">Alvenaria</option>
             <option value="MAD">Madeira ou mista</option>
           </select>
+        </div>
+        <div class="col-12" data-precast-field>
+          <label class="rs-label">Notas fiscais de pré-moldados/pré-fabricados aplicadas nesta destinação</label>
+          <div class="rs-input-group">
+            <span class="rs-input-prefix">R$</span>
+            <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="preMoldadoValor">
+          </div>
+          <small class="rs-hint">Somente estrutura e paredes externas em área do tipo alvenaria. O valor será comparado com 40% do COD.</small>
         </div>
         <div class="col-md-4">
           <label class="rs-label">Construção / obra nova</label>
@@ -208,12 +304,53 @@
             <span class="rs-input-unit">m²</span>
           </div>
         </div>
+        <div class="col-12 rs-project-areas" data-project-areas hidden>
+          <strong>Áreas totais desta destinação no projeto</strong>
+          <small>Usadas nos percentuais de equivalência, fator social e fator de ajuste.</small>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="rs-label">Obra nova/acréscimo no projeto</label>
+              <div class="rs-input-group">
+                <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="projetoAreaConstrucao">
+                <span class="rs-input-unit">m²</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="rs-label">Reforma no projeto</label>
+              <div class="rs-input-group">
+                <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="projetoAreaReforma">
+                <span class="rs-input-unit">m²</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="rs-label">Demolição no projeto</label>
+              <div class="rs-input-group">
+                <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="projetoAreaDemolicao">
+                <span class="rs-input-unit">m²</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="rs-label">Complementar coberta no projeto</label>
+              <div class="rs-input-group">
+                <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="projetoAreaCoberta">
+                <span class="rs-input-unit">m²</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="rs-label">Complementar descoberta no projeto</label>
+              <div class="rs-input-group">
+                <input class="rs-input" type="text" inputmode="decimal" value="0" data-destination-field="projetoAreaDescoberta">
+                <span class="rs-input-unit">m²</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </template>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="calculo-core.js?v=20260630-charges-concrete"></script>
-  <script src="main.js?v=20260630-charges-concrete"></script>
+  <script src="calculo-core.js?v=20260701-special-cases"></script>
+  <script src="main.js?v=20260701-special-cases"></script>
 </body>
 </html>

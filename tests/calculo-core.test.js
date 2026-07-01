@@ -119,6 +119,95 @@ test("soma mais de uma destinacao na mesma obra", () => {
   );
 });
 
+test("usa periodo e areas do projeto na afericao parcial", () => {
+  const result = calc.calculateConstruction({
+    UF: "TO",
+    responsavelObra: "PF",
+    isUsoConcreto: false,
+    tipoAfericao: "PARCIAL_DECLARADA",
+    inicioAfericaoOpcao: "APOS_ULTIMA",
+    dataInicioObra: "2021-01-01",
+    dataFimAfericaoAnterior: "2022-12-31",
+    dataFimObra: "2023-12-31",
+    dataAfericao: "2026-06-30",
+    destinacoes: [{
+      destinacao: "RES",
+      tipoObra: "ALV",
+      areaConstrucao: 100,
+      projetoAreaConstrucao: 1200,
+    }],
+  }, vauRows, concreteRows);
+
+  assert.equal(result.assessmentStartDate, "2023-01-01");
+  assert.equal(result.projectAreaTotal, 1200);
+  assert.equal(result.lines[0].equivalentArea, 85);
+  assert.equal(result.adjustmentRate, 0.70);
+  assert.equal(result.decay.totalMonths, 12);
+});
+
+test("mantem a data original na primeira afericao parcial", () => {
+  const result = calc.calculateConstruction({
+    UF: "TO",
+    responsavelObra: "PF",
+    isUsoConcreto: false,
+    tipoAfericao: "PARCIAL_HABITESE",
+    inicioAfericaoOpcao: "OBRA",
+    dataInicioObra: "2021-01-01",
+    dataFimObra: "2023-12-31",
+    dataAfericao: "2026-06-30",
+    destinacoes: [{
+      destinacao: "RES",
+      tipoObra: "ALV",
+      areaConstrucao: 100,
+      projetoAreaConstrucao: 1200,
+    }],
+  }, vauRows, concreteRows);
+
+  assert.equal(result.assessmentStartDate, "2021-01-01");
+});
+
+test("aplica notas de pre-moldado conforme relacao com o COD", () => {
+  const common = {
+    UF: "TO",
+    responsavelObra: "PF",
+    isUsoConcreto: false,
+    dataInicioObra: "2021-01-01",
+    dataFimObra: "2021-12-31",
+    dataAfericao: "2026-06-30",
+  };
+  const baseline = calc.calculateConstruction({
+    ...common,
+    destinacoes: [{ destinacao: "RES", tipoObra: "ALV", areaConstrucao: 200 }],
+  }, vauRows, concreteRows);
+  const enoughInvoices = calc.calculateConstruction({
+    ...common,
+    destinacoes: [{
+      destinacao: "RES",
+      tipoObra: "ALV",
+      areaConstrucao: 200,
+      preMoldadoValor: baseline.codTotal * 0.40,
+    }],
+  }, vauRows, concreteRows);
+  const belowThreshold = calc.calculateConstruction({
+    ...common,
+    destinacoes: [{
+      destinacao: "RES",
+      tipoObra: "ALV",
+      areaConstrucao: 200,
+      preMoldadoValor: baseline.codTotal * 0.20,
+    }],
+  }, vauRows, concreteRows);
+  const mixed = calc.calculateConstruction({
+    ...common,
+    destinacoes: [{ destinacao: "RES", tipoObra: "MAD", areaConstrucao: 200 }],
+  }, vauRows, concreteRows);
+
+  assert.equal(enoughInvoices.precastSummaries[0].status, "REDUCAO_70");
+  assert.equal(enoughInvoices.rmtIntegral, calc.roundMoney(baseline.rmtIntegral * 0.30));
+  assert.equal(belowThreshold.precastSummaries[0].status, "CALCULO_MISTO");
+  assert.equal(belowThreshold.rmtIntegral, mixed.rmtIntegral);
+});
+
 test("separa concreto por categoria e aplica decadencia antes dos creditos", () => {
   const result = calc.calculateConstruction({
     UF: "TO",

@@ -23,6 +23,13 @@ const typeTipoObra = {
   MAD: "Madeira ou mista",
 };
 
+const typeAfericao = {
+  TOTAL: "Obra total",
+  PARCIAL_HABITESE: "Aferição parcial com habite-se",
+  PARCIAL_DECLARADA: "Aferição parcial declarada",
+  INACABADA: "Obra inacabada com laudo",
+};
+
 const ufNames = {
   AC: "Acre",
   AL: "Alagoas",
@@ -202,6 +209,10 @@ function renderCommercialAndLegal(totals) {
     const current = document.getElementById("proposal-validity")?.textContent || "";
     setText("proposal-validity", `${current} Para pessoa jurídica, a meta utiliza a mesma metodologia da pessoa física como premissa comercial da simulação.`);
   }
+  if ((formData.tipoAfericao || "TOTAL") !== "TOTAL") {
+    const current = document.getElementById("proposal-validity")?.textContent || "";
+    setText("proposal-validity", `${current} Caso especial sujeito à conferência dos documentos e das aferições anteriores no Sero.`);
+  }
 }
 
 (() => {
@@ -225,7 +236,13 @@ function renderCommercialAndLegal(totals) {
   const totalComHonorarios = toNumber(totals.totalReducao) + toNumber(totals.honorarios);
 
   setPrintTitle("Redução de INSS de obra", formData.clienteNome);
-  setText("final-date", new Date(reducaoResult.calculatedAt || Date.now()).toLocaleString("pt-BR"));
+  setText("final-date", new Date(reducaoResult.calculatedAt || Date.now()).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }));
   setText("percentual-reducao", `${fmtPercentInt(totals.percentualReducao)}%`);
   setText("economia-bruta-percent", `${fmtPercentInt(totals.percentualReducao)}%`);
   setText("sem-reducao", fmt(totals.receita));
@@ -251,8 +268,12 @@ function renderCommercialAndLegal(totals) {
     : [{ destinacao: formData.destinacao, tipoObra: formData.tipoObra }];
   setText("destinacao", [...new Set(destinations.map((item) => typeDestinacao[item.destinacao]).filter(Boolean))].join(" · ") || "-");
   setText("tipo-obra", [...new Set(destinations.map((item) => typeTipoObra[item.tipoObra]).filter(Boolean))].join(" · ") || "-");
-  setText("data-inicio-obra", fmtDate(formData.dataInicioObra));
-  setText("data-fim-obra", fmtDate(formData.dataFimObra));
+  const assessmentType = formData.tipoAfericao || "TOTAL";
+  const assessmentTypeElement = document.getElementById("afericao-tipo");
+  assessmentTypeElement.hidden = assessmentType === "TOTAL";
+  assessmentTypeElement.textContent = typeAfericao[assessmentType] || "";
+  setText("data-inicio-obra", fmtDate(receitaResult.dateInitial || formData.dataInicioObra));
+  setText("data-fim-obra", fmtDate(receitaResult.dateFinal || formData.dataFimObra));
   renderCommercialAndLegal(totals);
 
   const chartMax = Math.max(

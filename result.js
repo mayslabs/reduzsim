@@ -20,6 +20,13 @@ const typeTipoObra = {
   MAD: "Madeira ou mista",
 };
 
+const typeAfericao = {
+  TOTAL: "Obra total",
+  PARCIAL_HABITESE: "Parte com habite-se parcial",
+  PARCIAL_DECLARADA: "Parte declarada sem habite-se",
+  INACABADA: "Obra inacabada com laudo",
+};
+
 const VAU_DATA = [
   { data: "06/2026", UF: "AC", RPOP: 2101.27, COM: 3892.71, CHAB: 2101.27, EGAR: 3892.71, GALP: 1799.60, RMUL: 3515.14, RES: 4158.89 },
   { data: "06/2026", UF: "AL", RPOP: 1335.68, COM: 2417.67, CHAB: 1335.68, EGAR: 2417.67, GALP: 1129.27, RMUL: 2161.41, RES: 2508.03 },
@@ -83,29 +90,6 @@ const CONCRETO_DATA = [
 
 let formData = {};
 
-function parseLocaleNumber(value) {
-  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
-  const cleaned = String(value || "").replace(/[^\d,.-]/g, "").trim();
-  if (!cleaned) return 0;
-
-  const lastComma = cleaned.lastIndexOf(",");
-  const lastDot = cleaned.lastIndexOf(".");
-  let normalized = cleaned;
-
-  if (lastComma >= 0 && lastDot >= 0) {
-    normalized = lastComma > lastDot
-      ? cleaned.replace(/\./g, "").replace(",", ".")
-      : cleaned.replace(/,/g, "");
-  } else if (lastComma >= 0) {
-    normalized = cleaned.replace(/\./g, "").replace(",", ".");
-  } else if (/^-?\d{1,3}(\.\d{3})+$/.test(cleaned)) {
-    normalized = cleaned.replace(/\./g, "");
-  }
-
-  const parsed = Number.parseFloat(normalized);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function normalizeFormData(data) {
   const normalized = { ...data };
   const legacyDestination = {
@@ -122,95 +106,11 @@ function normalizeFormData(data) {
     normalized.destinacoes?.length ? normalized.destinacoes : [legacyDestination],
   );
   normalized.dataAfericao = normalized.dataAfericao || calculoCore.formatLocalISO();
+  normalized.tipoAfericao = normalized.tipoAfericao || "TOTAL";
   normalized.areaTotal = calculoCore.roundMoney(normalized.destinacoes.reduce((sum, destination) => (
     sum + calculoCore.AREA_KEYS.reduce((areaSum, key) => areaSum + destination[key], 0)
   ), 0));
   return normalized;
-}
-
-function calcCOD(data, VAU) {
-  const destinacao = data.destinacao;
-
-  let areaConstrucao = parseLocaleNumber(data.areaConstrucao);
-  let areaReforma = parseLocaleNumber(data.areaReforma);
-  let areaDemolicao = parseLocaleNumber(data.areaDemolicao);
-  let areaCoberta = parseLocaleNumber(data.areaCoberta);
-  let areaDescoberta = parseLocaleNumber(data.areaDescoberta);
-
-  switch (destinacao) {
-    case "RES":
-      areaConstrucao = areaConstrucao <= 1000 ? areaConstrucao * 0.89 : areaConstrucao * 0.85;
-      areaReforma = areaReforma <= 1000 ? areaReforma * 0.89 : areaReforma * 0.85;
-      areaDemolicao = areaDemolicao <= 1000 ? areaDemolicao * 0.89 : areaDemolicao * 0.85;
-      break;
-    case "RMUL":
-      areaConstrucao = areaConstrucao <= 1000 ? areaConstrucao * 0.9 : areaConstrucao * 0.86;
-      areaReforma = areaReforma <= 1000 ? areaReforma * 0.9 : areaReforma * 0.86;
-      areaDemolicao = areaDemolicao <= 1000 ? areaDemolicao * 0.9 : areaDemolicao * 0.86;
-      break;
-    case "COM":
-    case "EGAR":
-      areaConstrucao = areaConstrucao <= 3000 ? areaConstrucao * 0.86 : areaConstrucao * 0.83;
-      areaReforma = areaReforma <= 3000 ? areaReforma * 0.86 : areaReforma * 0.83;
-      areaDemolicao = areaDemolicao <= 3000 ? areaDemolicao * 0.86 : areaDemolicao * 0.83;
-      break;
-    case "GALP":
-      areaConstrucao *= 0.95;
-      areaReforma *= 0.95;
-      areaDemolicao *= 0.95;
-      break;
-    case "RPOP":
-    case "CHAB":
-      areaConstrucao *= 0.98;
-      areaReforma *= 0.98;
-      areaDemolicao *= 0.98;
-      break;
-  }
-
-  areaCoberta *= 0.5;
-  areaDescoberta *= 0.25;
-
-  return [
-    round(areaConstrucao * VAU),
-    round(areaReforma * VAU),
-    round(areaDemolicao * VAU),
-    round(areaCoberta * VAU),
-    round(areaDescoberta * VAU),
-  ];
-}
-
-function getFatorSocial(area, responsavelObra) {
-  if (responsavelObra !== "PF") return 1;
-  if (area <= 100) return 0.2;
-  if (area <= 200) return 0.4;
-  if (area <= 300) return 0.55;
-  if (area <= 400) return 0.7;
-  return 0.9;
-}
-
-function getMaoDeObraPercentual() {
-  if (formData.destinacao === "RPOP" || formData.destinacao === "CHAB") {
-    return formData.tipoObra === "ALV" ? 0.12 : 0.07;
-  }
-
-  return formData.tipoObra === "ALV" ? 0.20 : 0.15;
-}
-
-function calcRMT(COD, area, totalArea, tipoResponsavel, fatorAjuste) {
-  if (area === 0) return 0;
-  return round(COD * getFatorSocial(totalArea, tipoResponsavel) * fatorAjuste * getMaoDeObraPercentual());
-}
-
-function calcAjusteConcreto(COD, percentConcreto, ajusteAreaReforma) {
-  return COD * percentConcreto * 0.05 * ajusteAreaReforma;
-}
-
-function calcTotal(RMT) {
-  return round(RMT * 0.368);
-}
-
-function round(value) {
-  return Math.round(value * 100) / 100;
 }
 
 function fmt(value) {
@@ -306,13 +206,20 @@ function renderRemuneracaoRows(rows) {
 
   validRows.forEach((row) => {
     const concretePercent = calculoCore.toNumber(row.concreteCategoryPercent);
+    const precastText = {
+      REDUCAO_70: "Pré-moldado: RMT reduzida em 70%",
+      CALCULO_MISTO: "Pré-moldado abaixo de 40% do COD: cálculo como tipo misto",
+    }[row.precastStatus] || "";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${row.destinationLabel || "-"}</td>
       <td>${row.label || "-"}</td>
       <td>${fmt(row.area || 0)} m²</td>
       <td>R$ ${fmt(row.cod || 0)}</td>
-      <td>R$ ${fmt(row.rmt || 0)}</td>
+      <td>
+        R$ ${fmt(row.rmt || 0)}
+        ${precastText ? `<small class="rs-table-detail">${precastText}</small>` : ""}
+      </td>
       <td>
         R$ ${fmt(row.concreteCredit || 0)}
         <small class="rs-table-detail">${fmt(concretePercent)}% da categoria</small>
@@ -346,6 +253,16 @@ function buildConcreteSummary(calculation) {
   return `Sim - ${categories.join("; ")}`;
 }
 
+function buildSpecialSummary() {
+  const details = [];
+  if (formData.mudancaResponsabilidade) details.push("mudança de responsável");
+  if (formData.tipoAfericao === "INACABADA" && formData.laudo) {
+    details.push(`${formData.laudo.conselho || "Conselho"} ${formData.laudo.registro || "-"}`);
+    details.push(`ART/RRT ${formData.laudo.artRrt || "-"}`);
+  }
+  return details.join("; ");
+}
+
 async function updateValues(forceRefresh = false) {
   formData = normalizeFormData(formData);
   const UF = formData.UF;
@@ -367,7 +284,7 @@ async function updateValues(forceRefresh = false) {
 
   const receitaResult = {
     calculatedAt: formData.calculatedAt,
-    calculationVersion: 2,
+    calculationVersion: 3,
     cod: calculation.codTotal,
     rmt: calculation.rmtIntegral,
     rmtIntegral: calculation.rmtIntegral,
@@ -381,12 +298,21 @@ async function updateValues(forceRefresh = false) {
     inssSemDecadencia: calculation.estimatedContributionWithoutDecay,
     economiaDecadencia: calculation.decaySavings,
     areaTotal: calculation.areaTotal,
-    dateInitial: formData.dataInicioObra,
+    projectAreaTotal: calculation.projectAreaTotal,
+    dateInitial: calculation.assessmentStartDate,
     dateFinal: formData.dataFimObra,
     assessmentDate: formData.dataAfericao,
     decadencia: calculation.decay,
     destinations: calculation.destinations,
     rmtRows: calculation.lines,
+    tipoAfericao: formData.tipoAfericao || "TOTAL",
+    specialCase: {
+      mudancaResponsabilidade: Boolean(formData.mudancaResponsabilidade),
+      dataTransferencia: formData.dataTransferencia || "",
+      dataFimAfericaoAnterior: formData.dataFimAfericaoAnterior || "",
+      laudo: formData.laudo || null,
+    },
+    precastSummaries: calculation.precastSummaries,
     vauPeriodo: vauRow.data,
     indices: {
       vau: {
@@ -402,7 +328,7 @@ async function updateValues(forceRefresh = false) {
   setText("date", vauRow.data);
   setText("date-hero", vauRow.data);
   setText("calc-date", fmtDate(formData.calculatedAt));
-  setText("data-inicio-obra", fmtInputDate(formData.dataInicioObra));
+  setText("data-inicio-obra", fmtInputDate(calculation.assessmentStartDate));
   setText("data-fim-obra", fmtInputDate(formData.dataFimObra));
   setText("data-afericao", fmtInputDate(formData.dataAfericao));
   setOptionalBlock("cliente-nome-block", "cliente-nome", formData.clienteNome);
@@ -410,6 +336,13 @@ async function updateValues(forceRefresh = false) {
   setText("responsavel-obra", typeResponsavel[formData.responsavelObra]);
   setText("concreto-str", buildConcreteSummary(calculation));
   setText("total-area-str", buildAreaLabel());
+  setText("tipo-afericao-str", typeAfericao[formData.tipoAfericao || "TOTAL"]);
+  const isSpecial = (formData.tipoAfericao || "TOTAL") !== "TOTAL";
+  document.getElementById("area-projeto-block").hidden = !isSpecial;
+  setText("area-projeto", fmt(calculation.projectAreaTotal));
+  const specialSummary = buildSpecialSummary();
+  document.getElementById("special-summary-block").hidden = !specialSummary;
+  setText("special-summary", specialSummary || "-");
   setText("UF", UF);
   setText("VAU", formData.destinacoes.filter((destination) => (
     getDestinationAreaTotal(destination) > 0
@@ -430,6 +363,14 @@ async function updateValues(forceRefresh = false) {
   setText("total", fmt(calculation.estimatedContribution));
   setText("total-2", fmt(calculation.estimatedContribution));
   setText("total-sem-decadencia", fmt(calculation.estimatedContributionWithoutDecay));
+  const precastApplied = calculation.precastSummaries.filter((item) => item.invoiceValue > 0);
+  const precastMeta = precastApplied.length
+    ? ` Pré-moldados: ${precastApplied.map((item) => `${item.destinationLabel} ${fmt(item.ratio)}% do COD`).join("; ")}.`
+    : "";
+  setText(
+    "calculation-meta",
+    `VAU ${receitaResult.indices.vau.period || "-"}, cálculo v3, aferição em ${fmtInputDate(formData.dataAfericao)}.${precastMeta}`,
+  );
 
 }
 

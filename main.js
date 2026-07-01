@@ -7,10 +7,27 @@ const UF = document.getElementById("UF");
 const dataInicioObra = document.getElementById("data-inicio-obra");
 const dataFimObra = document.getElementById("data-fim-obra");
 const dataAfericao = document.getElementById("data-afericao");
+const tipoAfericao = document.getElementById("tipo-afericao");
+const mudancaResponsabilidade = document.getElementById("mudanca-responsabilidade");
+const usoPreMoldado = document.getElementById("uso-pre-moldado");
+const dataFimAfericaoAnterior = document.getElementById("data-fim-afericao-anterior");
+const dataTransferencia = document.getElementById("data-transferencia");
+const inicioAfericaoOpcao = document.getElementById("inicio-afericao-opcao");
+const laudoData = document.getElementById("laudo-data");
+const laudoConselho = document.getElementById("laudo-conselho");
+const laudoRegistro = document.getElementById("laudo-registro");
+const laudoArtRrt = document.getElementById("laudo-art-rrt");
+const laudoMedida = document.getElementById("laudo-medida");
+const laudoValor = document.getElementById("laudo-valor");
 const destinationList = document.getElementById("destination-list");
 const destinationTemplate = document.getElementById("destination-template");
 const HISTORY_KEY = "reduzsim_simulation_history_v1";
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
+const NUMERIC_DESTINATION_KEYS = new Set([
+  ...calc.AREA_KEYS,
+  ...calc.PROJECT_AREA_KEYS,
+  "preMoldadoValor",
+]);
 
 let destinations = [];
 
@@ -40,6 +57,12 @@ function legacyDestination(data = {}) {
     areaDemolicao: calc.toNumber(data.areaDemolicao),
     areaCoberta: calc.toNumber(data.areaCoberta),
     areaDescoberta: calc.toNumber(data.areaDescoberta),
+    projetoAreaConstrucao: calc.toNumber(data.projetoAreaConstrucao),
+    projetoAreaReforma: calc.toNumber(data.projetoAreaReforma),
+    projetoAreaDemolicao: calc.toNumber(data.projetoAreaDemolicao),
+    projetoAreaCoberta: calc.toNumber(data.projetoAreaCoberta),
+    projetoAreaDescoberta: calc.toNumber(data.projetoAreaDescoberta),
+    preMoldadoValor: calc.toNumber(data.preMoldadoValor),
   };
 }
 
@@ -69,7 +92,7 @@ function syncDestinationsFromDOM() {
     const value = { id: item.dataset.destinationId || `dest-${index + 1}` };
     item.querySelectorAll("[data-destination-field]").forEach((field) => {
       const key = field.dataset.destinationField;
-      value[key] = calc.AREA_KEYS.includes(key) ? calc.toNumber(field.value) : field.value;
+      value[key] = NUMERIC_DESTINATION_KEYS.has(key) ? calc.toNumber(field.value) : field.value;
     });
     return calc.normalizeDestination(value, index);
   });
@@ -78,13 +101,44 @@ function syncDestinationsFromDOM() {
 
 function updateDestinationControls() {
   const items = Array.from(destinationList.querySelectorAll("[data-destination-item]"));
+  const showProjectAreas = tipoAfericao.value !== "TOTAL";
   items.forEach((item, index) => {
     const select = item.querySelector("[data-destination-field='destinacao']");
+    const constructionType = item.querySelector("[data-destination-field='tipoObra']");
     const title = item.querySelector("[data-destination-title]");
     const removeButton = item.querySelector("[data-remove-destination]");
+    const precastField = item.querySelector("[data-precast-field]");
+    const precastInput = item.querySelector("[data-destination-field='preMoldadoValor']");
+    const projectAreas = item.querySelector("[data-project-areas]");
     title.textContent = `${index + 1}. ${calc.DESTINATION_LABELS[select.value] || "Destinação"}`;
     removeButton.hidden = items.length === 1;
+    projectAreas.hidden = !showProjectAreas;
+    precastField.hidden = usoPreMoldado.value !== "true" || constructionType.value !== "ALV";
+    if (precastField.hidden) precastInput.value = "0";
   });
+}
+
+function updateSpecialControls() {
+  const isPartial = tipoAfericao.value !== "TOTAL";
+  const isUnfinished = tipoAfericao.value === "INACABADA";
+  const hasTransfer = mudancaResponsabilidade.value === "true" || isUnfinished;
+  if (isUnfinished) mudancaResponsabilidade.value = "true";
+  mudancaResponsabilidade.disabled = isUnfinished;
+
+  const transferOption = inicioAfericaoOpcao.querySelector("option[value='TRANSFERENCIA']");
+  transferOption.hidden = !hasTransfer;
+  transferOption.disabled = !hasTransfer;
+  if (!hasTransfer && inicioAfericaoOpcao.value === "TRANSFERENCIA") {
+    inicioAfericaoOpcao.value = "OBRA";
+  }
+
+  const needsPreviousEnd = inicioAfericaoOpcao.value === "APOS_ULTIMA";
+  document.querySelector("[data-special-field='previous-end']").hidden = !needsPreviousEnd;
+  document.querySelector("[data-special-field='transfer-date']").hidden = !hasTransfer;
+  document.querySelector("[data-special-field='start-option']").hidden = !isPartial && !hasTransfer;
+  document.getElementById("laudo-panel").hidden = !isUnfinished;
+  document.getElementById("special-case-note").hidden = !isPartial && !hasTransfer;
+  updateDestinationControls();
 }
 
 function createDestinationItem(destination, index) {
@@ -144,12 +198,29 @@ function paintInvalidAreas() {
     item.querySelectorAll("[data-destination-field]").forEach((field) => {
       if (!hasArea && calc.AREA_KEYS.includes(field.dataset.destinationField)) field.classList.add("is-invalid");
     });
+    if (tipoAfericao.value !== "TOTAL") {
+      calc.AREA_KEYS.forEach((areaKey, index) => {
+        const currentField = item.querySelector(`[data-destination-field='${areaKey}']`);
+        const projectField = item.querySelector(`[data-destination-field='${calc.PROJECT_AREA_KEYS[index]}']`);
+        if (calc.toNumber(projectField.value) < calc.toNumber(currentField.value)) {
+          projectField.classList.add("is-invalid");
+        }
+      });
+    }
   });
 }
 
 function validateAreas() {
   const items = syncDestinationsFromDOM();
-  return items.length > 0 && items.every((destination) => destinationAreaTotal(destination) > 0);
+  const hasCurrentAreas = items.length > 0 && items.every((destination) => destinationAreaTotal(destination) > 0);
+  if (!hasCurrentAreas || tipoAfericao.value === "TOTAL") return hasCurrentAreas;
+
+  return items.every((destination) => calc.AREA_KEYS.every((areaKey, index) => {
+    const projectKey = calc.PROJECT_AREA_KEYS[index];
+    const currentArea = calc.toNumber(destination[areaKey]);
+    const projectArea = calc.toNumber(destination[projectKey]);
+    return projectArea >= currentArea && (currentArea === 0 || projectArea > 0);
+  }));
 }
 
 function validateDates() {
@@ -166,11 +237,54 @@ function validateDates() {
   return true;
 }
 
+function setRequired(element, required) {
+  if (!element) return;
+  element.required = required;
+  if (!required) element.setCustomValidity("");
+}
+
+function validateSpecialCase() {
+  const isPartial = tipoAfericao.value !== "TOTAL";
+  const isUnfinished = tipoAfericao.value === "INACABADA";
+  const hasTransfer = mudancaResponsabilidade.value === "true";
+  const needsPreviousEnd = inicioAfericaoOpcao.value === "APOS_ULTIMA";
+
+  setRequired(dataFimAfericaoAnterior, isPartial && needsPreviousEnd);
+  setRequired(dataTransferencia, hasTransfer);
+  [laudoData, laudoRegistro, laudoArtRrt, laudoValor].forEach((field) => {
+    setRequired(field, isUnfinished);
+  });
+
+  if (dataFimAfericaoAnterior.value && dataFimAfericaoAnterior.value >= dataFimObra.value) {
+    dataFimAfericaoAnterior.setCustomValidity("A aferição anterior deve terminar antes da aferição atual.");
+    return false;
+  }
+  dataFimAfericaoAnterior.setCustomValidity("");
+
+  if (hasTransfer && dataTransferencia.value) {
+    const outsideWork = dataTransferencia.value < dataInicioObra.value
+      || dataTransferencia.value > dataFimObra.value;
+    dataTransferencia.setCustomValidity(outsideWork ? "Informe uma transferência dentro do período da obra." : "");
+    if (outsideWork) return false;
+  }
+
+  if (isUnfinished && laudoMedida.value === "PERCENTUAL") {
+    const percentage = calc.toNumber(laudoValor.value);
+    laudoValor.setCustomValidity(
+      percentage <= 0 || percentage > 100 ? "Informe um percentual entre 0 e 100." : "",
+    );
+    if (percentage <= 0 || percentage > 100) return false;
+  } else {
+    laudoValor.setCustomValidity("");
+  }
+  return true;
+}
+
 function buildFormData() {
   const normalizedDestinations = syncDestinationsFromDOM();
   const areaTotal = normalizedDestinations.reduce((sum, item) => sum + destinationAreaTotal(item), 0);
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     clienteNome: clienteNome.value.trim(),
     clienteTelefone: clienteTelefone.value.trim(),
     calculatedAt: new Date().toISOString(),
@@ -180,6 +294,20 @@ function buildFormData() {
     dataInicioObra: dataInicioObra.value,
     dataFimObra: dataFimObra.value,
     dataAfericao: dataAfericao.value,
+    tipoAfericao: tipoAfericao.value,
+    isUsoPreMoldado: usoPreMoldado.value === "true",
+    mudancaResponsabilidade: mudancaResponsabilidade.value === "true",
+    dataFimAfericaoAnterior: dataFimAfericaoAnterior.value,
+    dataTransferencia: dataTransferencia.value,
+    inicioAfericaoOpcao: inicioAfericaoOpcao.value,
+    laudo: {
+      data: laudoData.value,
+      conselho: laudoConselho.value,
+      registro: laudoRegistro.value.trim(),
+      artRrt: laudoArtRrt.value.trim(),
+      medida: laudoMedida.value,
+      valor: calc.toNumber(laudoValor.value),
+    },
     destinacoes: normalizedDestinations,
     areaTotal: calc.roundMoney(areaTotal),
   };
@@ -196,7 +324,11 @@ function restoreFormData(data) {
   if (!data) {
     dataFimObra.value = calc.formatLocalISO();
     dataAfericao.value = calc.formatLocalISO();
+    tipoAfericao.value = "TOTAL";
+    mudancaResponsabilidade.value = "false";
+    usoPreMoldado.value = "false";
     renderDestinations([legacyDestination()]);
+    updateSpecialControls();
     return;
   }
 
@@ -208,7 +340,25 @@ function restoreFormData(data) {
   dataInicioObra.value = data.dataInicioObra || "";
   dataFimObra.value = data.dataFimObra || calc.formatLocalISO();
   dataAfericao.value = data.dataAfericao || calc.formatLocalISO();
+  tipoAfericao.value = data.tipoAfericao || "TOTAL";
+  mudancaResponsabilidade.value = data.mudancaResponsabilidade ? "true" : "false";
+  usoPreMoldado.value = (
+    data.isUsoPreMoldado
+    || data.destinacoes?.some((item) => calc.toNumber(item.preMoldadoValor) > 0)
+  )
+    ? "true"
+    : "false";
+  dataFimAfericaoAnterior.value = data.dataFimAfericaoAnterior || "";
+  dataTransferencia.value = data.dataTransferencia || "";
+  inicioAfericaoOpcao.value = data.inicioAfericaoOpcao || "OBRA";
+  laudoData.value = data.laudo?.data || "";
+  laudoConselho.value = data.laudo?.conselho || "CREA";
+  laudoRegistro.value = data.laudo?.registro || "";
+  laudoArtRrt.value = data.laudo?.artRrt || "";
+  laudoMedida.value = data.laudo?.medida || "AREA";
+  laudoValor.value = data.laudo?.valor || "";
   renderDestinations(data.destinacoes?.length ? data.destinacoes : [legacyDestination(data)]);
+  updateSpecialControls();
 }
 
 function createHistoryRow(item) {
@@ -393,7 +543,9 @@ async function openDatabase() {
     errorMessage.hidden = true;
   });
   destinationList.addEventListener("change", (event) => {
-    if (event.target.matches("[data-destination-field='destinacao']")) updateDestinationControls();
+    if (event.target.matches("[data-destination-field='destinacao'], [data-destination-field='tipoObra']")) {
+      updateDestinationControls();
+    }
   });
   destinationList.addEventListener("click", (event) => {
     const removeButton = event.target.closest("[data-remove-destination]");
@@ -403,6 +555,13 @@ async function openDatabase() {
   dataInicioObra.addEventListener("change", validateDates);
   dataFimObra.addEventListener("change", validateDates);
   dataAfericao.addEventListener("change", validateDates);
+  tipoAfericao.addEventListener("change", updateSpecialControls);
+  mudancaResponsabilidade.addEventListener("change", updateSpecialControls);
+  usoPreMoldado.addEventListener("change", updateDestinationControls);
+  inicioAfericaoOpcao.addEventListener("change", () => {
+    updateSpecialControls();
+    validateSpecialCase();
+  });
 
   document.getElementById("save-base-btn").addEventListener("click", async () => {
     try {
@@ -432,10 +591,14 @@ async function openDatabase() {
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     validateDates();
+    const validSpecialCase = validateSpecialCase();
     const validAreas = validateAreas();
-    if (!form.checkValidity() || !validAreas) {
+    if (!form.checkValidity() || !validAreas || !validSpecialCase) {
       event.stopPropagation();
-      errorMessage.hidden = validAreas;
+      errorMessage.textContent = validAreas
+        ? "Revise os campos obrigatórios da situação da aferição."
+        : "Informe áreas atuais válidas e, nos casos parciais, áreas totais do projeto iguais ou superiores.";
+      errorMessage.hidden = validAreas && validSpecialCase;
       if (!validAreas) paintInvalidAreas();
       form.classList.add("was-validated");
       return;
