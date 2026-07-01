@@ -36,7 +36,7 @@ const SELIC_ACUMULADA = {
   "2026-07": 0.00,
 };
 
-const INDICES_UPDATED_AT = "01/07/2026 às 10:41";
+const INDICES_UPDATED_AT = "01/07/2026 às 13:16";
 const PARALISACOES_STORAGE_KEY = "reducaoParalisacoes";
 const calculoCore = window.ReduzSimCalculo;
 
