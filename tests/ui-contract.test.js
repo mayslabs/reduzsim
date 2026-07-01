@@ -92,3 +92,28 @@ test("mostra decadência apenas quando existem competências decadentes", () => 
   assert.match(finalHtml, /id="proposal-baseline-label"/);
   assert.match(finalJs, /function hasDecadence/);
 });
+
+test("distingue corretamente os cálculos de pessoa física e jurídica", () => {
+  const core = read("calculo-core.js");
+  const result = read("result.js");
+  const reduction = read("reducao.html");
+  const final = read("final.js");
+
+  assert.match(core, /if \(responsibleType !== "PF"\) return 1/);
+  assert.match(core, /data\.responsavelObra === "PF"/);
+  assert.match(result, /Fator social não aplicado \(pessoa jurídica\)/);
+  assert.match(reduction, /fator social e fator de ajuste de 50%\/70% não se aplicam/);
+  assert.doesNotMatch(final, /mesma metodologia da pessoa física/);
+});
+
+test("mantém retentativas mensais para atualização do VAU", () => {
+  const updater = read("scripts/update-data.py");
+  const workflow = read(".github/workflows/update-indices.yml");
+  const indices = read("indices.js");
+
+  assert.match(updater, /tentativa \{attempt\}\/4/);
+  assert.match(updater, /RESULT_HTML/);
+  assert.match(workflow, /0 14,17,20,23 1 \* \*/);
+  assert.match(workflow, /result\.js result\.html reducao\.js reducao\.html/);
+  assert.match(indices, /hour >= AUTO_UPDATE_HOURS\[0\] && !wasAttemptedThisHour/);
+});

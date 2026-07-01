@@ -105,7 +105,7 @@ const ReduzSimIndices = (() => {
 
   function canAttemptNow(kind) {
     const hour = new Date().getHours();
-    return hour >= AUTO_UPDATE_HOURS[0] && AUTO_UPDATE_HOURS.includes(hour) && !wasAttemptedThisHour(kind);
+    return hour >= AUTO_UPDATE_HOURS[0] && !wasAttemptedThisHour(kind);
   }
 
   function nextAttemptDelay() {

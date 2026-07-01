@@ -6,6 +6,8 @@ import io
 import json
 import re
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -15,6 +17,7 @@ from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULT_JS = ROOT / "result.js"
+RESULT_HTML = ROOT / "result.html"
 REDUCAO_JS = ROOT / "reducao.js"
 REDUCAO_HTML = ROOT / "reducao.html"
 
@@ -75,13 +78,21 @@ def br_money_to_float(value: str) -> float:
     return float(value.replace(".", "").replace(",", "."))
 
 
-def fetch_bytes(url: str) -> bytes:
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0 ReduzSim index updater"},
-    )
-    with urllib.request.urlopen(request, timeout=60) as response:
-        return response.read()
+def fetch_bytes(url: str, attempts: int = 3) -> bytes:
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        request = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Mozilla/5.0 ReduzSim index updater"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                return response.read()
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            last_error = error
+            if attempt < attempts:
+                time.sleep(attempt * 3)
+    raise RuntimeError(f"Falha após {attempts} tentativas: {url}") from last_error
 
 
 def fetch_json(url: str):
@@ -206,8 +217,18 @@ def fetch_vau_table(reference: dt.date) -> list[dict[str, float | str]]:
 
     for uf in UF_ORDER:
         url = f"https://www.tabelavau.seroassessoria.com.br/vau_visualizar_pdf.php?per={period_param}&uf={uf}"
-        print(f"Baixando VAU {period_label} - {uf}...")
-        rows.append(parse_vau_pdf(fetch_bytes(url), uf, period_label))
+        last_error: Exception | None = None
+        for attempt in range(1, 5):
+            try:
+                print(f"Baixando VAU {period_label} - {uf} (tentativa {attempt}/4)...")
+                rows.append(parse_vau_pdf(fetch_bytes(url, attempts=1), uf, period_label))
+                break
+            except Exception as error:
+                last_error = error
+                if attempt < 4:
+                    time.sleep(attempt * 5)
+        else:
+            raise RuntimeError(f"Não foi possível obter o VAU de {uf}.") from last_error
 
     return rows
 
@@ -259,6 +280,16 @@ def update_metadata(timestamp: dt.datetime) -> None:
     if note_count != 1 or script_count != 1:
         raise RuntimeError("Não foi possível atualizar a mensagem/cache bust da página de redução.")
     REDUCAO_HTML.write_text(html, encoding="utf-8", newline="\n")
+
+    result_html = RESULT_HTML.read_text(encoding="utf-8")
+    result_html, result_script_count = re.subn(
+        r'<script src="result\.js(?:\?v=[^"]*)?"></script>',
+        f'<script src="result.js?v={version}"></script>',
+        result_html,
+    )
+    if result_script_count != 1:
+        raise RuntimeError("Não foi possível atualizar o cache bust da página de resultado.")
+    RESULT_HTML.write_text(result_html, encoding="utf-8", newline="\n")
     print(f"Metadados de atualização gravados: {label}.")
 
 

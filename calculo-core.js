@@ -212,7 +212,7 @@
   }
 
   function getSocialFactor(categoryArea, responsibleType) {
-    if (responsibleType !== "PF" && responsibleType !== "PJ") return 1;
+    if (responsibleType !== "PF") return 1;
     if (categoryArea <= 100) return 0.20;
     if (categoryArea <= 200) return 0.40;
     if (categoryArea <= 300) return 0.55;
@@ -400,7 +400,9 @@
     const estimatedContribution = roundMoney(taxableRmt * 0.368);
     const estimatedContributionWithoutDecay = roundMoney(taxableRmtWithoutDecay * 0.368);
     const adjustmentArea = useProjectAreas ? projectAreaTotal : areaTotal;
-    const adjustmentRate = adjustmentArea <= 350 ? 0.50 : 0.70;
+    const adjustmentRate = data.responsavelObra === "PF"
+      ? (adjustmentArea <= 350 ? 0.50 : 0.70)
+      : 1;
     const adjustmentTarget = roundMoney(rmtNonDecadent * adjustmentRate);
 
     return {

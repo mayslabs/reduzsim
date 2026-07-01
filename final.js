@@ -216,7 +216,7 @@ function renderCommercialAndLegal(totals) {
   }
   if (formData.responsavelObra === "PJ") {
     const current = document.getElementById("proposal-validity")?.textContent || "";
-    setText("proposal-validity", `${current} Para pessoa jurídica, a meta utiliza a mesma metodologia da pessoa física como premissa comercial da simulação.`);
+    setText("proposal-validity", `${current} Para pessoa jurídica, o cálculo indireto não aplica fator social nem fator de ajuste de 50%/70%.`);
   }
   if ((formData.tipoAfericao || "TOTAL") !== "TOTAL") {
     const current = document.getElementById("proposal-validity")?.textContent || "";
